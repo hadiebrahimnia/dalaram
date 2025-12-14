@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>آزمون</title>
+    
+    {% load static %}
+    <link href="{% static 'plugins/bootstrap/css/bootstrap.rtl.min.css' %}" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/main.css' %}">
+    
+</head>
+<body class="d-flex align-items-center justify-content-center">
+    <div class="card bg-light bg-opacity-95 mt-5 mb-5">
+        <div class="card-header">
+            <h1>خوش آمدید!</h1>
+            <p class="mt-4 lh-lg text-justify">
+                <span>بدين وسيله از شما جهت شركت در پژوهش زیر دعوت به عمل مي‌آيد. اطلاعات مربوط به این پژوهش  در ادامه ارائه شده است و شما برای شرکت یا عدم شرکت در این پژوهش آزاد هستید.</span></br>   
+                <span> در این مطالعه به دنبال  این هستیم که درک کنیم چگونه مغز انتظارات هیجانی را شکل می‌دهد و چگونه خطاهای پیش‌بینی (ناسازگاری بین انتظارات و محرک‌های واقعی) بر ادراک و پاسخ‌های هیجانی تأثیر می‌گذارند.</span></br> 
+                <span>در این آزمون شما به توالی‌های صوتی با ارزش‌های هیجانی متفاوت گوش می‌دهید. پس از هر توالی صوتی، از شما خواسته می‌شود تا هیجان تجربه‌شده را از نظر ارزش (خوشایند یا ناخوشایند) رتبه‌بندی کنید. قبل از شروع، پرسشنامه‌های کوتاهی در مورد سطح هیجان، تنظیم هیجانی و همدلی تکمیل خواهید کرد.</span></br>
+                <span>داده‌های شما به‌صورت ناشناس ثبت و تحلیل می‌شوند، و می‌توانید در هر زمان بدون هیچ جریمه‌ای انصراف دهید.</span></br>
+                <span class="text-danger fw-bold ">شما باید  در یک اتاق ایزوله صوتی آزمون را تکمیل کنید </span></br>
+                <span class="d-flex justify-content-end text-white me-4 mt-3">با تشکر</span>
+                <span class="d-flex justify-content-end text-white">هادی ابراهیم نیا</span></br>
+            </p>
+        </div>
+        
+        <div class="form-container">
+            <form method="post">
+                {% csrf_token %}
+
+                <div class="form-group">
+                    <label class="custom-label">{{ form.phone.label }}</label>
+                    {{ form.phone }}
+                    <div class="help-text">{{ form.phone.help_text }}</div>
+                </div>
+
+                <div class="form-group">
+                    <label class="custom-label">{{ form.birth_date.label }}</label>
+                    {{ form.birth_date }}
+                </div>
+
+                <!-- جنسیت -->
+                <div class="form-group">
+                    <label class="custom-label">{{ form.gender.label }}</label>
+                    {{ form.gender }}
+                </div>
+
+                <!-- دست غالب -->
+                <div class="form-group">
+                    <label class="custom-label">{{ form.hand.label }}</label>
+                    {{ form.hand }}
+                </div>
+
+                <div class="form-group">
+                    <label class="custom-label">{{ form.disorder.label }}</label>
+                    {{ form.disorder }}
+                    <div class="help-text">{{ form.disorder.help_text }}</div>
+                </div>
+
+                <div class="form-group">
+                    <label class="custom-label">{{ form.drug.label }}</label>
+                    {{ form.drug }}
+                    <div class="help-text">{{ form.drug.help_text }}</div>
+                </div>
+
+                <button type="submit" class="btn btn-success text-white w-100 p-3">
+                    ثبت اطلاعات و شروع آزمون
+                </button>
+            </form>
+        </div>
+    </div>
+</body>
+<script src="{% static 'js/jquery.min.js' %}"></script>
+{{ form.media }}
+</html>
