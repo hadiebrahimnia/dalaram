@@ -26,7 +26,7 @@ SECRET_KEY = 'django-insecure-i9yu5poix44!qckh=)np((jm#qq_8ed7eux@-)djwe@=2n8i^$
 DEBUG = True
 
 ALLOWED_HOSTS = []
-
+AUTH_USER_MODEL = 'core.CustomUser'
 
 # Application definition
 
@@ -110,12 +110,10 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'fa-ir'
 
+USE_TZ = False
 TIME_ZONE = 'Asia/Tehran'
 
 USE_I18N = True
-
-USE_TZ = True
-
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/6.0/howto/static-files/

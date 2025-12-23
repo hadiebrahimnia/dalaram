@@ -17,9 +17,20 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path
 from core.views import *
+from django.contrib.auth import views as auth_views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', home_view, name='home'),
-    path('quiz/', quiz_view, name='quiz'),
+    path('login/', login_or_signup, name='login_or_signup'),
+    path(
+        'logout/',
+        auth_views.LogoutView.as_view(next_page='login_or_signup'),  # یا نام url دلخواه
+        name='logout',
+    ),
+    path('complete-profile/', complete_profile, name='complete_profile'),
+    path('experiment/pcm/', pcm_view, name='pcm'),
+    path('experiment/rating/', rating_view, name='rating'),
+
+    path('questionnaire/<int:pk>/respond/', respond_questionnaire, name='respond_questionnaire'),
 ]

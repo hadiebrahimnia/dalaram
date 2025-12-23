@@ -1,76 +1,274 @@
 <!DOCTYPE html>
 <html lang="fa" dir="rtl">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>آزمون</title>
-    
-    {% load static %}
-    <link href="{% static 'plugins/bootstrap/css/bootstrap.rtl.min.css' %}" rel="stylesheet">
-    <link rel="stylesheet" href="{% static 'css/main.css' %}">
-    
-</head>
-<body class="d-flex align-items-center justify-content-center">
-    <div class="card bg-light bg-opacity-95 mt-5 mb-5">
-        <div class="card-header">
-            <h1>خوش آمدید!</h1>
-            <p class="mt-4 lh-lg text-justify">
-                <span>بدين وسيله از شما جهت شركت در پژوهش زیر دعوت به عمل مي‌آيد. اطلاعات مربوط به این پژوهش  در ادامه ارائه شده است و شما برای شرکت یا عدم شرکت در این پژوهش آزاد هستید.</span></br>   
-                <span> در این مطالعه به دنبال  این هستیم که درک کنیم چگونه مغز انتظارات هیجانی را شکل می‌دهد و چگونه خطاهای پیش‌بینی (ناسازگاری بین انتظارات و محرک‌های واقعی) بر ادراک و پاسخ‌های هیجانی تأثیر می‌گذارند.</span></br> 
-                <span>در این آزمون شما به توالی‌های صوتی با ارزش‌های هیجانی متفاوت گوش می‌دهید. پس از هر توالی صوتی، از شما خواسته می‌شود تا هیجان تجربه‌شده را از نظر ارزش (خوشایند یا ناخوشایند) رتبه‌بندی کنید. قبل از شروع، پرسشنامه‌های کوتاهی در مورد سطح هیجان، تنظیم هیجانی و همدلی تکمیل خواهید کرد.</span></br>
-                <span>داده‌های شما به‌صورت ناشناس ثبت و تحلیل می‌شوند، و می‌توانید در هر زمان بدون هیچ جریمه‌ای انصراف دهید.</span></br>
-                <span class="text-danger fw-bold ">شما باید  در یک اتاق ایزوله صوتی آزمون را تکمیل کنید </span></br>
-                <span class="d-flex justify-content-end text-white me-4 mt-3">با تشکر</span>
-                <span class="d-flex justify-content-end text-white">هادی ابراهیم نیا</span></br>
-            </p>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>صفحه اصلی سایت</title>
+    <style>
+        @font-face {
+            font-family: "Vazirmatn"!important;
+            src: url("/static/fonts/Vazir-Medium-FD.woff") format("woff");
+            font-style: normal;
+            font-display: swap; /* بهترین عملکرد: متن ابتدا با فونت سیستم نمایش داده بشه، بعد عوض بشه */
+        }
+      /* ریست ساده */
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: "Vazirmatn";
+        line-height: 1.7;
+        color: #333;
+        background-color: #f9f9f9;
+      }
+
+      /* هدر */
+      header {
+        background-color: #ffffff;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        position: fixed;
+        width: 100%;
+        top: 0;
+        z-index: 1000;
+      }
+
+      nav {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 1rem 2rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      .logo {
+        font-size: 1.8rem;
+        font-weight: bold;
+        color: #4a6bdf;
+      }
+
+      .nav-links a {
+        margin-left: 2rem;
+        text-decoration: none;
+        color: #333;
+        font-weight: 500;
+        transition: color 0.3s;
+      }
+
+      .nav-links a:hover {
+        color: #4a6bdf;
+      }
+
+      /* بخش قهرمان */
+      .hero {
+        background: linear-gradient(
+            rgba(74, 107, 223, 0.9),
+            rgba(74, 107, 223, 0.8)
+          ),
+          url("https://source.unsplash.com/random/1600x900/?technology")
+            center/cover no-repeat;
+        color: white;
+        text-align: center;
+        padding: 160px 20px 100px;
+        margin-top: 80px; /* به خاطر هدر ثابت */
+      }
+
+      .hero h1 {
+        font-size: 3.5rem;
+        margin-bottom: 1rem;
+      }
+
+      .hero p {
+        font-size: 1.3rem;
+        max-width: 700px;
+        margin: 0 auto 2rem;
+      }
+
+      .btn {
+        background-color: white;
+        color: #4a6bdf;
+        padding: 12px 30px;
+        border: none;
+        border-radius: 50px;
+        font-size: 1.1rem;
+        font-weight: bold;
+        cursor: pointer;
+        text-decoration: none;
+        display: inline-block;
+        transition: all 0.3s;
+      }
+
+      .btn:hover {
+        background-color: #f0f0f0;
+        transform: translateY(-3px);
+      }
+
+      /* بخش ویژگی‌ها */
+      .features {
+        padding: 100px 20px;
+        background-color: white;
+        text-align: center;
+      }
+
+      .container {
+        max-width: 1200px;
+        margin: 0 auto;
+      }
+
+      .features h2 {
+        font-size: 2.5rem;
+        margin-bottom: 3rem;
+        color: #333;
+      }
+
+      .cards {
+        display: flex;
+        justify-content: center;
+        gap: 3rem;
+        flex-wrap: wrap;
+      }
+
+      .card-btn {
+        display: block;
+        background: #f9f9f9;
+        padding: 2.5rem 2rem;
+        border-radius: 15px;
+        width: 300px;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+        transition: all 0.3s ease;
+        text-decoration: none; /* حذف خط زیر کامل */
+        color: inherit; /* رنگ متن مثل قبل بمونه */
+        text-align: center;
+      }
+
+      .card-btn:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+        background: #ffffff;
+      }
+
+      .card-btn i {
+        font-size: 3rem;
+        color: #4a6bdf;
+        margin-bottom: 1rem;
+      }
+
+      .card-btn h3 {
+        margin: 1rem 0;
+        font-size: 1.5rem;
+        color: #333;
+      }
+
+      .card-btn p {
+        color: #666;
+        font-size: 1rem;
+      }
+
+      /* فوتر */
+      footer {
+        background-color: #333;
+        color: white;
+        text-align: center;
+        padding: 3rem 20px;
+      }
+
+      footer p {
+        margin-bottom: 1rem;
+      }
+
+      .footer-links a {
+        color: #aaa;
+        margin: 0 1rem;
+        text-decoration: none;
+      }
+
+      .footer-links a:hover {
+        color: white;
+      }
+
+    .logout-btn {
+        font-family: "Vazirmatn"!important;
+        display: inline-block;
+        font-weight: 500;
+        text-align: center;
+        vertical-align: middle;
+        user-select: none;
+        border: 1px solid transparent;
+        padding: 0.375rem 0.75rem!important;     /* padding استاندارد btn */
+        font-size: 1rem;                /* font-size استاندارد btn */
+        line-height: 1.5;
+        border-radius: 0.375rem;        /* گردی استاندارد Bootstrap 5 */
+        transition: all 0.15s ease-in-out;
+        cursor: pointer;
+        text-decoration: none;
+        background-color: transparent;
+    }
+
+
+    /* استایل outline-danger */
+    .logout-btn.outline-danger {
+        color: #dc3545;                 /* رنگ متن و border قرمز خطر */
+        border-color: #dc3545;
+        background-color: transparent;
+    }
+
+    .logout-btn.outline-danger:hover {
+        color: #fff;                    /* متن سفید در hover */
+        background-color: #dc3545;      /* پر شدن با قرمز */
+        border-color: #dc3545;
+    }
+
+    .logout-btn.outline-danger:focus {
+        outline: none;                  /* حذف outline پیش‌فرض مرورگر */
+        box-shadow: 0 0 0 0.25rem rgba(220, 53, 69, 0.25); /* فوکوس رینگ مشابه Bootstrap */
+    }
+
+      /* ریسپانسیو */
+      @media (max-width: 768px) {
+        .hero h1 {
+          font-size: 2.5rem;
+        }
+        .nav-links {
+          display: none;
+        } /* می‌تونی منوی همبرگری اضافه کنی */
+        .cards {
+          flex-direction: column;
+          align-items: center;
+        }
+      }
+    </style>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  </head>
+  <body>
+    <!-- بخش ویژگی‌ها -->
+    <section class="features">
+      <div class="container">
+        <h2>آزمون مد نظر را انتخاب نمایید !</h2>
+        <div class="cards">
+          <a href="/experiment/rating" class="card-btn">
+            <i class="fa fa-list-ul"></i>
+            <h3>آزمون رتبه بندی</h3>
+            <p>در این آزمون تعدای صدا پخش میشود و شما باید به آنها از نظر خوشایندی و شدت  هیجان نمره بدهید</p>
+          </a>
+          <a href="/experiment/pcm" class="card-btn">
+            <i class="fa fa-music"></i>
+            <h3>توالی‌های صوتی </h3>
+            <p>در این آزمون تعدادی توالی صوتی برای شما پخش میشود و شما به صدا ها از نظر خوشایندی نمره میدهید</p>
+          </a>
         </div>
-        
-        <div class="form-container">
-            <form method="post">
+        {% if user.is_authenticated %}
+        <div style="margin-top: 3rem; text-align: center;">
+            <form action="{% url 'logout' %}" method="post" style="display: inline;">
                 {% csrf_token %}
-
-                <div class="form-group">
-                    <label class="custom-label">{{ form.phone.label }}</label>
-                    {{ form.phone }}
-                    <div class="help-text">{{ form.phone.help_text }}</div>
-                </div>
-
-                <div class="form-group">
-                    <label class="custom-label">{{ form.birth_date.label }}</label>
-                    {{ form.birth_date }}
-                </div>
-
-                <!-- جنسیت -->
-                <div class="form-group">
-                    <label class="custom-label">{{ form.gender.label }}</label>
-                    {{ form.gender }}
-                </div>
-
-                <!-- دست غالب -->
-                <div class="form-group">
-                    <label class="custom-label">{{ form.hand.label }}</label>
-                    {{ form.hand }}
-                </div>
-
-                <div class="form-group">
-                    <label class="custom-label">{{ form.disorder.label }}</label>
-                    {{ form.disorder }}
-                    <div class="help-text">{{ form.disorder.help_text }}</div>
-                </div>
-
-                <div class="form-group">
-                    <label class="custom-label">{{ form.drug.label }}</label>
-                    {{ form.drug }}
-                    <div class="help-text">{{ form.drug.help_text }}</div>
-                </div>
-
-                <button type="submit" class="btn btn-success text-white w-100 p-3">
-                    ثبت اطلاعات و شروع آزمون
-                </button>
+                <button type="submit" class="logout-btn outline-danger sm">خروج/شرکت به عنوان کاربر جدید</button>
             </form>
         </div>
-    </div>
-</body>
-<script src="{% static 'js/jquery.min.js' %}"></script>
-{{ form.media }}
+        {% endif %}
+    </section>
+  </body>
 </html>

@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>پاسخ به پرسشنامه</title>
+    <style>
+        @font-face {
+            font-family: "Vazirmatn";
+            src: url("/static/fonts/Vazir-Medium-FD.woff") format("woff");
+            font-style: normal;
+            font-display: swap; /* بهترین عملکرد: متن ابتدا با فونت سیستم نمایش داده بشه، بعد عوض بشه */
+        }
+        body {
+            font-family: 'Vazirmatn'!important;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #333;
+        }
+        .container {
+            max-width: 800px;
+            width: 90%;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+            overflow: hidden;
+        }
+        .intro, .question-slide {
+            padding: 50px 40px;
+            text-align: center;
+        }
+        h1 {
+            font-size: 2.2rem;
+            color: #2c3e50;
+            margin-bottom: 20px;
+        }
+        .description {
+            font-size: 1.1rem;
+            color: #555;
+            line-height: 1.8;
+            margin-bottom: 40px;
+        }
+        .btn {
+            background: #27ae60;
+            font-family: 'Vazirmatn'!important;
+            color: white;
+            border: none;
+            padding: 14px 32px;
+            border-radius: 50px;
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(39, 174, 96, 0.3);
+        }
+        .btn:hover {
+            background: #219653;
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(39, 174, 96, 0.4);
+        }
+        .options {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin: 40px 0;
+        }
+        .option-btn {
+            font-family: 'Vazirmatn'!important;
+            background: #ecf0f1;
+            color: #2c3e50;
+            border: 2px solid #bdc3c7;
+            padding: 18px;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .option-btn:hover {
+            background: #d6dbdf;
+            border-color: #2980b9;
+        }
+        .option-btn.selected {
+            background: #3498db;
+            color: white;
+            border-color: #2980b9;
+        }
+        .progress-bar {
+            height: 6px;
+            background: #ecf0f1;
+            border-radius: 3px;
+            overflow: hidden;
+            margin: 30px 0;
+        }
+        .progress {
+            height: 100%;
+            background: #27ae60;
+            width: 0%;
+            transition: width 0.4s ease;
+        }
+        .question-number {
+            color: #7f8c8d;
+            font-size: 1rem;
+            margin-bottom: 10px;
+        }
+        textarea {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #bdc3c7;
+            border-radius: 12px;
+            font-family: inherit;
+            font-size: 1.1rem;
+            margin-top: 20px;
+        }
+        select {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #bdc3c7;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            margin-top: 20px;
+        }
+        .hidden { display: none; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- صفحه مقدمه -->
+        <div id="intro" class="intro">
+            {% if questionnaire.description %}
+                <p class="description">{{ questionnaire.description }}</p>
+            {% else %}
+                <p class="description">این پرسشنامه برای ارزیابی ویژگی‌های شما طراحی شده است.</p>
+            {% endif %}
+            <button class="btn" onclick="startQuestionnaire()">شروع پرسشنامه</button>
+        </div>
+
+        <!-- اسلایدها -->
+        {% for question in questions %}
+            <div id="slide-{{ forloop.counter0 }}" class="question-slide hidden">
+                <div class="question-number">سوال {{ forloop.counter }} از {{ questions|length }}</div>
+                <div class="progress-bar"><div class="progress" id="progress-{{ forloop.counter0 }}"></div></div>
+                <h2>{{ question.text }}</h2>
+
+                <div class="options" data-question-id="{{ question.id }}" data-type="{{ question.question_type }}">
+                    {% if question.question_type == 'MC' %}
+                        {% for choice in question.choices.all %}
+                            <button type="button" class="option-btn" data-value="{{ choice.id }}">
+                                {{ choice.text }}
+                            </button>
+                        {% endfor %}
+                    {% elif question.question_type == 'TX' %}
+                        <textarea placeholder="پاسخ خود را بنویسید..." id="text-{{ question.id }}"></textarea>
+                        <button type="button" class="btn" onclick="nextWithText({{ forloop.counter0 }}, {{ question.id }})">
+                            ادامه
+                        </button>
+                    {% elif question.question_type == 'SC' %}
+                        <select id="scale-{{ question.id }}">
+                            <option value="">انتخاب کنید</option>
+                            {% for i in "123456789"|make_list %}
+                                <option value="{{ i }}">{{ i }}</option>
+                            {% endfor %}
+                        </select>
+                        <small style="display:block; margin-top:10px; color:#777;">
+                            (۱ = کاملاً مخالف، ۹ = کاملاً موافق)
+                        </small>
+                        <button type="button" class="btn" style="margin-top:20px;" onclick="nextWithScale({{ forloop.counter0 }}, {{ question.id }})">
+                            ادامه
+                        </button>
+                    {% endif %}
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+
+    <form id="submitForm" method="post" action="{% url 'respond_questionnaire' pk=questionnaire.pk %}">
+        {% csrf_token %}
+        <input type="hidden" name="answers_data" id="answersData">
+        <input type="hidden" name="submit_final" value="1">
+    </form>
+
+    <script>
+        const questions = {{ questions|length }};
+        let currentSlide = 0;
+        let answers = []; // [{question_id, choice_id, text_answer, scale_value, rt}]
+        let questionStartTime = null;
+
+        function startQuestionnaire() {
+            document.getElementById('intro').classList.add('hidden');
+            showSlide(0);
+        }
+
+        function showSlide(n) {
+            // مخفی کردن همه اسلایدها
+            document.querySelectorAll('.question-slide').forEach(s => s.classList.add('hidden'));
+            document.getElementById(`slide-${n}`).classList.remove('hidden');
+
+            // بروزرسانی نوار پیشرفت
+            const progress = ((n + 1) / questions) * 100;
+            document.getElementById(`progress-${n}`).style.width = progress + '%';
+
+            // ثبت زمان شروع سوال
+            questionStartTime = Date.now();
+
+            currentSlide = n;
+        }
+
+        // برای سوالات چندگزینه‌ای
+        document.querySelectorAll('.option-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const questionId = this.parentElement.dataset.questionId;
+                const value = this.dataset.value;
+
+                // حذف انتخاب قبلی
+                this.parentElement.querySelectorAll('.option-btn').forEach(b => b.classList.remove('selected'));
+                this.classList.add('selected');
+
+                // محاسبه RT
+                const rt = Math.round((Date.now() - questionStartTime) / 1000); // ثانیه
+
+                // ذخیره پاسخ
+                answers[currentSlide] = {
+                    question_id: questionId,
+                    choice_id: value,
+                    text_answer: null,
+                    scale_value: null,
+                    rt: rt
+                };
+
+                // رفتن به سوال بعدی
+                setTimeout(() => {
+                    if (currentSlide < questions - 1) {
+                        showSlide(currentSlide + 1);
+                    } else {
+                        submitAnswers();
+                    }
+                }, 300);
+            });
+        });
+
+        // برای سوالات متنی
+        function nextWithText(slideIndex, questionId) {
+            const text = document.getElementById(`text-${questionId}`).value.trim();
+            if (text === '' && document.querySelector(`#slide-${slideIndex} h2`).innerHTML.includes('*')) {
+                alert('این سوال اجباری است.');
+                return;
+            }
+            const rt = Math.round((Date.now() - questionStartTime) / 1000);
+            answers[slideIndex] = {
+                question_id: questionId,
+                choice_id: null,
+                text_answer: text,
+                scale_value: null,
+                rt: rt
+            };
+            if (slideIndex < questions - 1) {
+                showSlide(slideIndex + 1);
+            } else {
+                submitAnswers();
+            }
+        }
+
+        // برای سوالات مقیاسی
+        function nextWithScale(slideIndex, questionId) {
+            const value = document.getElementById(`scale-${questionId}`).value;
+            if (value === '' && document.querySelector(`#slide-${slideIndex} h2`).innerHTML.includes('*')) {
+                alert('این سوال اجباری است.');
+                return;
+            }
+            const rt = Math.round((Date.now() - questionStartTime) / 1000);
+            answers[slideIndex] = {
+                question_id: questionId,
+                choice_id: null,
+                text_answer: null,
+                scale_value: value ? parseInt(value) : null,
+                rt: rt
+            };
+            if (slideIndex < questions - 1) {
+                showSlide(slideIndex + 1);
+            } else {
+                submitAnswers();
+            }
+        }
+
+        function submitAnswers() {
+            document.getElementById('answersData').value = JSON.stringify(answers);
+            document.getElementById('submitForm').submit();
+        }
+    </script>
+</body>
+</html>

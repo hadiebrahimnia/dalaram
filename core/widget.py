@@ -80,7 +80,7 @@ class PersianDateInput(forms.DateInput):
 
 
 
-class PersianPhoneInput(forms.TextInput):
+class PersianusernameInput(forms.TextInput):
     """
     ویجیت اختصاصی برای شماره موبایل ایرانی
     - فقط 11 رقم عددی
@@ -112,8 +112,8 @@ class PersianPhoneInput(forms.TextInput):
 
 
 # اختیاری: اعتبارسنجی قوی‌تر در سطح فیلد فرم
-phone_validator = RegexValidator(
+username_validator = RegexValidator(
     regex=r'^09\d{9}$',
     message=_("شماره موبایل باید ۱۱ رقم باشد و با ۰۹ شروع شود."),
-    code='invalid_phone'
+    code='invalid_username'
 )
