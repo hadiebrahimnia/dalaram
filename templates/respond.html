@@ -89,6 +89,7 @@
             border-color: #2980b9;
         }
         .progress-bar {
+            direction:ltr;
             height: 6px;
             background: #ecf0f1;
             border-radius: 3px;
@@ -183,112 +184,113 @@
     </form>
 
     <script>
-        const questions = {{ questions|length }};
-        let currentSlide = 0;
-        let answers = []; // [{question_id, choice_id, text_answer, scale_value, rt}]
-        let questionStartTime = null;
+    const questions = {{ questions|length }};
+    let currentSlide = 0;
+    let answers = []; // همچنان آرایه، اما حالا فقط با push پر می‌شود
+    let questionStartTime = null;
 
-        function startQuestionnaire() {
-            document.getElementById('intro').classList.add('hidden');
-            showSlide(0);
-        }
+    function startQuestionnaire() {
+        document.getElementById('intro').classList.add('hidden');
+        showSlide(0);
+    }
 
-        function showSlide(n) {
-            // مخفی کردن همه اسلایدها
-            document.querySelectorAll('.question-slide').forEach(s => s.classList.add('hidden'));
-            document.getElementById(`slide-${n}`).classList.remove('hidden');
+    function showSlide(n) {
+        document.querySelectorAll('.question-slide').forEach(s => s.classList.add('hidden'));
+        document.getElementById(`slide-${n}`).classList.remove('hidden');
 
-            // بروزرسانی نوار پیشرفت
-            const progress = ((n + 1) / questions) * 100;
-            document.getElementById(`progress-${n}`).style.width = progress + '%';
+        const progress = ((n + 1) / questions) * 100;
+        document.getElementById(`progress-${n}`).style.width = progress + '%';
 
-            // ثبت زمان شروع سوال
-            questionStartTime = Date.now();
+        questionStartTime = Date.now();
+        currentSlide = n;
+    }
 
-            currentSlide = n;
-        }
+    // === چندگزینه‌ای ===
+    document.querySelectorAll('.option-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const questionId = this.parentElement.dataset.questionId;
+            const value = this.dataset.value;
 
-        // برای سوالات چندگزینه‌ای
-        document.querySelectorAll('.option-btn').forEach(btn => {
-            btn.addEventListener('click', function() {
-                const questionId = this.parentElement.dataset.questionId;
-                const value = this.dataset.value;
+            this.parentElement.querySelectorAll('.option-btn').forEach(b => b.classList.remove('selected'));
+            this.classList.add('selected');
 
-                // حذف انتخاب قبلی
-                this.parentElement.querySelectorAll('.option-btn').forEach(b => b.classList.remove('selected'));
-                this.classList.add('selected');
-
-                // محاسبه RT
-                const rt = Math.round((Date.now() - questionStartTime) / 1000); // ثانیه
-
-                // ذخیره پاسخ
-                answers[currentSlide] = {
-                    question_id: questionId,
-                    choice_id: value,
-                    text_answer: null,
-                    scale_value: null,
-                    rt: rt
-                };
-
-                // رفتن به سوال بعدی
-                setTimeout(() => {
-                    if (currentSlide < questions - 1) {
-                        showSlide(currentSlide + 1);
-                    } else {
-                        submitAnswers();
-                    }
-                }, 300);
-            });
-        });
-
-        // برای سوالات متنی
-        function nextWithText(slideIndex, questionId) {
-            const text = document.getElementById(`text-${questionId}`).value.trim();
-            if (text === '' && document.querySelector(`#slide-${slideIndex} h2`).innerHTML.includes('*')) {
-                alert('این سوال اجباری است.');
-                return;
-            }
             const rt = Math.round((Date.now() - questionStartTime) / 1000);
-            answers[slideIndex] = {
+
+            // به جای answers[currentSlide] = ...   →   push کنید
+            answers.push({
                 question_id: questionId,
-                choice_id: null,
-                text_answer: text,
+                choice_id: value,
+                text_answer: null,
                 scale_value: null,
                 rt: rt
-            };
-            if (slideIndex < questions - 1) {
-                showSlide(slideIndex + 1);
-            } else {
-                submitAnswers();
-            }
+            });
+
+            setTimeout(() => {
+                if (currentSlide < questions - 1) {
+                    showSlide(currentSlide + 1);
+                } else {
+                    submitAnswers();
+                }
+            }, 300);
+        });
+    });
+
+    // === متنی ===
+    function nextWithText(slideIndex, questionId) {
+        const text = document.getElementById(`text-${questionId}`).value.trim();
+        // اگر اجباری بود و خالی بود (می‌توانید * در عنوان بگذارید)
+        if (text === '') {
+            alert('لطفاً به این سوال پاسخ دهید.');
+            return;
         }
 
-        // برای سوالات مقیاسی
-        function nextWithScale(slideIndex, questionId) {
-            const value = document.getElementById(`scale-${questionId}`).value;
-            if (value === '' && document.querySelector(`#slide-${slideIndex} h2`).innerHTML.includes('*')) {
-                alert('این سوال اجباری است.');
-                return;
-            }
-            const rt = Math.round((Date.now() - questionStartTime) / 1000);
-            answers[slideIndex] = {
-                question_id: questionId,
-                choice_id: null,
-                text_answer: null,
-                scale_value: value ? parseInt(value) : null,
-                rt: rt
-            };
-            if (slideIndex < questions - 1) {
-                showSlide(slideIndex + 1);
-            } else {
-                submitAnswers();
-            }
+        const rt = Math.round((Date.now() - questionStartTime) / 1000);
+
+        answers.push({
+            question_id: questionId,
+            choice_id: null,
+            text_answer: text,
+            scale_value: null,
+            rt: rt
+        });
+
+        if (slideIndex < questions - 1) {
+            showSlide(slideIndex + 1);
+        } else {
+            submitAnswers();
+        }
+    }
+
+    // === مقیاسی ===
+    function nextWithScale(slideIndex, questionId) {
+        const value = document.getElementById(`scale-${questionId}`).value;
+        if (value === '') {
+            alert('لطفاً یک گزینه انتخاب کنید.');
+            return;
         }
 
-        function submitAnswers() {
-            document.getElementById('answersData').value = JSON.stringify(answers);
-            document.getElementById('submitForm').submit();
+        const rt = Math.round((Date.now() - questionStartTime) / 1000);
+
+        answers.push({
+            question_id: questionId,
+            choice_id: null,
+            text_answer: null,
+            scale_value: parseInt(value),
+            rt: rt
+        });
+
+        if (slideIndex < questions - 1) {
+            showSlide(slideIndex + 1);
+        } else {
+            submitAnswers();
         }
-    </script>
+    }
+
+    function submitAnswers() {
+        // دیگر null وجود ندارد!
+        document.getElementById('answersData').value = JSON.stringify(answers);
+        document.getElementById('submitForm').submit();
+    }
+</script>
 </body>
 </html>

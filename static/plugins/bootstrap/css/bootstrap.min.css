@@ -4758,6 +4758,7 @@ fieldset:disabled .btn {
   border-radius: 0.25rem;
 }
 .progress-bar {
+  direction: ltr;
   display: flex;
   flex-direction: column;
   justify-content: center;

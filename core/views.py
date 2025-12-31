@@ -98,8 +98,12 @@ def respond_questionnaire(request, pk):
                 RT=ans.get('rt')
             )
         
-        # محاسبه و ایجاد نتایج برای هر ویژگی
-        attributes = Attribute.objects.filter(ویژگی__questionnaire=questionnaire).distinct()  # ویژگی‌های مرتبط با سوالات این پرسشنامه
+        
+
+        attributes = Attribute.objects.filter(
+            questions__questionnaire=questionnaire
+        ).distinct()
+        
         for attribute in attributes:
             answers = response.answers.filter(question__attribute=attribute)
             num_questions = answers.count()
