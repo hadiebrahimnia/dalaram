@@ -227,3 +227,149 @@ class ResultAdmin(admin.ModelAdmin):
     def has_delete_permission(self, request, obj=None):
         # فقط superuser یا کاربران خاص اجازه حذف مستقیم Result داشته باشند
         return request.user.is_superuser
+    
+
+class RatingResponseInline(admin.TabularInline):
+    model = RatingResponse
+    extra = 0
+    can_delete = False
+    readonly_fields = (
+        'stimulus',
+        'valence',
+        'valence_rt_formatted',
+        'arousal',
+        'arousal_rt_formatted',
+        'created_at_formatted',
+    )
+    fields = readonly_fields
+    ordering = ('-created_at',)
+
+    def valence_rt_formatted(self, obj):
+        return f"{obj.valence_rt} ms" if obj.valence_rt is not None else '-'
+    valence_rt_formatted.short_description = 'زمان پاسخ Valence'
+
+    def arousal_rt_formatted(self, obj):
+        return f"{obj.arousal_rt} ms" if obj.arousal_rt is not None else '-'
+    arousal_rt_formatted.short_description = 'زمان پاسخ Arousal'
+
+    def created_at_formatted(self, obj):
+        return obj.created_at.strftime("%Y-%m-%d %H:%M:%S")
+    created_at_formatted.short_description = 'زمان ثبت'
+
+    def has_add_permission(self, request, obj=None):
+        return False
+
+    def has_change_permission(self, request, obj=None):
+        return False
+
+
+@admin.register(RatingResponse)
+class RatingResponseAdmin(admin.ModelAdmin):
+    list_display = (
+        'user_username',
+        'stimulus',
+        'valence',
+        'arousal',
+        'valence_rt_formatted',
+        'arousal_rt_formatted',
+        'created_at_formatted',
+        'is_complete_display',
+    )
+    list_filter = (
+        'created_at',
+        'stimulus',
+        'valence',
+        'arousal',
+    )
+    search_fields = (
+        'user__username',
+        'stimulus',
+    )
+    readonly_fields = (
+        'user',
+        'stimulus',
+        'valence',
+        'valence_rt',
+        'arousal',
+        'arousal_rt',
+        'created_at',
+        'created_at_formatted',
+    )
+    date_hierarchy = 'created_at'
+    ordering = ('-created_at',)
+    list_per_page = 50
+
+    def user_username(self, obj):
+        return obj.user.username
+    user_username.short_description = 'کاربر'
+    user_username.admin_order_field = 'user__username'
+
+    def valence_rt_formatted(self, obj):
+        return f"{obj.valence_rt} ms" if obj.valence_rt is not None else '-'
+    valence_rt_formatted.short_description = 'RT Valence'
+
+    def arousal_rt_formatted(self, obj):
+        return f"{obj.arousal_rt} ms" if obj.arousal_rt is not None else '-'
+    arousal_rt_formatted.short_description = 'RT Arousal'
+
+    def created_at_formatted(self, obj):
+        return obj.created_at.strftime("%Y-%m-%d %H:%M:%S")
+    created_at_formatted.short_description = 'زمان ثبت'
+
+    def is_complete_display(self, obj):
+        if obj.is_complete():
+            return "✓ کامل"
+        elif obj.has_valence() or obj.has_arousal():
+            return "◐ ناقص"
+        else:
+            return "✗ خالی"
+    is_complete_display.short_description = 'وضعیت پاسخ'
+
+    def has_add_permission(self, request):
+        return False
+
+    def has_change_permission(self, request, obj=None):
+        return False
+
+    def has_delete_permission(self, request, obj=None):
+        return request.user.is_superuser
+
+
+# نمایش پاسخ‌های رتبه‌بندی در صفحه کاربر (CustomUser)
+class RatingResponseUserInline(admin.TabularInline):
+    model = RatingResponse
+    extra = 0
+    can_delete = False
+    readonly_fields = (
+        'stimulus',
+        'valence',
+        'valence_rt_formatted',
+        'arousal',
+        'arousal_rt_formatted',
+        'created_at_formatted',
+    )
+    fields = readonly_fields
+    ordering = ('-created_at',)
+
+    def valence_rt_formatted(self, obj):
+        return f"{obj.valence_rt} ms" if obj.valence_rt is not None else '-'
+    valence_rt_formatted.short_description = 'RT Valence'
+
+    def arousal_rt_formatted(self, obj):
+        return f"{obj.arousal_rt} ms" if obj.arousal_rt is not None else '-'
+    arousal_rt_formatted.short_description = 'RT Arousal'
+
+    def created_at_formatted(self, obj):
+        return obj.created_at.strftime("%Y-%m-%d %H:%M:%S")
+    created_at_formatted.short_description = 'زمان ثبت'
+
+    def has_add_permission(self, request, obj=None):
+        return False
+
+    def has_change_permission(self, request, obj=None):
+        return False
+
+
+# اضافه کردن Inline به UserAdmin (اصلاح‌شده با tuple)
+current_inlines = getattr(UserAdmin, 'inlines', ())
+UserAdmin.inlines = current_inlines + (RatingResponseUserInline,)

@@ -140,3 +140,65 @@ class Result(models.Model):
 
     def __str__(self):
         return f"نتیجه {self.attribute.title} برای {self.user.username} در {self.questionnaire.title}"
+    
+
+class RatingResponse(models.Model):
+    user = models.ForeignKey(
+        CustomUser,
+        on_delete=models.CASCADE,
+        verbose_name="کاربر"
+    )
+    stimulus = models.CharField(
+        max_length=50,
+        verbose_name="محرک"
+    )
+
+    # نمره خوشایندی (Valence) - از 1 تا 9
+    valence = models.IntegerField(
+        null=True,
+        blank=True,
+        verbose_name="خوشایندی (Valence)"
+    )
+    valence_rt = models.PositiveIntegerField(
+        null=True,
+        blank=True,
+        verbose_name="زمان پاسخ خوشایندی (میلی‌ثانیه)"
+    )
+
+    # نمره برانگیختگی (Arousal) - از 1 تا 9
+    arousal = models.IntegerField(
+        null=True,
+        blank=True,
+        verbose_name="برانگیختگی (Arousal)"
+    )
+    arousal_rt = models.PositiveIntegerField(
+        null=True,
+        blank=True,
+        verbose_name="زمان پاسخ برانگیختگی (میلی‌ثانیه)"
+    )
+
+    created_at = models.DateTimeField(
+        auto_now_add=True,
+        verbose_name="زمان ایجاد"
+    )
+
+    class Meta:
+        unique_together = ('user', 'stimulus')  # هر کاربر فقط یک بار برای هر محرک رتبه بدهد
+        verbose_name = "پاسخ رتبه‌بندی صدا"
+        verbose_name_plural = "پاسخ‌های رتبه‌بندی صدا"
+        ordering = ['-created_at']
+
+    def __str__(self):
+        v = f"Valence: {self.valence}" if self.valence is not None else "Valence: -"
+        a = f"Arousal: {self.arousal}" if self.arousal is not None else "Arousal: -"
+        return f"{v} | {a} — {self.stimulus} — {self.user.username}"
+
+    # اختیاری: متدهای کمکی برای بررسی اینکه آیا هر کدام پاسخ داده شده
+    def has_valence(self):
+        return self.valence is not None
+
+    def has_arousal(self):
+        return self.arousal is not None
+
+    def is_complete(self):
+        return self.has_valence() and self.has_arousal()

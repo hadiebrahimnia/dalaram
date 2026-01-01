@@ -1,335 +1,139 @@
 <!DOCTYPE html>
 <html lang="fa" dir="rtl">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>{{ title }}</title>
     {% load static %}
-    <link href="{% static 'plugins/bootstrap/css/bootstrap.rtl.min.css' %}" rel="stylesheet">
-    <style>
-        @font-face {
-            font-family: "Vazirmatn"!important;
-            src: url("/static/fonts/Vazir-Medium-FD.woff") format("woff");
-            font-style: normal;
-            font-display: swap; /* بهترین عملکرد: متن ابتدا با فونت سیستم نمایش داده بشه، بعد عوض بشه */
-        }
-        body { background: #f0f0f0; font-family: "Vazirmatn";padding:10px; }
-        .fixation { font-size: 120px; font-weight: bold; color: #333; }
-        .hidden { display: none !important; }
-        .full-center {
-            position: fixed; top: 50%; left: 50%;
-            transform: translate(-50%, -50%);
-            width: 100%; height: 100%;
-            background: rgba(240, 240, 240, 0.95);
-            display: flex; align-items: center; justify-content: center;
-            z-index: 1000;
-        }
-        
-        .sam-container {
-            max-width: 1200px;
-            margin: 0 auto;
-           
-        }
-        .sam-buttons {
-            display: flex;
-            justify-content: center;
-            direction: ltr;
-            flex-wrap: nowrap;
-            gap: 10px;
-            margin-top: 30px;
-        }
-        .sam-btn {
-            width: 120px;
-            height: 150px;
-            padding: 5px;
-            background: white;
-            border: 3px solid #ddd;
-            border-radius: 12px;
-            cursor: pointer;
-            transition: all 0.2s;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-        }
-        .sam-btn:hover {
-            border-color: #007bff;
-            transform: scale(1.05);
-        }
-        .sam-btn.selected {
-            border-color: #007bff;
-            box-shadow: 0 0 15px rgba(0, 123, 255, 0.6);
-            transform: scale(1.1);
-        }
-        .sam-btn img {
-            width: 100%;
-            height: 100px;
-            object-fit: contain;
-        }
-        .key-hint {
-            font-size: 12px;
-            color: #666;
-            margin-top: 5px;
-        }
-        .card {
-            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
-        }
-
-
-
-        /* ----------------- بهبود نمایش دکمه‌ها در موبایل ----------------- */
-    @media (max-width: 768px) {
-        .sam-buttons {
-            flex-wrap: wrap;         /* اجازه می‌ده دکمه‌ها به خط بعدی برن */
-            justify-content: center;
-            gap: 15px;               /* فاصله یکنواخت */
-            padding: 0 10px;
-        }
-        
-        .sam-btn {
-            width: 100px;            /* کمی کوچکتر در موبایل */
-            height: 130px;
-        }
-        
-        .sam-btn img {
-            height: 80px;
-        }
-        
-        .sam-container {
-            max-width: 100%;
-            padding: 0 15px;
-        }
-    }
-
-    @media (max-width: 480px) {
-        .sam-btn {
-            width: 90px;
-            height: 120px;
-        }
-        .sam-btn img {
-            height: 70px;
-        }
-    }
-
-    /* ----------------- پیام چرخاندن گوشی ----------------- */
-    #rotate-device {
-        display: none;
-        position: fixed;
-        top: 0; left: 0;
-        width: 100vw;
-        height: 100vh;
-        background: #333;
-        color: white;
-        z-index: 10000;
-        align-items: center;
-        justify-content: center;
-        flex-direction: column;
-        text-align: center;
-        font-size: 18px;
-        padding: 20px;
-        box-sizing: border-box;
-    }
-
-    #rotate-device i {
-        font-size: 80px;
-        margin-bottom: 30px;
-        animation: rotate 2s infinite linear;
-    }
-
-    @keyframes rotate {
-        from { transform: rotate(0deg); }
-        to { transform: rotate(360deg); }
-    }
-
-    /* فقط در موبایل و در حالت portrait نشان بده */
-    @media (max-width: 768px) and (orientation: portrait) {
-        #rotate-device {
-            display: flex !important;
-        }
-        
-        /* مخفی کردن بقیه صفحه تا وقتی گوشی چرخانده نشده */
-        body > *:not(#rotate-device) {
-            display: none !important;
-        }
-    }
-    </style>
-</head>
-<body>
-<div id="rotate-device">
-    <i>↻</i>
-    <h3>لطفاً گوشی خود را بچرخانید</h3>
-    <p>برای تجربه بهتر، صفحه را به حالت افقی (landscape) درآورید.</p>
-</div>
-<div id="fixation" class="full-center hidden">
-    <div class="fixation">+</div>
-</div>
-<audio id="audio-player" preload="auto"></audio>
-<!-- صفحه خوشایندی -->
-<div id="valence-rating" class="py-5 hidden">
-    <div class="card">
-        <div class="card-body text-center sam-container ">
+    <link
+      href="{% static 'plugins/bootstrap/css/bootstrap.rtl.min.css' %}"
+      rel="stylesheet" />
+    <link
+      href="{% static 'css/rating.css' %}"
+      rel="stylesheet" />
+  </head>
+  <body>
+    <div id="rotate-device">
+      <i>↻</i>
+      <h3>لطفاً گوشی خود را بچرخانید</h3>
+      <p>برای تجربه بهتر، صفحه را به حالت افقی (landscape) درآورید.</p>
+    </div>
+    <div class="content">
+      <div
+        id="feedback-message"
+        class="hidden"
+        style="
+          position: fixed;
+          top: 50%;
+          left: 50%;
+          transform: translate(-50%, -50%);
+          background: rgba(255, 70, 70, 0.95);
+          color: white;
+          padding: 30px 50px;
+          border-radius: 20px;
+          font-size: 28px;
+          font-weight: bold;
+          box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+          z-index: 9999;
+          text-align: center;
+          backdrop-filter: blur(10px);
+          opacity: 0;
+          transition: opacity 0.4s ease;
+        ">
+        لطفاً سریع‌تر پاسخ دهید!
+      </div>
+      <div id="fixation" class="full-center hidden">
+        <div class="fixation">+</div>
+      </div>
+      <audio id="audio-player" preload="auto"></audio>
+      <!-- صفحه خوشایندی -->
+      <div id="valence-rating" class="py-5 hidden">
+        <div class="card">
+          <div class="card-body text-center sam-container">
             <h3 class="mb-4">لطفاً میزان خوشایندی صدا را انتخاب کنید</h3>
             <div class="sam-buttons">
-                {% for i in "123456789" %}
-                <button type="button" class="sam-btn" data-value="{{ forloop.counter }}">
-                    <img src="{% static 'images/valence/' %}{{ forloop.counter }}.png" alt="خوشایندی {{ forloop.counter }}">
-                    <div class="key-hint">{{ forloop.counter }}</div>
-                </button>
-                {% endfor %}
+              {% for i in "123456789" %}
+              <button
+                type="button"
+                class="sam-btn"
+                data-value="{{ forloop.counter }}">
+                <img
+                  src="{% static 'images/valence/' %}{{ forloop.counter }}.png"
+                  alt="خوشایندی {{ forloop.counter }}" />
+                <div class="key-hint">{{ forloop.counter }}</div>
+              </button>
+              {% endfor %}
             </div>
+          </div>
         </div>
-    </div>
-</div>
-<!-- صفحه برانگیختگی -->
-<div id="arousal-rating" class="py-5 hidden">
-    <div class="card">
-        <div class="card-body text-center sam-container">
+      </div>
+      <!-- صفحه برانگیختگی -->
+      <div id="arousal-rating" class="py-5 hidden">
+        <div class="card">
+          <div class="card-body text-center sam-container">
             <h3 class="mb-4">لطفاً میزان برانگیختگی صدا را انتخاب کنید</h3>
             <div class="sam-buttons">
-                {% for i in "123456789" %}
-                <button type="button" class="sam-btn" data-value="{{ forloop.counter }}">
-                    <img src="{% static 'images/arousal/' %}{{ forloop.counter }}.jpg" alt="برانگیختگی {{ forloop.counter }}">
-                    <div class="key-hint">{{ forloop.counter }}</div>
-                </button>
-                {% endfor %}
+              {% for i in "123456789" %}
+              <button
+                type="button"
+                class="sam-btn col-3"
+                data-value="{{ forloop.counter }}">
+                <img
+                  src="{% static 'images/arousal/' %}{{ forloop.counter }}.jpg"
+                  alt="برانگیختگی {{ forloop.counter }}" />
+                <div class="key-hint">{{ forloop.counter }}</div>
+              </button>
+              {% endfor %}
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- صفحه شروع -->
+      <div id="practice-note" class="p-5 m-auto">
+        <div class="card">
+          <div class="card-body text-center">
+            <p class="lead mt-3"> در این آزمون تعدادی صدا برای شما پخش میشود</p>
+            <p class="lead mt-3">بعد از پایان هر صدا شما اولا میزان خوشایندی (اینکه صدا چقدر صدای این صدا برای شما حس خوب یا بد ایجاد کرده است را تعیین میکنید و ( و سپسس میزان برانگیختگی( اینکه میزان حس ایجاد شده چه میزان هست را تعیین میکنید</p>
+            <button class="btn btn-success btn-lg mt-4" id="start-practice">
+              شروع آزمون
+            </button>
+          </div>
+        </div>
+      </div>
+      <div id="main-note" class="p-5 m-auto hidden">
+        <div class="card">
+            <div class="card-body text-center">
+            <h3 class="mb-4">مرحله آزمایشی به پایان رسید</h3>
+            <p class="lead mt-3">
+                اکنون آزمون اصلی آغاز می‌شود. در این بخش دیگر زمان محدود نیست و پیام «سریع‌تر پاسخ دهید» نمایش داده نمی‌شود.
+            </p>
+            <p class="lead">
+                لطفاً برای هر صدا همانند قبل، ابتدا میزان <strong>خوشایندی</strong> و سپس میزان <strong>برانگیختگی</strong> را انتخاب کنید.
+            </p>
+            <p class="lead text-danger">
+                توجه: این بخش نتایج واقعی شماست، بنابراین با دقت و تمرکز پاسخ دهید.
+            </p>
+            <button class="btn btn-primary btn-lg mt-4" id="start-main">
+                شروع آزمون اصلی
+            </button>
             </div>
         </div>
-    </div>
-</div>
-<!-- صفحه شروع -->
-<div id="practice-note" class="py-5 m-auto">
-    <div class="card">
-        <div class="card-body text-center">
-            <p class="lead mt-3">بعد از آن آزمون اصلی شروع می‌شود.</p>
-            <button class="btn btn-success btn-lg mt-4" id="start-practice">شروع آزمون</button>
         </div>
-    </div>
-</div>
-<!-- صفحه پایان -->
-<div id="thanks" class="py-5 hidden">
-    <div class="card m-auto">
-        <div class="card-body text-center">
+      <!-- صفحه پایان -->
+      <div id="thanks" class="py-5 hidden">
+        <div class="card m-auto">
+          <div class="card-body text-center">
             <h2>متشکریم!</h2>
             <p class="lead">آزمون با موفقیت به پایان رسید.</p>
+          </div>
         </div>
+      </div>
+      <script>
+            const practiceFiles = {{ practice_files|safe }};
+            const mainFiles = {{ main_files|safe }};
+      </script>
+      <script src="{% static 'js/jquery.min.js' %}"></script>
+      <script src="{% static 'js/rating.js' %}"></script>
     </div>
-</div>
-<script src="{% static 'js/jquery.min.js' %}"></script>
-<script>
-    $('#start-practice').click(() => {
-        const elem = document.documentElement; // تمام صفحه (body/html)
-            if (elem.requestFullscreen) {
-                elem.requestFullscreen();
-            } else if (elem.mozRequestFullScreen) { // Firefox
-                elem.mozRequestFullScreen();
-            } else if (elem.webkitRequestFullscreen) { // Chrome, Safari
-                elem.webkitRequestFullscreen();
-            } else if (elem.msRequestFullscreen) { // IE/Edge
-                elem.msRequestFullscreen();
-            }
-    });
-    const practiceFiles = {{ practice_files|safe }};
-    const mainFiles = {{ main_files|safe }};
-    let allFiles = practiceFiles.concat(mainFiles);
-    let currentIndex = 0;
-    let valence = null;
-    let arousal = null;
-    let valenceTimeout, arousalTimeout;
-    responsetime=30000;
-    function setupButtons(containerId, callback) {
-        $(`${containerId} .sam-btn`).on('click', function() {
-            $(`${containerId} .sam-btn`).removeClass('selected');
-            $(this).addClass('selected');
-            callback(parseInt($(this).data('value')));
-        });
-    }
-    $(document).on('keydown', function(e) {
-        if ($('#valence-rating').is(':visible')) {
-            if (e.key >= '1' && e.key <= '9') {
-                const val = parseInt(e.key);
-                $('#valence-rating .sam-btn').removeClass('selected');
-                $(`#valence-rating .sam-btn[data-value="${val}"]`).addClass('selected');
-                valence = val;
-                clearTimeout(valenceTimeout);
-                setTimeout(showArousal, 400);
-            }
-        }
-        else if ($('#arousal-rating').is(':visible')) {
-            if (e.key >= '1' && e.key <= '9') {
-                const val = parseInt(e.key);
-                $('#arousal-rating .sam-btn').removeClass('selected');
-                $(`#arousal-rating .sam-btn[data-value="${val}"]`).addClass('selected');
-                arousal = val;
-                clearTimeout(arousalTimeout);
-                saveAndNext();
-            }
-        }
-    });
-    function showFixation() {
-        $('#fixation').removeClass('hidden');
-        setTimeout(() => {
-            $('#fixation').addClass('hidden');
-            playAudio();
-        }, 1000);
-    }
-    function playAudio() {
-        const file = allFiles[currentIndex];
-        $('#audio-player').attr('src', file);
-        const audio = $('#audio-player')[0];
-        audio.play();
-        setTimeout(() => {
-            audio.pause();
-            audio.currentTime = 0;
-            showValence();
-        }, 6000);
-    }
-    function showValence() {
-        $('#valence-rating').removeClass('hidden');
-        valenceTimeout = setTimeout(() => {
-            saveAndNext();
-        }, responsetime);
-        setupButtons('#valence-rating', function(val) {
-            valence = val;
-            clearTimeout(valenceTimeout);
-            setTimeout(showArousal, 400);
-        });
-    }
-    function showArousal() {
-        $('#valence-rating').addClass('hidden');
-        $('#arousal-rating').removeClass('hidden');
-        arousalTimeout = setTimeout(saveAndNext, responsetime);
-        setupButtons('#arousal-rating', function(val) {
-            arousal = val;
-            clearTimeout(arousalTimeout);
-            saveAndNext();
-        });
-    }
-    function saveAndNext() {
-        clearTimeout(valenceTimeout);
-        clearTimeout(arousalTimeout);
-        $('#arousal-rating').addClass('hidden');
-        const file = allFiles[currentIndex];
-        const isPractice = currentIndex < practiceFiles.length;
-        if (!isPractice && valence !== null && arousal !== null) {
-            $.post('', {
-                csrfmiddlewaretoken: '{{ csrf_token }}',
-                audio_file: file,
-                valence: valence,
-                arousal: arousal
-            });
-        }
-        currentIndex++;
-        if (currentIndex >= allFiles.length) {
-            $('#thanks').removeClass('hidden');
-        } else {
-            if (isPractice && currentIndex === practiceFiles.length) {
-                alert('۱۰ محرک آزمایشی تمام شد.\nحالا آزمون اصلی آغاز می‌شود.');
-            }
-            valence = arousal = null;
-            showFixation();
-        }
-    }
-    $('#start-practice').click(() => {
-        $('#practice-note').addClass('hidden');
-        showFixation();
-    });
-</script>
-</body>
+  </body>
 </html>

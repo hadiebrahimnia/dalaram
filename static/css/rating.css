@@ -1,0 +1,166 @@
+@font-face {
+  font-family: "Vazirmatn" !important;
+  src: url("/static/fonts/Vazir-Medium-FD.woff") format("woff");
+  font-style: normal;
+  font-display: swap; /* بهترین عملکرد: متن ابتدا با فونت سیستم نمایش داده بشه، بعد عوض بشه */
+}
+body {
+  background: #f0f0f0;
+  font-family: "Vazirmatn";
+  padding: 10px;
+}
+.fixation {
+  font-size: 120px;
+  font-weight: bold;
+  color: #333;
+}
+.hidden {
+  display: none !important;
+}
+.full-center {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 100%;
+  height: 100%;
+  background: rgba(240, 240, 240, 0.95);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.sam-container {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+.sam-buttons {
+  display: flex;
+  justify-content: center;
+  direction: ltr;
+  flex-wrap: nowrap;
+  gap: 10px;
+  margin-top: 30px;
+}
+.sam-btn {
+  width: 120px;
+  height: 150px;
+  padding: 5px;
+  background: white;
+  border: 3px solid #ddd;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+.sam-btn:hover {
+  border-color: #007bff;
+  transform: scale(1.05);
+}
+.sam-btn.selected {
+  border-color: #007bff;
+  box-shadow: 0 0 15px rgba(0, 123, 255, 0.6);
+  transform: scale(1.1);
+}
+.sam-btn img {
+  width: 100%;
+  height: 100px;
+  object-fit: contain;
+}
+.key-hint {
+  font-size: 12px;
+  color: #666;
+  margin-top: 5px;
+}
+.card {
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+}
+
+/* ----------------- بهبود نمایش دکمه‌ها در موبایل ----------------- */
+@media (max-width: 768px) {
+  .sam-buttons {
+    flex-wrap: wrap; /* اجازه می‌ده دکمه‌ها به خط بعدی برن */
+    justify-content: center;
+    gap: 15px; /* فاصله یکنواخت */
+    padding: 0 10px;
+  }
+
+  .sam-btn {
+    width: 100px; /* کمی کوچکتر در موبایل */
+    height: 130px;
+  }
+
+  .sam-btn img {
+    height: 80px;
+  }
+
+  .sam-container {
+    max-width: 100%;
+    padding: 0 15px;
+  }
+}
+
+@media (max-width: 480px) {
+  .sam-btn {
+    width: 90px;
+    height: 120px;
+  }
+  .sam-btn img {
+    height: 70px;
+  }
+}
+
+/* ----------------- پیام چرخاندن گوشی ----------------- */
+#rotate-device {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: #333;
+  color: white;
+  z-index: 10000;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  text-align: center;
+  font-size: 18px;
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+#rotate-device i {
+  font-size: 80px;
+  margin-bottom: 30px;
+  animation: rotate 2s infinite linear;
+}
+
+@keyframes rotate {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* فقط در موبایل و در حالت portrait نشان بده */
+@media (max-width: 768px) and (orientation: portrait) {
+  #rotate-device {
+    display: flex !important;
+  }
+
+  /* مخفی کردن بقیه صفحه تا وقتی گوشی چرخانده نشده */
+  body > *:not(#rotate-device) {
+    display: none !important;
+  }
+}
+.content {
+  display: flex;
+  justify-content: center; /* وسط افقی */
+  align-items: center; /* وسط عمودی */
+  height: 100vh; /* ارتفاع کامل صفحه (viewport height) */
+  background-color: #f0f0f0; /* اختیاری */
+}

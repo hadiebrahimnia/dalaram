@@ -12,6 +12,7 @@ from django.utils import timezone
 import os
 import random
 from django.templatetags.static import static
+from django.http import JsonResponse
 
 
 def home_view(request):
@@ -156,31 +157,88 @@ def pcm_view(request):
 @login_required(login_url='login_or_signup')
 @questionnaires_required([1,2,3])
 def rating_view(request):
+    if request.method == 'POST':
+        data = json.loads(request.body) if request.body else {}
+        audio_file = data.get('audio_file')
+        valence = data.get('valence')
+        arousal = data.get('arousal')
+        valence_rt = data.get('valence_rt')
+        arousal_rt = data.get('arousal_rt')
+
+        if audio_file:
+            parts = audio_file.split('/')
+            number = parts[4][:-4] 
+            stimulus = f"{number}"
+            rating_response, created = RatingResponse.objects.update_or_create(
+                user=request.user,
+                stimulus=stimulus,
+                defaults={
+                    'valence': valence if valence is not None else None,
+                    'valence_rt': valence_rt if valence is not None else None,
+                    'arousal': arousal if arousal is not None else None,
+                    'arousal_rt': arousal_rt if arousal is not None else None,
+                }
+            )
+
+        return JsonResponse({'status': 'success'})
+
     base_dir = 'sounds'
     practice_files = [
         '0-practice/1.WAV',
-        '0-practice/2.WAV',
-        '0-practice/3.WAV',
-        '0-practice/4.WAV',
-        '0-practice/5.WAV',
-        '0-practice/6.WAV',
-        '0-practice/7.WAV',
-        '0-practice/8.WAV',
-        '0-practice/9.WAV',
-        '0-practice/10.WAV',
+        # '0-practice/2.WAV',
+        # '0-practice/3.WAV',
+        # '0-practice/4.WAV',
+        # '0-practice/5.WAV',
+        # '0-practice/6.WAV',
+        # '0-practice/7.WAV',
+        # '0-practice/8.WAV',
+        # '0-practice/9.WAV',
+        # '0-practice/10.WAV',
     ]
     main_files = [
-        'folder1/sound1.mp3',
-        'folder2/happy_sound.mp3',
+        '1-HP-HA/110.WAV','1-HP-HA/200.WAV','1-HP-HA/201.WAV','1-HP-HA/202.WAV','1-HP-HA/205.WAV','1-HP-HA/215.WAV','1-HP-HA/220.WAV','1-HP-HA/311.WAV','1-HP-HA/352.WAV','1-HP-HA/353.WAV','1-HP-HA/355.WAV','1-HP-HA/360.WAV','1-HP-HA/363.WAV','1-HP-HA/365.WAV','1-HP-HA/366.WAV','1-HP-HA/367.WAV','1-HP-HA/378.WAV','1-HP-HA/415.WAV','1-HP-HA/716.WAV','1-HP-HA/717.WAV','1-HP-HA/808.WAV','1-HP-HA/815.WAV','1-HP-HA/817.WAV',
+
+        '2-HP-MA/109.WAV','2-HP-MA/111.WAV','2-HP-MA/112.WAV','2-HP-MA/150.WAV','2-HP-MA/151.WAV','2-HP-MA/206.WAV','2-HP-MA/221.WAV','2-HP-MA/224.WAV','2-HP-MA/226.WAV','2-HP-MA/230.WAV','2-HP-MA/254.WAV','2-HP-MA/270.WAV','2-HP-MA/351.WAV','2-HP-MA/400.WAV','2-HP-MA/601.WAV','2-HP-MA/721.WAV','2-HP-MA/725.WAV','2-HP-MA/726.WAV','2-HP-MA/802.WAV','2-HP-MA/810.WAV','2-HP-MA/811.WAV','2-HP-MA/813.WAV','2-HP-MA/816.WAV','2-HP-MA/820.WAV','2-HP-MA/826.WAV',
+
+        '3-HP-LA/172.WAV','3-HP-LA/809.WAV','3-HP-LA/812.WAV',
+
+        '4-MP-HA/114.WAV','4-MP-HA/204.WAV','4-MP-HA/210.WAV','4-MP-HA/216.WAV','4-MP-HA/610.WAV','4-MP-HA/704.WAV','4-MP-HA/710.WAV','4-MP-HA/715.WAV',
+
+        '5-MP-MA/102.WAV','5-MP-MA/104.WAV','5-MP-MA/107.WAV','5-MP-MA/111.WAV','5-MP-MA/113.WAV','5-MP-MA/120.WAV','5-MP-MA/130.WAV','5-MP-MA/132.WAV','5-MP-MA/152.WAV','5-MP-MA/170.WAV','5-MP-MA/225.WAV','5-MP-MA/245.WAV','5-MP-MA/246.WAV','5-MP-MA/251.WAV','5-MP-MA/252.WAV','5-MP-MA/320.WAV','5-MP-MA/322.WAV','5-MP-MA/358.WAV','5-MP-MA/361.WAV','5-MP-MA/364.WAV','5-MP-MA/368.WAV','5-MP-MA/370.WAV','5-MP-MA/373.WAV','5-MP-MA/374.WAV','5-MP-MA/375.WAV','5-MP-MA/376.WAV','5-MP-MA/382.WAV','5-MP-MA/403.WAV','5-MP-MA/410.WAV','5-MP-MA/425.WAV','5-MP-MA/500.WAV','5-MP-MA/627.WAV','5-MP-MA/698.WAV','5-MP-MA/700.WAV','5-MP-MA/701.WAV','5-MP-MA/702.WAV','5-MP-MA/705.WAV','5-MP-MA/706.WAV','5-MP-MA/720.WAV','5-MP-MA/722.WAV','5-MP-MA/723.WAV','5-MP-MA/724.WAV','5-MP-MA/728.WAV','5-MP-MA/729.WAV',
+
+        '6-MP-LA/171.WAV','6-MP-LA/262.WAV','6-MP-LA/377.WAV','6-MP-LA/602.WAV','6-MP-LA/708.WAV',
+
+        '7-LP-HA/105.WAV','7-LP-HA/106.WAV','7-LP-HA/115.WAV','7-LP-HA/116.WAV','7-LP-HA/133.WAV','7-LP-HA/134.WAV','7-LP-HA/244.WAV','7-LP-HA/255.WAV','7-LP-HA/260.WAV','7-LP-HA/261.WAV','7-LP-HA/275.WAV','7-LP-HA/276.WAV','7-LP-HA/277.WAV','7-LP-HA/278.WAV','7-LP-HA/279.WAV','7-LP-HA/281.WAV','7-LP-HA/282.WAV','7-LP-HA/283.WAV','7-LP-HA/284.WAV','7-LP-HA/285.WAV','7-LP-HA/286.WAV','7-LP-HA/288.WAV','7-LP-HA/289.WAV','7-LP-HA/290.WAV','7-LP-HA/292.WAV','7-LP-HA/296.WAV','7-LP-HA/310.WAV','7-LP-HA/312.WAV','7-LP-HA/319.WAV','7-LP-HA/380.WAV','7-LP-HA/420.WAV','7-LP-HA/422.WAV','7-LP-HA/423.WAV','7-LP-HA/424.WAV','7-LP-HA/501.WAV','7-LP-HA/502.WAV','7-LP-HA/600.WAV','7-LP-HA/624.WAV','7-LP-HA/625.WAV','7-LP-HA/626.WAV','7-LP-HA/699.WAV','7-LP-HA/709.WAV','7-LP-HA/711.WAV','7-LP-HA/712.WAV','7-LP-HA/713.WAV','7-LP-HA/714.WAV','7-LP-HA/719.WAV','7-LP-HA/730.WAV','7-LP-HA/732.WAV','7-LP-HA/910.WAV',
+
+        '8-LP-MA/241.WAV','8-LP-MA/242.WAV','8-LP-MA/243.WAV','8-LP-MA/250.WAV','8-LP-MA/280.WAV','8-LP-MA/293.WAV','8-LP-MA/295.WAV','8-LP-MA/611.WAV','8-LP-MA/703.WAV',
+
     ]
+    main_files = list(set(main_files))
+
+    completed_stimuli = set(
+        RatingResponse.objects
+        .filter(user=request.user)
+        .exclude(valence__isnull=True)
+        .exclude(arousal__isnull=True)
+        .values_list('stimulus', flat=True)
+    )
+
+    remaining_main_files = []
+    for file in main_files:
+        parts = file.split('/')
+        number = parts[1][:-4]
+        stimulus = f"{number}"
+        if stimulus not in completed_stimuli:
+            remaining_main_files.append(file)
+
     random.shuffle(practice_files)
-    random.shuffle(main_files)
-    practice_files = practice_files[:10]
+    random.shuffle(remaining_main_files)
+    practice_files = practice_files[:10] 
     def audio_url(filename):
         return static(f'{base_dir}/{filename}')
 
     practice_urls = [audio_url(f) for f in practice_files]
-    main_urls = [audio_url(f) for f in main_files]
+    main_urls = [audio_url(f) for f in remaining_main_files]
 
     context = {
         'title': 'آزمایش رتبه‌بندی',
