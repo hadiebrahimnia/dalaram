@@ -3,6 +3,7 @@ from django.contrib import messages
 from .forms import *
 from .models import *
 from django.contrib.auth.decorators import login_required
+from django.contrib.staticfiles.storage import staticfiles_storage
 from django.urls import reverse_lazy
 from django.contrib.auth.views import LoginView
 from django.contrib.auth import login
@@ -146,16 +147,6 @@ def respond_questionnaire(request, pk):
 
 @login_required(login_url='login_or_signup')
 @questionnaires_required([1,2,3])
-def pcm_view(request):
-    context = {
-        'title': 'آزمایش حافظه کاری (PCM)',
-    }
-    return render(request, 'pcm.html', context)
-
-
-
-@login_required(login_url='login_or_signup')
-@questionnaires_required([1,2,3])
 def rating_view(request):
     if request.method == 'POST':
         data = json.loads(request.body) if request.body else {}
@@ -246,3 +237,139 @@ def rating_view(request):
         'main_files': main_urls,
     }
     return render(request, 'rating.html', context)
+
+@login_required(login_url='login_or_signup')
+@questionnaires_required([1, 2, 3])
+def pcm_view(request):
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body) if request.body else {}
+        except json.JSONDecodeError:
+            return JsonResponse({'status': 'error', 'message': 'JSON نامعتبر'}, status=400)
+
+        is_practice = data.get('is_practice', False)
+
+        if is_practice:
+            practice_trial = data.get('practice_trial')
+            if practice_trial is None:
+                return JsonResponse({'status': 'error', 'message': 'شماره تریال تمرینی الزامی است'}, status=400)
+
+            defaults = {
+                'cue': data.get('cue'),
+                'stimulus1': data.get('stimulus1'),
+                'stimulus2': data.get('stimulus2'),
+                'expected_sequence': data.get('expected_sequence'),
+                'practice_response': data.get('user_response'),
+                'practice_correct': data.get('practice_correct'),
+            }
+
+            pcm_response, created = PCMResponse.objects.update_or_create(
+                user=request.user,
+                block=0,
+                trial=practice_trial,
+                defaults=defaults
+            )
+
+        else:
+            block = data.get('block')
+            trial = data.get('trial')
+            if block is None or trial is None:
+                return JsonResponse({'status': 'error', 'message': 'block و trial الزامی هستند'}, status=400)
+
+            defaults = {
+                'cue': data.get('cue'),
+                'stimulus1': data.get('stimulus1'),
+                'stimulus2': data.get('stimulus2'),
+                'expected_sequence': data.get('expected_sequence'),  # رشته
+                'category_stim1': data.get('category_stim1'),
+                'category_stim2': data.get('category_stim2'),
+                'valence_stim1': data.get('valence_stim1'),
+                'valence_rt_stim1': data.get('valence_rt_stim1'),
+                'valence_stim2': data.get('valence_stim2'),
+                'valence_rt_stim2': data.get('valence_rt_stim2'),
+                'valence_sequence': data.get('valence_sequence'),
+                'valence_rt_sequence': data.get('valence_rt_sequence'),
+            }
+
+            pcm_response, created = PCMResponse.objects.update_or_create(
+                user=request.user,
+                block=block,
+                trial=trial,
+                defaults=defaults
+            )
+
+        return JsonResponse({'status': 'success', 'created': created})
+
+    if request.method != 'GET':
+        return JsonResponse({'status': 'error', 'message': 'فقط GET و POST پشتیبانی می‌شود'}, status=405)
+
+    NUM_BLOCKS = 4
+    TRIALS_PER_BLOCK = 20
+    PRACTICE_TRIALS = 30
+    PRACTICE_SUCCESS_THRESHOLD = 0.8
+    INCONSISTENT_TRIALS_RATIO = 0.2
+
+    CUE_CATEGORIES = {
+        '1': ['CUE/1/1.mp3'],
+        '2': ['CUE/2/2.mp3'],
+        '3': ['CUE/3/3.mp3'],
+    }
+
+    categories = list(CUE_CATEGORIES.keys())
+    if len(categories) < 3:
+        return JsonResponse({'error': 'حداقل ۳ کیو لازم است'}, status=500)
+
+    POSSIBLE_SEQUENCES = [
+        'Neutral-Neutral',
+        'Negative-Neutral',
+        'Neutral-Negative',
+    ]
+
+    sequences_shuffled = POSSIBLE_SEQUENCES.copy()
+    random.shuffle(sequences_shuffled)
+    category_to_sequence = dict(zip(categories, sequences_shuffled))
+
+    cues_mapping = {}
+    for category, sequence in category_to_sequence.items():
+        for cue_file in CUE_CATEGORIES[category]:
+            cues_mapping[cue_file] = sequence
+
+    full_path_cues_mapping = {
+        f'/static/sounds/{key}': value for key, value in cues_mapping.items()
+    }
+
+    neutral_files = [
+        '5-MP-MA/102.WAV','5-MP-MA/104.WAV','5-MP-MA/107.WAV','5-MP-MA/111.WAV','5-MP-MA/113.WAV','5-MP-MA/120.WAV','5-MP-MA/130.WAV','5-MP-MA/132.WAV','5-MP-MA/152.WAV','5-MP-MA/170.WAV','5-MP-MA/225.WAV','5-MP-MA/245.WAV','5-MP-MA/246.WAV','5-MP-MA/251.WAV','5-MP-MA/252.WAV','5-MP-MA/320.WAV','5-MP-MA/322.WAV','5-MP-MA/358.WAV','5-MP-MA/361.WAV','5-MP-MA/364.WAV','5-MP-MA/368.WAV','5-MP-MA/370.WAV','5-MP-MA/373.WAV','5-MP-MA/374.WAV','5-MP-MA/375.WAV','5-MP-MA/376.WAV','5-MP-MA/382.WAV','5-MP-MA/403.WAV','5-MP-MA/410.WAV','5-MP-MA/425.WAV','5-MP-MA/500.WAV','5-MP-MA/627.WAV','5-MP-MA/698.WAV','5-MP-MA/700.WAV','5-MP-MA/701.WAV','5-MP-MA/702.WAV','5-MP-MA/705.WAV','5-MP-MA/706.WAV','5-MP-MA/720.WAV','5-MP-MA/722.WAV','5-MP-MA/723.WAV','5-MP-MA/724.WAV','5-MP-MA/728.WAV','5-MP-MA/729.WAV',
+    ]
+
+    negative_files = [
+        '7-LP-HA/105.WAV','7-LP-HA/106.WAV','7-LP-HA/115.WAV','7-LP-HA/116.WAV','7-LP-HA/133.WAV','7-LP-HA/134.WAV','7-LP-HA/244.WAV','7-LP-HA/255.WAV','7-LP-HA/260.WAV','7-LP-HA/261.WAV','7-LP-HA/275.WAV','7-LP-HA/276.WAV','7-LP-HA/277.WAV','7-LP-HA/278.WAV','7-LP-HA/279.WAV','7-LP-HA/281.WAV','7-LP-HA/282.WAV','7-LP-HA/283.WAV','7-LP-HA/284.WAV','7-LP-HA/285.WAV','7-LP-HA/286.WAV','7-LP-HA/288.WAV','7-LP-HA/289.WAV','7-LP-HA/290.WAV','7-LP-HA/292.WAV','7-LP-HA/296.WAV','7-LP-HA/310.WAV','7-LP-HA/312.WAV','7-LP-HA/319.WAV','7-LP-HA/380.WAV','7-LP-HA/420.WAV','7-LP-HA/422.WAV','7-LP-HA/423.WAV','7-LP-HA/424.WAV','7-LP-HA/501.WAV','7-LP-HA/502.WAV','7-LP-HA/600.WAV','7-LP-HA/624.WAV','7-LP-HA/625.WAV','7-LP-HA/626.WAV','7-LP-HA/699.WAV','7-LP-HA/709.WAV','7-LP-HA/711.WAV','7-LP-HA/712.WAV','7-LP-HA/713.WAV','7-LP-HA/714.WAV','7-LP-HA/719.WAV','7-LP-HA/730.WAV','7-LP-HA/732.WAV','7-LP-HA/910.WAV',
+        '8-LP-MA/241.WAV','8-LP-MA/242.WAV','8-LP-MA/243.WAV','8-LP-MA/250.WAV','8-LP-MA/280.WAV','8-LP-MA/293.WAV','8-LP-MA/295.WAV','8-LP-MA/611.WAV','8-LP-MA/703.WAV',
+    ]
+
+    neutral_files = list(set(neutral_files))
+    negative_files = list(set(negative_files))
+    random.shuffle(neutral_files)
+    random.shuffle(negative_files)
+
+    def audio_url(filename):
+        return staticfiles_storage.url(f'sounds/{filename}')
+
+    cue_urls = [audio_url(cue) for cue in cues_mapping.keys()]
+    neutral_urls = [audio_url(f) for f in neutral_files]
+    negative_urls = [audio_url(f) for f in negative_files]
+
+    context = {
+        'title': 'آزمایش حافظه کاری (PCM)',
+        'cue_urls': json.dumps(cue_urls),
+        'neutral_urls': json.dumps(neutral_urls),
+        'negative_urls': json.dumps(negative_urls),
+        'cues_mapping': json.dumps(full_path_cues_mapping),
+        'num_blocks': NUM_BLOCKS,
+        'trials_per_block': TRIALS_PER_BLOCK,
+        'practice_trials': PRACTICE_TRIALS,
+        'practice_success_threshold': PRACTICE_SUCCESS_THRESHOLD,
+        'inconsistent_trials_ratio': INCONSISTENT_TRIALS_RATIO,
+    }
+
+    return render(request, 'pcm.html', context)

@@ -373,3 +373,218 @@ class RatingResponseUserInline(admin.TabularInline):
 # اضافه کردن Inline به UserAdmin (اصلاح‌شده با tuple)
 current_inlines = getattr(UserAdmin, 'inlines', ())
 UserAdmin.inlines = current_inlines + (RatingResponseUserInline,)
+
+
+
+class PCMResponseInline(admin.TabularInline):
+    model = PCMResponse
+    extra = 0
+    can_delete = False
+    readonly_fields = (
+        'block',
+        'trial',
+        'cue',
+        'stimulus1',
+        'stimulus2',
+        'expected_sequence_display',
+        'valence_stim1',
+        'valence_rt_stim1_formatted',
+        'valence_stim2',
+        'valence_rt_stim2_formatted',
+        'valence_sequence',
+        'valence_rt_sequence_formatted',
+        'practice_response',
+        'practice_correct_display',
+        'created_at_formatted',
+        'is_complete_display',
+    )
+    fields = readonly_fields
+    ordering = ('-created_at', 'block', 'trial')
+
+    def valence_rt_stim1_formatted(self, obj):
+        return f"{obj.valence_rt_stim1} ms" if obj.valence_rt_stim1 is not None else '-'
+    valence_rt_stim1_formatted.short_description = 'RT Stim1'
+
+    def valence_rt_stim2_formatted(self, obj):
+        return f"{obj.valence_rt_stim2} ms" if obj.valence_rt_stim2 is not None else '-'
+    valence_rt_stim2_formatted.short_description = 'RT Stim2'
+
+    def valence_rt_sequence_formatted(self, obj):
+        return f"{obj.valence_rt_sequence} ms" if obj.valence_rt_sequence is not None else '-'
+    valence_rt_sequence_formatted.short_description = 'RT Sequence'
+
+    def expected_sequence_display(self, obj):
+        return "بله" if obj.expected_sequence else "خیر"
+    expected_sequence_display.short_description = 'توالی مورد انتظار'
+
+    def practice_correct_display(self, obj):
+        if obj.practice_correct is None:
+            return '-'
+        return "✓ درست" if obj.practice_correct else "✗ غلط"
+    practice_correct_display.short_description = 'نتیجه آزمایشی'
+
+    def created_at_formatted(self, obj):
+        return obj.created_at.strftime("%Y-%m-%d %H:%M:%S")
+    created_at_formatted.short_description = 'زمان ثبت'
+
+    def is_complete_display(self, obj):
+        if obj.is_complete():
+            return "✓ کامل"
+        elif (obj.valence_stim1 or obj.valence_stim2 or obj.valence_sequence):
+            return "◐ ناقص"
+        else:
+            return "✗ خالی"
+    is_complete_display.short_description = 'وضعیت پاسخ'
+
+    def has_add_permission(self, request, obj=None):
+        return False
+
+    def has_change_permission(self, request, obj=None):
+        return False
+
+
+@admin.register(PCMResponse)
+class PCMResponseAdmin(admin.ModelAdmin):
+    list_display = (
+        'user_username',
+        'block',
+        'trial',
+        'cue',
+        'stimulus1',
+        'stimulus2',
+        'expected_sequence_display',
+        'valence_stim1',
+        'valence_stim2',
+        'valence_sequence',
+        'created_at_formatted',
+        'is_complete_display',
+    )
+    list_filter = (
+        'block',
+        'expected_sequence',
+        'created_at',
+        'category_stim1',
+        'category_stim2',
+    )
+    search_fields = (
+        'user__username',
+        'cue',
+        'stimulus1',
+        'stimulus2',
+    )
+    readonly_fields = (
+        'user',
+        'block',
+        'trial',
+        'cue',
+        'stimulus1',
+        'stimulus2',
+        'expected_sequence',
+        'category_stim1',
+        'category_stim2',
+        'valence_stim1',
+        'valence_rt_stim1',
+        'valence_stim2',
+        'valence_rt_stim2',
+        'valence_sequence',
+        'valence_rt_sequence',
+        'created_at',
+        'created_at_formatted',
+    )
+    date_hierarchy = 'created_at'
+    ordering = ('-created_at', 'block', 'trial')
+    list_per_page = 50
+
+    def user_username(self, obj):
+        return obj.user.username
+    user_username.short_description = 'کاربر'
+    user_username.admin_order_field = 'user__username'
+
+    def expected_sequence_display(self, obj):
+        return "بله" if obj.expected_sequence else "خیر"
+    expected_sequence_display.short_description = 'توالی مورد انتظار'
+    expected_sequence_display.boolean = True
+
+    def valence_rt_stim1_formatted(self, obj):
+        return f"{obj.valence_rt_stim1} ms" if obj.valence_rt_stim1 is not None else '-'
+    valence_rt_stim1_formatted.short_description = 'RT Stim1'
+
+    def valence_rt_stim2_formatted(self, obj):
+        return f"{obj.valence_rt_stim2} ms" if obj.valence_rt_stim2 is not None else '-'
+    valence_rt_stim2_formatted.short_description = 'RT Stim2'
+
+    def valence_rt_sequence_formatted(self, obj):
+        return f"{obj.valence_rt_sequence} ms" if obj.valence_rt_sequence is not None else '-'
+    valence_rt_sequence_formatted.short_description = 'RT Sequence'
+
+    def created_at_formatted(self, obj):
+        return obj.created_at.strftime("%Y-%m-%d %H:%M:%S")
+    created_at_formatted.short_description = 'زمان ثبت'
+
+    def is_complete_display(self, obj):
+        if obj.is_complete():
+            return "✓ کامل"
+        elif (obj.valence_stim1 or obj.valence_stim2 or obj.valence_sequence):
+            return "◐ ناقص"
+        else:
+            return "✗ خالی"
+    is_complete_display.short_description = 'وضعیت پاسخ'
+
+    def has_add_permission(self, request):
+        return False
+
+    def has_change_permission(self, request, obj=None):
+        return False
+
+    def has_delete_permission(self, request, obj=None):
+        return request.user.is_superuser
+
+class PCMResponseUserInline(admin.TabularInline):
+    model = PCMResponse
+    extra = 0
+    can_delete = False
+    readonly_fields = (
+        'block',
+        'trial',
+        'cue',
+        'stimulus1',
+        'stimulus2',
+        'expected_sequence_display',
+        'valence_stim1',
+        'valence_stim2',
+        'valence_sequence',
+        'created_at_formatted',
+        'is_complete_display',
+    )
+    fields = readonly_fields
+    ordering = ('block', 'trial')
+
+    # همان متدهای بالا را اینجا هم تکرار می‌کنیم (یا می‌توان از inheritance استفاده کرد، اما برای سادگی تکرار می‌کنیم)
+    def expected_sequence_display(self, obj):
+        return "بله" if obj.expected_sequence else "خیر"
+    expected_sequence_display.short_description = 'توالی مورد انتظار'
+
+
+    def created_at_formatted(self, obj):
+        return obj.created_at.strftime("%Y-%m-%d %H:%M:%S")
+    created_at_formatted.short_description = 'زمان ثبت'
+
+    def is_complete_display(self, obj):
+        if obj.is_complete():
+            return "✓ کامل"
+        elif (obj.valence_stim1 or obj.valence_stim2 or obj.valence_sequence):
+            return "◐ ناقص"
+        else:
+            return "✗ خالی"
+    is_complete_display.short_description = 'وضعیت'
+
+    def has_add_permission(self, request, obj=None):
+        return False
+
+    def has_change_permission(self, request, obj=None):
+        return False
+
+
+# اضافه کردن Inline پاسخ‌های PCM به صفحه ادمین کاربر
+current_inlines = getattr(UserAdmin, 'inlines', ())
+UserAdmin.inlines = current_inlines + (PCMResponseUserInline,)

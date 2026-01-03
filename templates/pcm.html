@@ -3,16 +3,116 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>آزمون</title>
-    
+    <title>{{ title }}</title>
     {% load static %}
     <link href="{% static 'plugins/bootstrap/css/bootstrap.rtl.min.css' %}" rel="stylesheet">
-    <link rel="stylesheet" href="{% static 'css/main.css' %}">
-    
+    <link href="{% static 'css/pcm.css' %}" rel="stylesheet">
 </head>
-<body class="d-flex align-items-center justify-content-center">
+<body>
+    <div id="rotate-device">
+        <i>↻</i>
+        <h3>لطفاً گوشی خود را بچرخانید</h3>
+        <p>برای تجربه بهتر، صفحه را به حالت افقی (landscape) درآورید.</p>
+    </div>
+
+    <div class="content">
+        <div id="fixation" class="full-center hidden">
+            <div class="fixation">+</div>
+        </div>
+
+        <audio id="audio-player" preload="auto"></audio>
+
+        <!-- صفحه دستورالعمل اولیه -->
+        <div id="intro" class="p-5 m-auto text-center">
+            <div class="card">
+                <div class="card-body">
+                    <p class="lead">
+                            در این مرحله یک عدد در ایتدا پحش شده و سپس 2 صدا پحش میشود که شما باید تعیین کنید نوع هیجانی صدا ها چیست
+                    </p>
+                    {% comment %} <p class="lead">
+                        سه نوع توالی وجود دارد:<br>
+                        <strong></strong>
+                    </p> {% endcomment %}
+                    
+                    <button class="btn btn-success btn-lg mt-4" id="start-practice">شروع مرحله تمرینی</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- انتخاب توالی در مرحله تمرینی -->
+        <div id="practice-choice" class="hidden py-5">
+            <div class="card">
+                <div class="card-body text-center">
+                    <h3>کدام توالی شنیده شد؟</h3>
+                    <div class="d-flex flex-column gap-3 mt-4">
+                        <button class="btn btn-outline-primary sequence-btn" data-seq="Neutral-Neutral">خنثی → خنثی</button>
+                        <button class="btn btn-outline-primary sequence-btn" data-seq="Negative-Neutral">خنثی → منفی</button>
+                        <button class="btn btn-outline-primary sequence-btn" data-seq="Neutral-Negative">منفی → خنثی</button>
+                    </div>
+                    <div id="practice-feedback" class="mt-4 fs-4 fw-bold"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- صفحه انتقال به آزمون اصلی -->
+        <div id="main-intro" class="hidden py-5 text-center">
+            <div class="card">
+                <div class="card-body">
+                    <h3>تبریک! مرحله تمرینی با موفقیت به پایان رسید.</h3>
+                    <p class="lead">اکنون آزمون اصلی آغاز می‌شود.</p>
+                    <p class="lead">این بار پس از شنیدن توالی، باید سه بار خوشایندی را رتبه‌بندی کنید:</p>
+                    <ol class="lead text-start mx-auto" style="max-width: 600px;">
+                        <li>محرک اول</li>
+                        <li>محرک دوم</li>
+                        <li>کل توالی</li>
+                    </ol>
+                    <button class="btn btn-primary btn-lg mt-4" id="start-main">شروع آزمون اصلی</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- رتبه‌بندی خوشایندی (مشترک برای هر سه مرحله) -->
+        <div id="valence-rating" class="py-5 hidden">
+            <div class="card">
+                <div class="card-body text-center sam-container">
+                    <h3 id="valence-question" class="mb-4"></h3>
+                    <div class="sam-buttons">
+                        {% for i in "123456789" %}
+                        <button type="button" class="sam-btn" data-value="{{ forloop.counter }}">
+                            <img src="{% static 'images/valence/' %}{{ forloop.counter }}.png" alt="Valence {{ forloop.counter }}">
+                            <div class="key-hint">{{ forloop.counter }}</div>
+                        </button>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- صفحه پایان -->
+        <div id="thanks" class="py-5 hidden">
+            <div class="card m-auto">
+                <div class="card-body text-center">
+                    <h2>متشکریم!</h2>
+                    <p class="lead">آزمایش با موفقیت به پایان رسید.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
     
+    <script>
+        const cueUrls = {{ cue_urls|safe }};
+        const neutralUrls = {{ neutral_urls|safe }};
+        const negativeUrls = {{ negative_urls|safe }};
+        const cuesMapping = {{ cues_mapping|safe }}; // {"cues/1_male1.mp3": "Neutral-Neutral", ...}
+
+        const NUM_BLOCKS = {{ num_blocks }};
+        const TRIALS_PER_BLOCK = {{ trials_per_block }};
+        const PRACTICE_TRIALS = {{ practice_trials }};
+        const PRACTICE_THRESHOLD = {{ practice_success_threshold }};
+        const INCONSISTENT_RATIO = {{ inconsistent_trials_ratio }};
+    </script>
+    <script src="{% static 'js/jquery.min.js' %}"></script>
+    <script src="{% static 'js/pcm.js' %}"></script>
 </body>
-<script src="{% static 'js/jquery.min.js' %}"></script>
-{{ form.media }}
 </html>

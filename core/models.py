@@ -202,3 +202,163 @@ class RatingResponse(models.Model):
 
     def is_complete(self):
         return self.has_valence() and self.has_arousal()
+    
+class PCMResponse(models.Model):
+    user = models.ForeignKey(
+        CustomUser,
+        on_delete=models.CASCADE,
+        verbose_name="کاربر"
+    )
+    block = models.PositiveIntegerField(
+        verbose_name="شماره بلاک"
+    )
+    trial = models.PositiveIntegerField(
+        verbose_name="شماره تریال"
+    )
+    cue = models.CharField(
+        max_length=100,
+        verbose_name="نام فایل کیو (Cue)"
+    )
+    stimulus1 = models.CharField(
+        max_length=100,
+        null=True,
+        blank=True,
+        verbose_name="نام فایل محرک اول"
+    )
+    stimulus2 = models.CharField(
+        max_length=100,
+        null=True,
+        blank=True,
+        verbose_name="نام فایل محرک دوم"
+    )
+    expected_sequence = models.BooleanField(
+        default=True,
+        verbose_name="آیا توالی مورد انتظار بوده؟"
+    )
+    category_stim1 = models.CharField(
+        max_length=10,
+        null=True,
+        blank=True,
+        verbose_name="دسته محرک اول"
+    )
+    category_stim2 = models.CharField(
+        max_length=10,
+        null=True,
+        blank=True,
+        verbose_name="دسته محرک دوم"
+    )
+    valence_stim1 = models.IntegerField(
+        null=True,
+        blank=True,
+        verbose_name="پاسخ خوشایندی محرک اول (Valence)"
+    )
+    valence_rt_stim1 = models.PositiveIntegerField(
+        null=True,
+        blank=True,
+        verbose_name="زمان پاسخ خوشایندی محرک اول (میلی‌ثانیه)"
+    )
+    valence_stim2 = models.IntegerField(
+        null=True,
+        blank=True,
+        verbose_name="پاسخ خوشایندی محرک دوم (Valence)"
+    )
+    valence_rt_stim2 = models.PositiveIntegerField(
+        null=True,
+        blank=True,
+        verbose_name="زمان پاسخ خوشایندی محرک دوم (میلی‌ثانیه)"
+    )
+    valence_sequence = models.IntegerField(
+        null=True,
+        blank=True,
+        verbose_name="پاسخ خوشایندی کل توالی (Valence)"
+    )
+    valence_rt_sequence = models.PositiveIntegerField(
+        null=True,
+        blank=True,
+        verbose_name="زمان پاسخ خوشایندی کل توالی (میلی‌ثانیه)"
+    )
+
+    created_at = models.DateTimeField(
+        auto_now_add=True,
+        verbose_name="زمان ایجاد"
+    )
+
+    class Meta:
+        unique_together = ('user', 'block', 'trial')  # هر کاربر فقط یک بار برای هر تریال در بلاک
+        verbose_name = "پاسخ آزمون PCM"
+        verbose_name_plural = "پاسخ‌های آزمون PCM"
+        ordering = ['-created_at', 'block', 'trial']
+
+    def __str__(self):
+        return f"{self.user.username} - بلاک {self.block} - تریال {self.trial} - Cue: {self.cue}"
+
+    def is_complete(self):
+        return (
+            self.valence_stim1 is not None and
+            self.valence_stim2 is not None and
+            self.valence_sequence is not None
+        )
+    
+class PCMPracticeResponse(models.Model):
+    user = models.ForeignKey(
+        CustomUser,
+        on_delete=models.CASCADE,
+        verbose_name="کاربر"
+    )
+    trial = models.PositiveIntegerField(
+        verbose_name="شماره تریال"
+    )
+    cue = models.CharField(
+        max_length=100,
+        verbose_name="نام فایل کیو (Cue)"
+    )
+    stimulus1 = models.CharField(
+        max_length=100,
+        null=True,
+        blank=True,
+        verbose_name="نام فایل محرک اول"
+    )
+    stimulus2 = models.CharField(
+        max_length=100,
+        null=True,
+        blank=True,
+        verbose_name="نام فایل محرک دوم"
+    )
+    
+    category_stim1 = models.CharField(
+        max_length=10,
+        null=True,
+        blank=True,
+        verbose_name="دسته محرک اول"
+    )
+    category_stim2 = models.CharField(
+        max_length=10,
+        null=True,
+        blank=True,
+        verbose_name="دسته محرک دوم"
+    )
+    
+    practice_response = models.CharField(
+        max_length=20,
+        null=True,
+        blank=True,
+        verbose_name="پاسخ کاربر در مرحله آزمایشی (کدام توالی؟)"
+    )
+    practice_correct = models.BooleanField(
+        null=True,
+        blank=True,
+        verbose_name="آیا پاسخ آزمایشی درست بوده؟"
+    )
+    created_at = models.DateTimeField(
+        auto_now_add=True,
+        verbose_name="زمان ایجاد"
+    )
+
+    class Meta:
+        verbose_name = "پاسخ مرحله آزمایشی"
+        verbose_name_plural = "پاسخ مرحله آزمایشی"
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"{self.user.username} - Cue: {self.cue}"
+    
