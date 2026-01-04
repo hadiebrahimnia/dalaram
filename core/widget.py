@@ -68,7 +68,7 @@ class PersianDateInput(forms.DateInput):
         return value
 
     class Media:
-        # استفاده از static() برای تولید آدرس درست در همه محیط‌ها
+        # استفاده از static() برای تولید آدرس correct در همه محیط‌ها
         css = {
             'all': (
                 static('plugins/jalalidatepicker/jalalidatepicker.css'),

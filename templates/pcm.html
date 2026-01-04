@@ -1,118 +1,316 @@
 <!DOCTYPE html>
 <html lang="fa" dir="rtl">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>{{ title }}</title>
     {% load static %}
-    <link href="{% static 'plugins/bootstrap/css/bootstrap.rtl.min.css' %}" rel="stylesheet">
-    <link href="{% static 'css/pcm.css' %}" rel="stylesheet">
-</head>
-<body>
+    <link
+      href="{% static 'plugins/bootstrap/css/bootstrap.rtl.min.css' %}"
+      rel="stylesheet" />
+    <link href="{% static 'css/pcm.css' %}" rel="stylesheet" />
+  </head>
+  <body>
+    <!-- پیام چرخش دستگاه -->
     <div id="rotate-device">
-        <i>↻</i>
-        <h3>لطفاً گوشی خود را بچرخانید</h3>
-        <p>برای تجربه بهتر، صفحه را به حالت افقی (landscape) درآورید.</p>
+      <i>↻</i>
+      <h3>لطفاً گوشی خود را بچرخانید</h3>
+      <p>برای تجربه بهتر، صفحه را به حالت افقی (landscape) درآورید.</p>
     </div>
 
     <div class="content">
-        <div id="fixation" class="full-center hidden">
-            <div class="fixation">+</div>
+      <!-- Fixation Cross -->
+      <div id="fixation" class="full-center hidden">
+        <div class="fixation">+</div>
+      </div>
+
+      <audio id="audio-player" preload="auto"></audio>
+
+      <!-- ۱. صفحه مقدمه اولیه -->
+      <div id="intro" class="p-5 m-auto text-center hidden">
+        <div class="card">
+          <div class="card-body">
+            <h3 class="mb-4">خوش آمدید به آزمایش حافظه کاری عاطفی (PCM)</h3>
+            <p class="lead">
+              در این آزمایش، ابتدا یک نشانه صوتی (Cue) پخش می‌شود و سپس دو صدای
+              عاطفی متوالی.<br />
+              وظیفه شما تشخیص نوع توالی عاطفی و رتبه‌بندی خوشایندی آن‌هاست.
+            </p>
+            <button class="btn btn-success btn-lg mt-4" id="start-practice">
+              شروع مرحله تمرینی
+            </button>
+          </div>
         </div>
+      </div>
 
-        <audio id="audio-player" preload="auto"></audio>
-
-        <!-- صفحه دستورالعمل اولیه -->
-        <div id="intro" class="p-5 m-auto text-center">
-            <div class="card">
-                <div class="card-body">
-                    <p class="lead">
-                            در این مرحله یک عدد در ایتدا پحش شده و سپس 2 صدا پحش میشود که شما باید تعیین کنید نوع هیجانی صدا ها چیست
-                    </p>
-                    {% comment %} <p class="lead">
-                        سه نوع توالی وجود دارد:<br>
-                        <strong></strong>
-                    </p> {% endcomment %}
-                    
-                    <button class="btn btn-success btn-lg mt-4" id="start-practice">شروع مرحله تمرینی</button>
-                </div>
+      <!-- ۲. انتخاب توالی در مرحله تمرینی -->
+      <div id="practice-choice" class="hidden py-5">
+        <div class="card">
+          <div class="card-body text-center">
+            <h3>کدام توالی شنیده شد؟</h3>
+            <div class="d-flex flex-column gap-3 mt-4">
+              <button
+                class="btn btn-outline-primary sequence-btn"
+                data-seq="Neutral-Neutral">
+                خنثی → خنثی
+              </button>
+              <button
+                class="btn btn-outline-primary sequence-btn"
+                data-seq="Negative-Neutral">
+                منفی → خنثی
+              </button>
+              <button
+                class="btn btn-outline-primary sequence-btn"
+                data-seq="Neutral-Negative">
+                خنثی → منفی
+              </button>
             </div>
+            <div id="practice-feedback" class="mt-4 fs-4 fw-bold"></div>
+          </div>
         </div>
+      </div>
 
-        <!-- انتخاب توالی در مرحله تمرینی -->
-        <div id="practice-choice" class="hidden py-5">
-            <div class="card">
-                <div class="card-body text-center">
-                    <h3>کدام توالی شنیده شد؟</h3>
-                    <div class="d-flex flex-column gap-3 mt-4">
-                        <button class="btn btn-outline-primary sequence-btn" data-seq="Neutral-Neutral">خنثی → خنثی</button>
-                        <button class="btn btn-outline-primary sequence-btn" data-seq="Negative-Neutral">خنثی → منفی</button>
-                        <button class="btn btn-outline-primary sequence-btn" data-seq="Neutral-Negative">منفی → خنثی</button>
-                    </div>
-                    <div id="practice-feedback" class="mt-4 fs-4 fw-bold"></div>
-                </div>
-            </div>
+      <!-- ۳. ادامه از مرحله تمرینی (Resume Practice) -->
+      <div id="resume-practice" class="py-5 text-center hidden">
+        <div class="card">
+          <div class="card-body">
+            <h3>ادامه مرحله تمرینی</h3>
+            <p class="lead" id="resume-practice-message"></p>
+            <button
+              class="btn btn-warning btn-lg mt-4"
+              id="resume-practice-btn">
+              ادامه مرحله تمرینی
+            </button>
+          </div>
         </div>
+      </div>
 
-        <!-- صفحه انتقال به آزمون اصلی -->
-        <div id="main-intro" class="hidden py-5 text-center">
-            <div class="card">
-                <div class="card-body">
-                    <h3>تبریک! مرحله تمرینی با موفقیت به پایان رسید.</h3>
-                    <p class="lead">اکنون آزمون اصلی آغاز می‌شود.</p>
-                    <p class="lead">این بار پس از شنیدن توالی، باید سه بار خوشایندی را رتبه‌بندی کنید:</p>
-                    <ol class="lead text-start mx-auto" style="max-width: 600px;">
-                        <li>محرک اول</li>
-                        <li>محرک دوم</li>
-                        <li>کل توالی</li>
-                    </ol>
-                    <button class="btn btn-primary btn-lg mt-4" id="start-main">شروع آزمون اصلی</button>
-                </div>
-            </div>
+      <!-- ۴. انتقال به آزمون اصلی -->
+      <div id="main-intro" class="hidden py-5 text-center">
+        <div class="card">
+          <div class="card-body">
+            <h3>تبریک! مرحله تمرینی با موفقیت به پایان رسید.</h3>
+            <p class="lead">
+              اکنون آزمون اصلی آغاز می‌شود ({{ num_blocks }} بلوک، هر بلوک {{
+              trials_per_block }} تریال).
+            </p>
+            <p class="lead">
+              در هر تریال، پس از شنیدن توالی دو صدا، باید سه بار خوشایندی را
+              رتبه‌بندی کنید:
+            </p>
+            <ol class="lead text-start mx-auto" style="max-width: 600px">
+              <li>صدا اول</li>
+              <li>صدا دوم</li>
+              <li>کل توالی</li>
+            </ol>
+            <button class="btn btn-primary btn-lg mt-4" id="start-main">
+              شروع آزمون اصلی
+            </button>
+          </div>
         </div>
+      </div>
 
-        <!-- رتبه‌بندی خوشایندی (مشترک برای هر سه مرحله) -->
-        <div id="valence-rating" class="py-5 hidden">
-            <div class="card">
-                <div class="card-body text-center sam-container">
-                    <h3 id="valence-question" class="mb-4"></h3>
-                    <div class="sam-buttons">
-                        {% for i in "123456789" %}
-                        <button type="button" class="sam-btn" data-value="{{ forloop.counter }}">
-                            <img src="{% static 'images/valence/' %}{{ forloop.counter }}.png" alt="Valence {{ forloop.counter }}">
-                            <div class="key-hint">{{ forloop.counter }}</div>
-                        </button>
-                        {% endfor %}
-                    </div>
-                </div>
-            </div>
+      <!-- ۵. ادامه از آزمون اصلی (Resume Main) -->
+      <div id="resume-main" class="py-5 text-center hidden">
+        <div class="card">
+          <div class="card-body">
+            <h3>خوش آمدید دوباره!</h3>
+            <p class="lead">شما در حال انجام آزمون اصلی هستید.</p>
+            <p class="lead" id="resume-main-message"></p>
+            <button class="btn btn-warning btn-lg mt-4" id="resume-main-button">
+              ادامه آزمون اصلی
+            </button>
+          </div>
         </div>
+      </div>
 
-        <!-- صفحه پایان -->
-        <div id="thanks" class="py-5 hidden">
-            <div class="card m-auto">
-                <div class="card-body text-center">
-                    <h2>متشکریم!</h2>
-                    <p class="lead">آزمایش با موفقیت به پایان رسید.</p>
-                </div>
-            </div>
+      <!-- ۶. استراحت بین بلوک‌ها -->
+      <div id="block-break" class="py-5 text-center hidden">
+        <div class="card">
+          <div class="card-body">
+            <h3>استراحت کوتاه</h3>
+            <p class="lead" id="block-break-message"></p>
+            <button
+              class="btn btn-primary btn-lg mt-4"
+              id="continue-after-break">
+              ادامه آزمون (شروع بلوک بعدی)
+            </button>
+          </div>
         </div>
+      </div>
+      
+
+      <!-- ۷. رتبه‌بندی خوشایندی (مشترک) -->
+      <div id="valence-rating" class="py-5 hidden">
+        <div class="card">
+          <div class="card-body text-center sam-container">
+            <h3 id="valence-question" class="mb-4"></h3>
+            <div class="sam-buttons">
+              {% for i in "123456789" %}
+              <button
+                type="button"
+                class="sam-btn"
+                data-value="{{ forloop.counter }}">
+                <img
+                  src="{% static 'images/valence/' %}{{ forloop.counter }}.png"
+                  alt="Valence {{ forloop.counter }}" />
+                <div class="key-hint">{{ forloop.counter }}</div>
+              </button>
+              {% endfor %}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ۸. مقدمه رتبه‌بندی مجدد -->
+      <div id="rerating-intro" class="py-5 text-center hidden">
+        <div class="card">
+          <div class="card-body">
+            <h3>تبریک! آزمون اصلی به پایان رسید.</h3>
+            <p class="lead">اکنون مرحله نهایی: رتبه‌بندی مجدد صداها</p>
+            <p class="lead">
+              صداهایی که در آزمون اصلی شنیدید، به صورت تک‌تک پخش می‌شوند.<br />
+              برای هر صدا لطفاً:
+            </p>
+            <ol class="lead text-start mx-auto" style="max-width: 600px">
+              <li>ابتدا <strong>خوشایندی</strong> را رتبه‌بندی کنید</li>
+              <li>
+                سپس <strong>برانگیختگی (Arousal)</strong> را رتبه‌بندی کنید
+              </li>
+            </ol>
+            <button class="btn btn-info btn-lg mt-4" id="start-rerating">
+              شروع رتبه‌بندی مجدد
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div id="arousal-rating" class="py-5 hidden">
+        <div class="card">
+          <div class="card-body text-center sam-container">
+            <h3 id="arousal-question" class="mb-4">
+              لطفاً میزان برانگیختگی صدا را انتخاب کنید
+            </h3>
+            <div class="sam-buttons">
+              {% for i in "123456789" %}
+              <button
+                type="button"
+                class="sam-btn col-3"
+                data-value="{{ forloop.counter }}">
+                <img
+                  src="{% static 'images/arousal/' %}{{ forloop.counter }}.jpg"
+                  alt="برانگیختگی {{ forloop.counter }}" />
+                <div class="key-hint">{{ forloop.counter }}</div>
+              </button>
+              {% endfor %}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ۹. ادامه رتبه‌بندی مجدد -->
+      <div id="resume-rerating" class="py-5 text-center hidden">
+        <div class="card">
+          <div class="card-body">
+            <h3>ادامه رتبه‌بندی مجدد</h3>
+            <p class="lead" id="resume-rerating-message"></p>
+            <button class="btn btn-info btn-lg mt-4" id="resume-rerating-btn">
+              ادامه رتبه‌بندی مجدد
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ۱۰. صفحه پایان نهایی -->
+      <div id="final-thanks" class="py-5 text-center hidden">
+        <div class="card m-auto">
+          <div class="card-body text-center">
+            <h2 class="display-5">متشکریم!</h2>
+            <p class="lead">تمام مراحل آزمایش با موفقیت به پایان رسید.</p>
+            <p class="text-muted">می‌توانید این تب را ببندید.</p>
+          </div>
+        </div>
+      </div>
     </div>
 
+    <div id="preparation-intro" class="py-5 text-center hidden">
+      <div class="card">
+        <div class="card-body">
+          <h3>مرحله تمرینی رتبه‌بندی خوشایندی</h3>
+          <p class="lead">
+            قبل از شروع آزمون اصلی، چند توالی صوتی خواهید شنید و باید خوشایندی
+            هر صدا و کل توالی را رتبه‌بندی کنید.
+          </p>
+          <p class="lead">
+            این مرحله فقط برای آشنایی با رتبه‌بندی است و نتیجه آن تأثیری در
+            آزمون اصلی ندارد.
+          </p>
+          <button
+            class="btn btn-success btn-lg mt-4"
+            id="start-valence-practice">
+            شروع تمرینی رتبه‌بندی
+          </button>
+        </div>
+      </div>
+    </div>
     
-    <script>
-        const cueUrls = {{ cue_urls|safe }};
-        const neutralUrls = {{ neutral_urls|safe }};
-        const negativeUrls = {{ negative_urls|safe }};
-        const cuesMapping = {{ cues_mapping|safe }}; // {"cues/1_male1.mp3": "Neutral-Neutral", ...}
+    <!-- ادامه تمرینی رتبه‌بندی -->
+    <div id="resume-preparation" class="py-5 text-center hidden">
+      <div class="card">
+        <div class="card-body">
+          <h3>ادامه تمرینی رتبه‌بندی خوشایندی</h3>
+          <p class="lead" id="resume-preparation-message"></p>
+          <button
+            class="btn btn-warning btn-lg mt-4"
+            id="resume-preparation-btn">
+            ادامه تمرینی
+          </button>
+        </div>
+      </div>
+    </div>
 
-        const NUM_BLOCKS = {{ num_blocks }};
-        const TRIALS_PER_BLOCK = {{ trials_per_block }};
-        const PRACTICE_TRIALS = {{ practice_trials }};
-        const PRACTICE_THRESHOLD = {{ practice_success_threshold }};
-        const INCONSISTENT_RATIO = {{ inconsistent_trials_ratio }};
+    <!-- مودال سفارشی (برای پیام‌های خطا یا هشدار) -->
+    <div id="custom-modal" class="custom-modal hidden">
+      <div class="modal-overlay"></div>
+      <div class="modal-content">
+        <div class="modal-icon">ℹ</div>
+        <h2 class="modal-title">توجه</h2>
+        <p class="modal-message" id="modal-message"></p>
+        <button class="modal-button" id="modal-close-btn">ادامه</button>
+      </div>
+    </div>
+    <script>
+      const cueUrls = {{ cue_urls|safe }};
+      const neutralUrls = {{ neutral_urls|safe }};
+      const negativeUrls = {{ negative_urls|safe }};
+      const cuesMapping = {{ cues_mapping|safe }};
+
+      const NUM_BLOCKS = {{ NUM_BLOCKS }};
+      const TRIALS_PER_BLOCK = {{ TRIALS_PER_BLOCK }};
+      const PRACTICE_TRIALS = {{ PRACTICE_TRIALS }};
+      const PRACTICE_THRESHOLD = {{ PRACTICE_THRESHOLD }};
+      const INCONSISTENT_RATIO = {{ INCONSISTENT_RATIO }};
+
+      const reratingFiles = {{ rerating_files|safe }};
+      const HAS_RERATING = {{ HAS_RERATING }} === 'true';
+      const RERATING_COMPLETED_COUNT = {{ RERATING_COMPLETED_COUNT }};
+      const TOTAL_RERATING_FILES = {{ TOTAL_RERATING_FILES }};
+
+      const CURRENT_BLOCK_INIT = {{ CURRENT_BLOCK_INIT }};
+      const CURRENT_TRIAL_INIT = {{ CURRENT_TRIAL_INIT }};
+      const PRACTICE_CORRECT_INIT = {{ PRACTICE_CORRECT_INIT }};
+      const PRACTICE_TOTAL_INIT = {{ PRACTICE_TOTAL_INIT }};
+      console.log("{{ INITIAL_STAGE }}")
+
+      const INITIAL_STAGE = "{{ INITIAL_STAGE }}";
+      const SHOW_RESUME_SCREEN = {{ SHOW_RESUME_SCREEN }} === 'true';
+      const RESUME_MESSAGE = "{{ RESUME_MESSAGE|escapejs }}";
+
+      const IS_AT_BLOCK_BREAK = {{ IS_AT_BLOCK_BREAK }} === 'true';
+      const VALENCE_PRACTICE_COMPLETED_COUNT = {{ VALENCE_PRACTICE_COMPLETED_COUNT }};
     </script>
+
     <script src="{% static 'js/jquery.min.js' %}"></script>
     <script src="{% static 'js/pcm.js' %}"></script>
-</body>
+  </body>
 </html>

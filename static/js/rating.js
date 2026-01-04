@@ -62,7 +62,6 @@ function playAudio() {
   }, 6000);
 }
 
-// نمایش پیام "لطفاً سریع‌تر پاسخ دهید!" (فقط در مرحله آزمایشی)
 function showFeedback() {
   const feedback = $("#feedback-message");
   feedback.removeClass("hidden").css("opacity", "1");

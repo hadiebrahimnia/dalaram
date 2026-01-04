@@ -3,7 +3,7 @@ from django.contrib.auth.admin import UserAdmin
 from .models import *
 
 
-# ثبت CustomUser با UserAdmin استاندارد
+# Register CustomUser with standard UserAdmin
 admin.site.register(CustomUser, UserAdmin)
 
 
@@ -17,7 +17,7 @@ class QuestionnaireAdmin(admin.ModelAdmin):
         (None, {
             'fields': ('title', 'description', 'is_active')
         }),
-        ('اطلاعات پیشرفته', {
+        ('Advanced info', {
             'fields': ('created_at',),
             'classes': ('collapse',),
         }),
@@ -25,15 +25,15 @@ class QuestionnaireAdmin(admin.ModelAdmin):
 
     def questions_count(self, obj):
         return obj.questions.count()
-    questions_count.short_description = 'تعداد سؤالات'
+    questions_count.short_description = 'Number of Questions'
 
 
 class ChoiceInline(admin.TabularInline):
     model = Choice
     extra = 1
     fields = ('text', 'value')
-    verbose_name = 'گزینه'
-    verbose_name_plural = 'گزینه‌ها'
+    verbose_name = 'Choice'
+    verbose_name_plural = 'Choices'
 
 
 @admin.register(Question)
@@ -46,7 +46,7 @@ class QuestionAdmin(admin.ModelAdmin):
 
     def question_type_display(self, obj):
         return dict(Question.QUESTION_TYPES).get(obj.question_type, obj.question_type)
-    question_type_display.short_description = 'نوع سؤال'
+    question_type_display.short_description = 'Question Type'
 
 
 @admin.register(Choice)
@@ -57,10 +57,9 @@ class ChoiceAdmin(admin.ModelAdmin):
 
     def questionnaire_title(self, obj):
         return obj.question.questionnaire.title
-    questionnaire_title.short_description = 'پرسشنامه'
+    questionnaire_title.short_description = 'Questionnaire'
 
 
-# Inline برای نمایش جواب‌ها در صفحه Response
 class AnswerInline(admin.TabularInline):
     model = Answer
     extra = 0
@@ -69,13 +68,12 @@ class AnswerInline(admin.TabularInline):
 
     def get_choice_text(self, obj):
         return obj.choice.text if obj.choice else '-'
-    get_choice_text.short_description = 'گزینه انتخاب‌شده'
+    get_choice_text.short_description = 'Selected Choice'
 
     def has_add_permission(self, request, obj):
         return False
 
 
-# Inline برای نمایش نتایج در صفحه Response
 class ResultInline(admin.TabularInline):
     model = Result
     extra = 0
@@ -107,35 +105,26 @@ class ResponseAdmin(admin.ModelAdmin):
     date_hierarchy = 'started_at'
 
     def respondent_username(self, obj):
-        return obj.respondent.username if obj.respondent else 'ناشناس (مهمان)'
-    respondent_username.short_description = 'پاسخ‌دهنده'
+        return obj.respondent.username if obj.respondent else 'Anonymous (Guest)'
+    respondent_username.short_description = 'Respondent'
 
     def answers_count(self, obj):
         return obj.answers.count()
-    answers_count.short_description = 'تعداد پاسخ‌ها'
+    answers_count.short_description = 'Number of Answers'
 
-    # --- مهم: اجازه حذف Response حتی با وجود Result و Answer ---
     def has_delete_permission(self, request, obj=None):
-        # فقط کاربرانی که اجازه حذف Response دارند (معمولاً staff/superuser)
-        if not request.user.has_perm('core.delete_response'):
-            return False
-        # چون CASCADE داریم، نیازی به چک جداگانه Result نیست
-        # اما اگر بخواهید احتیاط بیشتری کنید:
-        return True
+        return request.user.has_perm('core.delete_response')
 
-    # اختیاری: نمایش پیام تأیید قبل از حذف
     actions = ['delete_selected']
 
     def delete_queryset(self, request, queryset):
-        # اجازه حذف گروهی با CASCADE
         count = queryset.count()
         queryset.delete()
-        self.message_user(request, f"{count} پاسخ با موفقیت حذف شد (همراه با جواب‌ها و نتایج مرتبط).")
+        self.message_user(request, f"{count} responses deleted successfully (including related answers and results).")
 
     def delete_model(self, request, obj):
-        # برای حذف تک‌تایی
         obj.delete()
-        self.message_user(request, "پاسخ با تمام داده‌های مرتبط حذف شد.")
+        self.message_user(request, "Response and all related data deleted.")
 
 
 @admin.register(Answer)
@@ -147,13 +136,13 @@ class AnswerAdmin(admin.ModelAdmin):
 
     def choice_text(self, obj):
         return obj.choice.text if obj.choice else '-'
-    choice_text.short_description = 'گزینه'
+    choice_text.short_description = 'Choice'
 
     def text_answer_short(self, obj):
         if obj.text_answer:
             return obj.text_answer[:50] + ('...' if len(obj.text_answer) > 50 else '')
         return '-'
-    text_answer_short.short_description = 'پاسخ متنی'
+    text_answer_short.short_description = 'Text Answer'
 
     def has_add_permission(self, request, obj=None):
         return False
@@ -161,7 +150,6 @@ class AnswerAdmin(admin.ModelAdmin):
     def has_change_permission(self, request, obj=None):
         return False
 
-    # اجازه حذف دستی Answer (اگر لازم شد)
     def has_delete_permission(self, request, obj=None):
         return request.user.has_perm('core.delete_answer')
 
@@ -205,17 +193,17 @@ class ResultAdmin(admin.ModelAdmin):
     )
 
     def respondent_username(self, obj):
-        return obj.user.username if obj.user else 'نامشخص'
-    respondent_username.short_description = 'کاربر'
+        return obj.user.username if obj.user else 'Unknown'
+    respondent_username.short_description = 'User'
 
     def response_started_at(self, obj):
         return obj.response.started_at
-    response_started_at.short_description = 'زمان شروع آزمون'
+    response_started_at.short_description = 'Start Time'
     response_started_at.admin_order_field = 'response__started_at'
 
     def average_rt_formatted(self, obj):
-        return f"{obj.average_rt:.2f} ثانیه" if obj.average_rt else '-'
-    average_rt_formatted.short_description = 'میانگین RT'
+        return f"{obj.average_rt:.2f} sec" if obj.average_rt else '-'
+    average_rt_formatted.short_description = 'Avg RT'
 
     def has_add_permission(self, request):
         return False
@@ -223,11 +211,11 @@ class ResultAdmin(admin.ModelAdmin):
     def has_change_permission(self, request, obj=None):
         return False
 
-    # مهم: اجازه حذف دستی Result (اختیاری، اما بهتر است محدود باشد)
     def has_delete_permission(self, request, obj=None):
-        # فقط superuser یا کاربران خاص اجازه حذف مستقیم Result داشته باشند
         return request.user.is_superuser
-    
+
+
+# ------------------- Rating Responses -------------------
 
 class RatingResponseInline(admin.TabularInline):
     model = RatingResponse
@@ -246,15 +234,15 @@ class RatingResponseInline(admin.TabularInline):
 
     def valence_rt_formatted(self, obj):
         return f"{obj.valence_rt} ms" if obj.valence_rt is not None else '-'
-    valence_rt_formatted.short_description = 'زمان پاسخ Valence'
+    valence_rt_formatted.short_description = 'Valence RT'
 
     def arousal_rt_formatted(self, obj):
         return f"{obj.arousal_rt} ms" if obj.arousal_rt is not None else '-'
-    arousal_rt_formatted.short_description = 'زمان پاسخ Arousal'
+    arousal_rt_formatted.short_description = 'Arousal RT'
 
     def created_at_formatted(self, obj):
         return obj.created_at.strftime("%Y-%m-%d %H:%M:%S")
-    created_at_formatted.short_description = 'زمان ثبت'
+    created_at_formatted.short_description = 'Created At'
 
     def has_add_permission(self, request, obj=None):
         return False
@@ -301,29 +289,29 @@ class RatingResponseAdmin(admin.ModelAdmin):
 
     def user_username(self, obj):
         return obj.user.username
-    user_username.short_description = 'کاربر'
+    user_username.short_description = 'User'
     user_username.admin_order_field = 'user__username'
 
     def valence_rt_formatted(self, obj):
         return f"{obj.valence_rt} ms" if obj.valence_rt is not None else '-'
-    valence_rt_formatted.short_description = 'RT Valence'
+    valence_rt_formatted.short_description = 'Valence RT'
 
     def arousal_rt_formatted(self, obj):
         return f"{obj.arousal_rt} ms" if obj.arousal_rt is not None else '-'
-    arousal_rt_formatted.short_description = 'RT Arousal'
+    arousal_rt_formatted.short_description = 'Arousal RT'
 
     def created_at_formatted(self, obj):
         return obj.created_at.strftime("%Y-%m-%d %H:%M:%S")
-    created_at_formatted.short_description = 'زمان ثبت'
+    created_at_formatted.short_description = 'Created At'
 
     def is_complete_display(self, obj):
         if obj.is_complete():
-            return "✓ کامل"
+            return "✓ Complete"
         elif obj.has_valence() or obj.has_arousal():
-            return "◐ ناقص"
+            return "◐ Partial"
         else:
-            return "✗ خالی"
-    is_complete_display.short_description = 'وضعیت پاسخ'
+            return "✗ Empty"
+    is_complete_display.short_description = 'Status'
 
     def has_add_permission(self, request):
         return False
@@ -335,7 +323,6 @@ class RatingResponseAdmin(admin.ModelAdmin):
         return request.user.is_superuser
 
 
-# نمایش پاسخ‌های رتبه‌بندی در صفحه کاربر (CustomUser)
 class RatingResponseUserInline(admin.TabularInline):
     model = RatingResponse
     extra = 0
@@ -353,15 +340,15 @@ class RatingResponseUserInline(admin.TabularInline):
 
     def valence_rt_formatted(self, obj):
         return f"{obj.valence_rt} ms" if obj.valence_rt is not None else '-'
-    valence_rt_formatted.short_description = 'RT Valence'
+    valence_rt_formatted.short_description = 'Valence RT'
 
     def arousal_rt_formatted(self, obj):
         return f"{obj.arousal_rt} ms" if obj.arousal_rt is not None else '-'
-    arousal_rt_formatted.short_description = 'RT Arousal'
+    arousal_rt_formatted.short_description = 'Arousal RT'
 
     def created_at_formatted(self, obj):
         return obj.created_at.strftime("%Y-%m-%d %H:%M:%S")
-    created_at_formatted.short_description = 'زمان ثبت'
+    created_at_formatted.short_description = 'Created At'
 
     def has_add_permission(self, request, obj=None):
         return False
@@ -370,11 +357,12 @@ class RatingResponseUserInline(admin.TabularInline):
         return False
 
 
-# اضافه کردن Inline به UserAdmin (اصلاح‌شده با tuple)
+# Add Rating responses inline to CustomUser admin
 current_inlines = getattr(UserAdmin, 'inlines', ())
 UserAdmin.inlines = current_inlines + (RatingResponseUserInline,)
 
 
+# ------------------- PCM Main Responses -------------------
 
 class PCMResponseInline(admin.TabularInline):
     model = PCMResponse
@@ -386,15 +374,12 @@ class PCMResponseInline(admin.TabularInline):
         'cue',
         'stimulus1',
         'stimulus2',
-        'expected_sequence_display',
         'valence_stim1',
         'valence_rt_stim1_formatted',
         'valence_stim2',
         'valence_rt_stim2_formatted',
         'valence_sequence',
         'valence_rt_sequence_formatted',
-        'practice_response',
-        'practice_correct_display',
         'created_at_formatted',
         'is_complete_display',
     )
@@ -413,28 +398,18 @@ class PCMResponseInline(admin.TabularInline):
         return f"{obj.valence_rt_sequence} ms" if obj.valence_rt_sequence is not None else '-'
     valence_rt_sequence_formatted.short_description = 'RT Sequence'
 
-    def expected_sequence_display(self, obj):
-        return "بله" if obj.expected_sequence else "خیر"
-    expected_sequence_display.short_description = 'توالی مورد انتظار'
-
-    def practice_correct_display(self, obj):
-        if obj.practice_correct is None:
-            return '-'
-        return "✓ درست" if obj.practice_correct else "✗ غلط"
-    practice_correct_display.short_description = 'نتیجه آزمایشی'
-
     def created_at_formatted(self, obj):
         return obj.created_at.strftime("%Y-%m-%d %H:%M:%S")
-    created_at_formatted.short_description = 'زمان ثبت'
+    created_at_formatted.short_description = 'Created At'
 
     def is_complete_display(self, obj):
         if obj.is_complete():
-            return "✓ کامل"
+            return "✓ Complete"
         elif (obj.valence_stim1 or obj.valence_stim2 or obj.valence_sequence):
-            return "◐ ناقص"
+            return "◐ Partial"
         else:
-            return "✗ خالی"
-    is_complete_display.short_description = 'وضعیت پاسخ'
+            return "✗ Empty"
+    is_complete_display.short_description = 'Status'
 
     def has_add_permission(self, request, obj=None):
         return False
@@ -452,7 +427,6 @@ class PCMResponseAdmin(admin.ModelAdmin):
         'cue',
         'stimulus1',
         'stimulus2',
-        'expected_sequence_display',
         'valence_stim1',
         'valence_stim2',
         'valence_sequence',
@@ -497,13 +471,8 @@ class PCMResponseAdmin(admin.ModelAdmin):
 
     def user_username(self, obj):
         return obj.user.username
-    user_username.short_description = 'کاربر'
+    user_username.short_description = 'User'
     user_username.admin_order_field = 'user__username'
-
-    def expected_sequence_display(self, obj):
-        return "بله" if obj.expected_sequence else "خیر"
-    expected_sequence_display.short_description = 'توالی مورد انتظار'
-    expected_sequence_display.boolean = True
 
     def valence_rt_stim1_formatted(self, obj):
         return f"{obj.valence_rt_stim1} ms" if obj.valence_rt_stim1 is not None else '-'
@@ -519,16 +488,16 @@ class PCMResponseAdmin(admin.ModelAdmin):
 
     def created_at_formatted(self, obj):
         return obj.created_at.strftime("%Y-%m-%d %H:%M:%S")
-    created_at_formatted.short_description = 'زمان ثبت'
+    created_at_formatted.short_description = 'Created At'
 
     def is_complete_display(self, obj):
         if obj.is_complete():
-            return "✓ کامل"
+            return "✓ Complete"
         elif (obj.valence_stim1 or obj.valence_stim2 or obj.valence_sequence):
-            return "◐ ناقص"
+            return "◐ Partial"
         else:
-            return "✗ خالی"
-    is_complete_display.short_description = 'وضعیت پاسخ'
+            return "✗ Empty"
+    is_complete_display.short_description = 'Status'
 
     def has_add_permission(self, request):
         return False
@@ -538,6 +507,7 @@ class PCMResponseAdmin(admin.ModelAdmin):
 
     def has_delete_permission(self, request, obj=None):
         return request.user.is_superuser
+
 
 class PCMResponseUserInline(admin.TabularInline):
     model = PCMResponse
@@ -549,7 +519,6 @@ class PCMResponseUserInline(admin.TabularInline):
         'cue',
         'stimulus1',
         'stimulus2',
-        'expected_sequence_display',
         'valence_stim1',
         'valence_stim2',
         'valence_sequence',
@@ -559,24 +528,18 @@ class PCMResponseUserInline(admin.TabularInline):
     fields = readonly_fields
     ordering = ('block', 'trial')
 
-    # همان متدهای بالا را اینجا هم تکرار می‌کنیم (یا می‌توان از inheritance استفاده کرد، اما برای سادگی تکرار می‌کنیم)
-    def expected_sequence_display(self, obj):
-        return "بله" if obj.expected_sequence else "خیر"
-    expected_sequence_display.short_description = 'توالی مورد انتظار'
-
-
     def created_at_formatted(self, obj):
         return obj.created_at.strftime("%Y-%m-%d %H:%M:%S")
-    created_at_formatted.short_description = 'زمان ثبت'
+    created_at_formatted.short_description = 'Created At'
 
     def is_complete_display(self, obj):
         if obj.is_complete():
-            return "✓ کامل"
+            return "✓ Complete"
         elif (obj.valence_stim1 or obj.valence_stim2 or obj.valence_sequence):
-            return "◐ ناقص"
+            return "◐ Partial"
         else:
-            return "✗ خالی"
-    is_complete_display.short_description = 'وضعیت'
+            return "✗ Empty"
+    is_complete_display.short_description = 'Status'
 
     def has_add_permission(self, request, obj=None):
         return False
@@ -585,6 +548,294 @@ class PCMResponseUserInline(admin.TabularInline):
         return False
 
 
-# اضافه کردن Inline پاسخ‌های PCM به صفحه ادمین کاربر
+# Add PCM main responses inline to CustomUser admin
 current_inlines = getattr(UserAdmin, 'inlines', ())
 UserAdmin.inlines = current_inlines + (PCMResponseUserInline,)
+
+
+# ------------------- PCM Practice Responses -------------------
+
+class PCMPracticeResponseUserInline(admin.TabularInline):
+    model = PCMPracticeResponse
+    extra = 0
+    can_delete = False
+    readonly_fields = (
+        'trial',
+        'cue',
+        'stimulus1',
+        'stimulus2',
+        'category_stim1',
+        'category_stim2',
+        'practice_response',
+        'practice_correct',
+        'created_at_formatted',
+    )
+    fields = readonly_fields
+    ordering = ('-created_at', 'trial')
+
+    def created_at_formatted(self, obj):
+        return obj.created_at.strftime("%Y-%m-%d %H:%M:%S")
+    created_at_formatted.short_description = 'Created At'
+
+    def has_add_permission(self, request, obj=None):
+        return False
+
+    def has_change_permission(self, request, obj=None):
+        return False
+
+
+# Add PCM practice responses inline to CustomUser admin
+current_inlines = getattr(UserAdmin, 'inlines', ())
+UserAdmin.inlines = current_inlines + (PCMPracticeResponseUserInline,)
+
+
+@admin.register(PCMPracticeResponse)
+class PCMPracticeResponseAdmin(admin.ModelAdmin):
+    list_display = (
+        'user_username',
+        'trial',
+        'cue_short',
+        'stimulus1_short',
+        'stimulus2_short',
+        'practice_response',
+        'practice_correct',
+        'created_at_formatted',
+    )
+    list_filter = (
+        'practice_correct',
+        'created_at',
+        'trial',
+    )
+    search_fields = (
+        'user__username',
+        'cue',
+        'stimulus1',
+        'stimulus2',
+        'practice_response',
+    )
+    readonly_fields = (
+        'user',
+        'trial',
+        'cue',
+        'stimulus1',
+        'stimulus2',
+        'category_stim1',
+        'category_stim2',
+        'practice_response',
+        'practice_correct',
+        'created_at',
+        'created_at_formatted',
+    )
+    date_hierarchy = 'created_at'
+    ordering = ('-created_at', 'trial')
+    list_per_page = 50
+
+    def user_username(self, obj):
+        return obj.user.username
+    user_username.short_description = 'User'
+    user_username.admin_order_field = 'user__username'
+
+    def cue_short(self, obj):
+        return obj.cue[:50] + '...' if len(obj.cue) > 50 else obj.cue
+    cue_short.short_description = 'Cue'
+
+    def stimulus1_short(self, obj):
+        if not obj.stimulus1:
+            return '-'
+        return obj.stimulus1[:40] + '...' if len(obj.stimulus1) > 40 else obj.stimulus1
+    stimulus1_short.short_description = 'Stimulus 1'
+
+    def stimulus2_short(self, obj):
+        if not obj.stimulus2:
+            return '-'
+        return obj.stimulus2[:40] + '...' if len(obj.stimulus2) > 40 else obj.stimulus2
+    stimulus2_short.short_description = 'Stimulus 2'
+
+    def created_at_formatted(self, obj):
+        return obj.created_at.strftime("%Y-%m-%d %H:%M:%S")
+    created_at_formatted.short_description = 'Created At'
+
+    def has_add_permission(self, request):
+        return False
+
+    def has_change_permission(self, request, obj=None):
+        return False
+
+    def has_delete_permission(self, request, obj=None):
+        return request.user.is_superuser
+
+
+# ------------------- PCM Re-Rating Responses -------------------
+
+class PCMReRatingResponseInline(admin.TabularInline):
+    model = PCMReRatingResponse
+    extra = 0
+    can_delete = False
+    readonly_fields = (
+        'stimulus_file',
+        'stimulus_number',
+        'valence',
+        'valence_rt_formatted',
+        'arousal',
+        'arousal_rt_formatted',
+        'created_at_formatted',
+        'is_complete_display',
+    )
+    fields = readonly_fields
+    ordering = ('-created_at',)
+
+    def valence_rt_formatted(self, obj):
+        return f"{obj.valence_rt} ms" if obj.valence_rt is not None else '-'
+    valence_rt_formatted.short_description = 'Valence RT'
+
+    def arousal_rt_formatted(self, obj):
+        return f"{obj.arousal_rt} ms" if obj.arousal_rt is not None else '-'
+    arousal_rt_formatted.short_description = 'Arousal RT'
+
+    def created_at_formatted(self, obj):
+        return obj.created_at.strftime("%Y-%m-%d %H:%M:%S")
+    created_at_formatted.short_description = 'Created At'
+
+    def is_complete_display(self, obj):
+        if obj.is_complete():
+            return "✓ Complete"
+        elif obj.valence is not None or obj.arousal is not None:
+            return "◐ Partial"
+        else:
+            return "✗ Empty"
+    is_complete_display.short_description = 'Status'
+
+    def has_add_permission(self, request, obj=None):
+        return False
+
+    def has_change_permission(self, request, obj=None):
+        return False
+
+
+@admin.register(PCMReRatingResponse)
+class PCMReRatingResponseAdmin(admin.ModelAdmin):
+    list_display = (
+        'user_username',
+        'stimulus_number',
+        'stimulus_file_short',
+        'valence',
+        'arousal',
+        'valence_rt_formatted',
+        'arousal_rt_formatted',
+        'created_at_formatted',
+        'is_complete_display',
+    )
+    list_filter = (
+        'created_at',
+        'valence',
+        'arousal',
+        'stimulus_number',
+    )
+    search_fields = (
+        'user__username',
+        'stimulus_file',
+        'stimulus_number',
+    )
+    readonly_fields = (
+        'user',
+        'stimulus_file',
+        'stimulus_number',
+        'valence',
+        'valence_rt',
+        'arousal',
+        'arousal_rt',
+        'created_at',
+        'created_at_formatted',
+    )
+    date_hierarchy = 'created_at'
+    ordering = ('-created_at',)
+    list_per_page = 50
+
+    def user_username(self, obj):
+        return obj.user.username
+    user_username.short_description = 'User'
+    user_username.admin_order_field = 'user__username'
+
+    def stimulus_file_short(self, obj):
+        return obj.stimulus_file[:60] + '...' if len(obj.stimulus_file) > 60 else obj.stimulus_file
+    stimulus_file_short.short_description = 'Stimulus File'
+
+    def valence_rt_formatted(self, obj):
+        return f"{obj.valence_rt} ms" if obj.valence_rt is not None else '-'
+    valence_rt_formatted.short_description = 'Valence RT'
+
+    def arousal_rt_formatted(self, obj):
+        return f"{obj.arousal_rt} ms" if obj.arousal_rt is not None else '-'
+    arousal_rt_formatted.short_description = 'Arousal RT'
+
+    def created_at_formatted(self, obj):
+        return obj.created_at.strftime("%Y-%m-%d %H:%M:%S")
+    created_at_formatted.short_description = 'Created At'
+
+    def is_complete_display(self, obj):
+        if obj.is_complete():
+            return "✓ Complete"
+        elif obj.valence is not None or obj.arousal is not None:
+            return "◐ Partial"
+        else:
+            return "✗ Empty"
+    is_complete_display.short_description = 'Status'
+
+    def has_add_permission(self, request):
+        return False
+
+    def has_change_permission(self, request, obj=None):
+        return False
+
+    def has_delete_permission(self, request, obj=None):
+        return request.user.is_superuser
+
+
+class PCMReRatingResponseUserInline(admin.TabularInline):
+    model = PCMReRatingResponse
+    extra = 0
+    can_delete = False
+    readonly_fields = (
+        'stimulus_file',
+        'stimulus_number',
+        'valence',
+        'valence_rt_formatted',
+        'arousal',
+        'arousal_rt_formatted',
+        'created_at_formatted',
+        'is_complete_display',
+    )
+    fields = readonly_fields
+    ordering = ('-created_at',)
+
+    def valence_rt_formatted(self, obj):
+        return f"{obj.valence_rt} ms" if obj.valence_rt is not None else '-'
+    valence_rt_formatted.short_description = 'Valence RT'
+
+    def arousal_rt_formatted(self, obj):
+        return f"{obj.arousal_rt} ms" if obj.arousal_rt is not None else '-'
+    arousal_rt_formatted.short_description = 'Arousal RT'
+
+    def created_at_formatted(self, obj):
+        return obj.created_at.strftime("%Y-%m-%d %H:%M:%S")
+    created_at_formatted.short_description = 'Created At'
+
+    def is_complete_display(self, obj):
+        if obj.is_complete():
+            return "✓ Complete"
+        elif obj.valence is not None or obj.arousal is not None:
+            return "◐ Partial"
+        else:
+            return "✗ Empty"
+    is_complete_display.short_description = 'Status'
+
+    def has_add_permission(self, request, obj=None):
+        return False
+
+    def has_change_permission(self, request, obj=None):
+        return False
+
+
+# Add PCM Re-Rating responses inline to CustomUser admin
+current_inlines = getattr(UserAdmin, 'inlines', ())
+UserAdmin.inlines = current_inlines + (PCMReRatingResponseUserInline,)
