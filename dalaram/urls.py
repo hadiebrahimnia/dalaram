@@ -29,8 +29,9 @@ urlpatterns = [
         name='logout',
     ),
     path('complete-profile/', complete_profile, name='complete_profile'),
-    path('experiment/pcm/', pcm_view, name='pcm'),
     path('experiment/rating/', rating_view, name='rating'),
+    path('experiment/pcm/', pcm_view, name='pcm'),
+    path('pcm/save/', pcm_save_response, name='pcm_save'),
 
     path('questionnaire/<int:pk>/respond/', respond_questionnaire, name='respond_questionnaire'),
 ]

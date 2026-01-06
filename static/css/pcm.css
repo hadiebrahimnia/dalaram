@@ -74,6 +74,7 @@ body {
   margin-top: 5px;
 }
 .card {
+  margin: 200px;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
 }
 
@@ -165,7 +166,56 @@ body {
   background-color: #f0f0f0; /* اختیاری */
 }
 
+CSS.custom-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 10000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.3s ease;
+  /* مهم: جلوگیری از اسکرول صفحه اصلی */
+  overflow: hidden;
+}
 
+.custom-modal.active {
+  opacity: 1;
+  visibility: visible;
+}
+
+.modal-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(4px);
+}
+
+.modal-content {
+  position: relative;
+  background: white;
+  border-radius: 16px;
+  padding: 32px 24px;
+  width: 90%;
+  max-width: 420px;
+  text-align: center;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+  transform: scale(0.9);
+  transition: transform 0.3s ease;
+
+  /* تغییرات کلیدی برای اسکرول داخلی */
+  max-height: 90vh; /* حداکثر ارتفاع ۹۰٪ صفحه */
+  overflow-y: auto; /* فقط در جهت عمودی اسکرول شود */
+  overflow-x: hidden; /* اسکرول افقی لازم نیست */
+  -webkit-overflow-scrolling: touch; /* اسکرول نرم در موبایل */
+}
 
 .custom-modal {
   position: fixed;
@@ -208,16 +258,38 @@ body {
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
   transform: scale(0.9);
   transition: transform 0.3s ease;
+
+  /* اسکرول فقط داخل modal */
+  max-height: 90vh;
+  overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
 }
 
 .custom-modal.active .modal-content {
   transform: scale(1);
 }
 
+/* ظاهر بهتر اسکرول‌بار */
+.modal-content::-webkit-scrollbar {
+  width: 8px;
+}
+.modal-content::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 10px;
+}
+.modal-content::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 10px;
+}
+.modal-content::-webkit-scrollbar-thumb:hover {
+  background: #a8a8a8;
+}
+
 .modal-icon {
   font-size: 48px;
   margin-bottom: 16px;
-  color: #e74c3c; /* قرمز ملایم برای هشدار */
+  color: #e74c3c;
 }
 
 .modal-title {
@@ -245,6 +317,7 @@ body {
   cursor: pointer;
   transition: background 0.3s ease;
   min-width: 120px;
+  margin-top: 16px;
 }
 
 .modal-button:hover {
@@ -255,10 +328,7 @@ body {
   transform: translateY(1px);
 }
 
-/* برای حالت هشدار شدیدتر (مثلاً خطا) می‌تونید کلاس اضافی بذارید */
-.modal-warning .modal-icon {
-  color: #e67e22;
-}
-.modal-error .modal-icon {
-  color: #e74c3c;
+
+.ltr{
+    direction:ltr;
 }

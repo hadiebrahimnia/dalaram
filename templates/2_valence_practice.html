@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>مرحله ۲: ارزیابی خوشایندی توالی‌ها</title>
+  {% load static %}
+  <link href="{% static 'plugins/bootstrap/css/bootstrap.rtl.min.css' %}" rel="stylesheet" />
+  <link href="{% static 'css/pcm.css' %}" rel="stylesheet" />
+</head>
+<body>
+
+  <!-- پیام چرخش گوشی -->
+  <div id="rotate-device">
+    <i>↻</i>
+    <h3>لطفاً گوشی را بچرخانید</h3>
+    <p>برای تجربه بهتر، صفحه را به حالت افقی ببرید</p>
+  </div>
+
+  <div class="content">
+
+    <!-- صفحه مقدمه -->
+    <div id="intro" class="card" style="margin-top:400px;margin-top:400px ">
+            <div class="card-body text-center p-5">
+                <h2 class="mb-4">مرحله ۲: رتبه‌بندی خوشایندی</h2>
+                <p class="lead mb-4">
+                    در این مرحله، پس از شنیدن نشانه و دو صدای هیجانی، باید میزان خوشایندی را رتبه‌بندی کنید که به ترتیب شامل:
+                </p>
+                <ol class="text-start mx-auto mb-4" style="max-width: 500px;">
+                    <li>خوشایندی محرک اول</li>
+                    <li>خوشایندی محرک دوم</li>
+                    <li>خوشایندی کل توالی</li>
+                </ol>
+                <p class="text-muted">در اینجا 9 آدمک روی صفحه نمایش داده میشود که خوشایندی صدا ها را با انتخاب آن ها مشخص میکند </p><br>
+                <div class="sam-buttons mt-0 mb-4">
+                    {% for i in "123456789" %}
+                        <button type="button" class="sam-btn" data-value="{{ forloop.counter }}">
+                            <img src="{% static 'images/valence/' %}{{ forloop.counter }}.png" alt="{{ forloop.counter }}">
+                            <div class="key-hint">{{ forloop.counter }}</div>
+                        </button>
+                    {% endfor %}
+                </div>
+                <p class="text-muted">9 = خیلی خوشایند	&nbsp; &nbsp; &nbsp; &nbsp;	&nbsp;،	&nbsp; &nbsp; &nbsp; &nbsp;	&nbsp; 1 = خیلی ناخوشایند</p><br>
+                <p class="text-muted">در صورتی که از کامپیوتر استفاده میکنید برای پاسخ میتوانید از کلیک موس استفاده نمیوده و یا کلید های 1 تا 9 بالی ی صفحه را انتخاب نمایید</p>
+                <p class="text-danger">در اینجا برای پاسخ به هر سوال تنها 3 ثانیه زمان دارید ، لطفا در زمان تعیین شده پاسخ دهید</p><br>
+
+                <div class="progress-container mb-4">
+                    <div class="d-flex justify-content-between mb-2">
+                        <span class="text-muted">پیشرفت مرحله</span>
+                    </div>
+                    <div class="progress" style="direction: ltr; height: 20px;">
+                        <div class="progress-bar bg-success progress-bar-striped"
+                            role="progressbar"
+                            style="width: {{ progress_percentage }}%;"
+                            aria-valuenow="{{ progress_percentage }}"
+                            aria-valuemin="0"
+                            aria-valuemax="100">
+                        <span class="fw-bold" style="direction: rtl;">{{ current_trial }} از {{ total_trials }}</span>
+                        </div>
+                    </div>
+                </div>
+                <button id="start-btn" class="btn btn-success btn-lg mt-4 px-5">شروع آزمون</button>
+            </div>
+        </div>
+
+    <!-- Fixation Cross -->
+    <div id="fixation" class="full-center hidden">
+      <div class="fixation">+</div>
+    </div>
+
+    <!-- صفحه ارزیابی خوشایندی -->
+    <div id="rating" class="hidden">
+      <div class="card p-5">
+        <div class="card-body text-center">
+
+          <h3 id="rating-question" class="mb-5"></h3>
+
+          <div class="sam-buttons" style="margin: auto;">
+            {% for i in "123456789" %}
+            <button type="button" class="btn sam-btn valence-btn" data-value="{{ forloop.counter }}">
+              <img src="{% static 'images/valence/' %}{{ forloop.counter }}.png" alt="امتیاز {{ forloop.counter }}" style="width: 106px;height: 136px;">
+              <div class="key-hint mt-2 fw-bold">{{ forloop.counter }}</div>
+            </button>
+            {% endfor %}
+          </div>
+
+          <div id="feedback" class="mt-4 fs-3 fw-bold text-danger"></div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <audio id="audio-player" preload="auto"></audio>
+
+  <script>
+    // درخواست تمام‌صفحه هنگام شروع
+    function requestFullscreen() {
+      const elem = document.documentElement;
+      if (elem.requestFullscreen) elem.requestFullscreen();
+      else if (elem.mozRequestFullScreen) elem.mozRequestFullScreen();
+      else if (elem.webkitRequestFullscreen) elem.webkitRequestFullscreen();
+      else if (elem.msRequestFullscreen) elem.msRequestFullscreen();
+    }
+
+    document.getElementById('start-btn').addEventListener('click', () => {
+      requestFullscreen();
+      setTimeout(startTrial, 300);
+    });
+
+    // داده‌های ارسالی از ویو
+    let trialIndex = {{ current_trial }} + 1;
+    const totalTrials = {{ total_trials }};
+    const cueUrls = {{ cue_urls|safe }};
+    const neutralUrls = {{ neutral_urls|safe }};
+    const negativeUrls = {{ negative_urls|safe }};
+    const cuesMapping = {{ cues_mapping|safe }};
+    const remainingSequences = {{ remaining_sequences|safe }}; // لیست متعادل و تصادفی توالی‌های باقی‌مانده
+
+    const audio = document.getElementById('audio-player');
+    const intro = document.getElementById('intro');
+    const fixation = document.getElementById('fixation');
+    const rating = document.getElementById('rating');
+    const question = document.getElementById('rating-question');
+
+    let currentCue, currentStim1, currentStim2;
+    let expectedSeq; // مثلاً "Neutral-Negative"
+    let currentRatingStep = 0; // 0: اول، 1: دوم، 2: کل توالی
+    let ratings = { stim1: null, stim2: null, sequence: null };
+
+    const feedback = document.getElementById('feedback');
+    
+    let ratingTimeout; // تایمر هشدار 3 ثانیه‌ای
+    let isModalActive = false; // وضعیت مدال
+    const RESPONSE_TIMEOUT = 3000; // زمان مجاز: ۳۰۰۰ میلی‌ثانیه (۳ ثانیه)
+
+
+    const questions = [
+      "صداي اول براي شما چقدر خوشايند يا ناخوشايند بود؟",
+      "صداي دوم براي شما چقدر خوشايند يا ناخوشايند بود؟",
+      "کل اين توالي صوتي (دو صدا با هم) براي شما چقدر خوشايند يا ناخوشايند بود؟"
+    ];
+
+    function getCsrfToken() {
+      const name = 'csrftoken';
+      const cookies = document.cookie.split(';');
+      for (let cookie of cookies) {
+        const [key, value] = cookie.trim().split('=');
+        if (key === name) return decodeURIComponent(value);
+      }
+      return '';
+    }
+
+    
+
+    function showFixation(cb) {
+      fixation.classList.remove('hidden');
+      setTimeout(() => {
+        fixation.classList.add('hidden');
+        cb();
+      }, 1000);
+    }
+
+    function play(url, next) {
+      audio.src = url;
+      audio.play().catch(e => console.error('خطا در پخش:', e));
+      audio.onended = () => setTimeout(next, 500);
+    }
+
+    function startTrial() {
+      intro.classList.add('hidden');
+
+      // گرفتن توالی بعدی
+      expectedSeq = remainingSequences.shift();
+      const [cat1, cat2] = expectedSeq.split('-');
+
+      // انتخاب cue متناسب (مانند مرحله ۱)
+      const validCues = Object.keys(cuesMapping).filter(cue => cuesMapping[cue] === expectedSeq);
+      currentCue = validCues[Math.floor(Math.random() * validCues.length)];
+
+      // انتخاب صداها
+      const pool1 = cat1 === 'Neutral' ? neutralUrls : negativeUrls;
+      const pool2 = cat2 === 'Neutral' ? neutralUrls : negativeUrls;
+      currentStim1 = pool1[Math.floor(Math.random() * pool1.length)];
+      currentStim2 = pool2[Math.floor(Math.random() * pool2.length)];
+
+      // ریست رتبه‌بندی‌ها
+      currentRatingStep = 0;
+      ratings = { stim1: null, stim2: null, sequence: null };
+
+      showFixation(() => {
+        play(currentCue, () => {
+          play(currentStim1, () => {
+            play(currentStim2, () => {
+              showRatingQuestion();
+            });
+          });
+        });
+      });
+    }
+    
+    function showRatingQuestion() {
+      question.textContent = questions[currentRatingStep];
+      rating.classList.remove('hidden');
+      ratingStartTime = Date.now();
+
+      // لغو هر تایمر قبلی
+      clearTimeout(ratingTimeout);
+
+      // شروع تایمر جدید ۳ ثانیه‌ای
+      startRatingTimer();
+    }
+
+    function startRatingTimer() {
+      clearTimeout(ratingTimeout);
+
+      ratingTimeout = setTimeout(() => {
+        const noResponse =
+          (currentRatingStep === 0 && ratings.stim1 === null) ||
+          (currentRatingStep === 1 && ratings.stim2 === null) ||
+          (currentRatingStep === 2 && ratings.sequence === null);
+
+        if (noResponse && !isModalActive) {
+          const welcomeModal = document.getElementById('welcomeModal');
+          welcomeModal.classList.add('active');
+          document.body.style.overflow = 'hidden';
+          isModalActive = true; // مدال باز است → تایمر متوقف
+        }
+      }, 3000);
+    }
+
+    // کلیک روی دکمه‌های مقیاس ۱-۹
+    document.querySelectorAll('.valence-btn').forEach(btn => {
+      btn.onclick = () => {
+        clearTimeout(ratingTimeout); // توقف تایمر هنگام پاسخ
+        const value = parseInt(btn.dataset.value);
+        const rt = Date.now() - ratingStartTime;
+
+        if (currentRatingStep === 0) {
+            ratings.stim1 = value; ratings.rt_stim1 = rt;
+        } else if (currentRatingStep === 1) {
+            ratings.stim2 = value; ratings.rt_stim2 = rt;
+        } else if (currentRatingStep === 2) {
+            ratings.sequence = value; ratings.rt_sequence = rt;
+        }
+
+        document.querySelectorAll('.valence-btn').forEach(b => b.disabled = true);
+
+        if (currentRatingStep < 2) {
+          currentRatingStep++;
+          setTimeout(() => {
+            showRatingQuestion();
+            document.querySelectorAll('.valence-btn').forEach(b => b.disabled = false);
+          }, 1000);
+        } else {
+          saveTrialData();
+        }
+      };
+    });
+
+    function saveTrialData() {
+      fetch('/pcm/save/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRFToken': getCsrfToken()
+        },
+        body: JSON.stringify({
+          is_valence_practice: true, // مرحله ارزیابی خوشایندی توالی‌ها
+          trial: trialIndex,
+          cue: currentCue,
+          stimulus1: currentStim1,
+          stimulus2: currentStim2,
+          category_stim1: expectedSeq.split('-')[0],
+          category_stim2: expectedSeq.split('-')[1],
+          valence_stim1: ratings.stim1,
+          rt_stim1:ratings.rt_stim1,
+          valence_stim2: ratings.stim2,
+          rt_stim2:ratings.rt_stim2,
+          valence_sequence: ratings.sequence,
+          rt_sequence:ratings.rt_sequence
+        })
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (data.status === 'success') {
+          trialIndex++;
+          setTimeout(() => {
+            rating.classList.add('hidden');
+            document.querySelectorAll('.valence-btn').forEach(b => b.disabled = false);
+
+            if (trialIndex > totalTrials) {
+              setTimeout(() => location.href = '/experiment/pcm/', 1000);
+            } else {
+              showFixation(startTrial);
+            }
+          }, 1200);
+        }
+      })
+      .catch(err => console.error('خطا در ارسال:', err));
+    }
+
+    // پشتیبانی از کلیدهای کیبورد ۱ تا ۹
+    document.addEventListener('keydown', e => {
+      if (rating.classList.contains('hidden')) return;
+      if (e.key >= '1' && e.key <= '9') {
+        const btn = document.querySelector(`[data-value="${e.key}"]`);
+        if (btn && !btn.disabled) btn.click();
+      }
+    });
+  </script>
+</body>
+
+<script>
+      document.addEventListener('DOMContentLoaded', function () {
+        const welcomeModal = document.getElementById('welcomeModal');
+        const body = document.body;
+
+        function closeModal() {
+          welcomeModal.classList.remove('active');
+          body.style.overflow = '';
+          isModalActive = false; // مدال بسته شد ⇒ اجازه شروع دوباره تایمر
+        }
+
+        document.getElementById('closeModal').onclick = closeModal;
+        welcomeModal.querySelector('.modal-overlay').onclick = closeModal;
+      });
+</script>
+
+    <div id="welcomeModal" class="custom-modal">
+      <div class="modal-overlay"></div>
+      <div class="modal-content">
+        <div class="modal-icon">⚠️</div>
+        <h3 class="modal-title"> لطفا سریعتر پاسخ دهید </h3>
+        <button class="modal-button" id="closeModal">
+         ادامه
+        </button>
+      </div>
+    </div>
+</html>

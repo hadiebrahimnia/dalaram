@@ -16,10 +16,19 @@ from django.templatetags.static import static
 from django.http import JsonResponse
 from django.core.exceptions import PermissionDenied
 from typing import Dict, List, Tuple, Optional
+from django.views.decorators.csrf import csrf_exempt
+from collections import Counter
 
+###################################################################################################### 
+###################################################################################################### 
+###################################################################################################### 
+###################################################################################################### 
 def home_view(request):
     return render(request, 'index.html')
-
+###################################################################################################### 
+###################################################################################################### 
+###################################################################################################### 
+###################################################################################################### 
 def login_or_signup(request):
     if request.user.is_authenticated:
         return redirect('home')
@@ -43,6 +52,10 @@ def login_or_signup(request):
 
     return render(request, 'username_entry.html', {'form': username_form})
 
+###################################################################################################### 
+###################################################################################################### 
+###################################################################################################### 
+###################################################################################################### 
 def complete_profile(request):
     if request.user.is_authenticated:
         return redirect('home')
@@ -79,6 +92,11 @@ def complete_profile(request):
         'username': username
     })
 
+###################################################################################################### 
+###################################################################################################### 
+###################################################################################################### 
+###################################################################################################### 
+
 @login_required(login_url='login_or_signup')
 def respond_questionnaire(request, pk):
     questionnaire = get_object_or_404(Questionnaire, pk=pk, is_active=True)
@@ -100,7 +118,6 @@ def respond_questionnaire(request, pk):
                 scale_value=ans.get('scale_value'),
                 RT=ans.get('rt')
             )
-        
         
 
         attributes = Attribute.objects.filter(
@@ -145,6 +162,11 @@ def respond_questionnaire(request, pk):
         'questionnaire': questionnaire,
         'questions': questions,
     })
+
+###################################################################################################### 
+###################################################################################################### 
+###################################################################################################### 
+###################################################################################################### 
 
 @login_required(login_url='login_or_signup')
 @questionnaires_required([1,2,3])
@@ -239,7 +261,10 @@ def rating_view(request):
     }
     return render(request, 'rating.html', context)
 
-
+###################################################################################################### 
+###################################################################################################### 
+###################################################################################################### 
+###################################################################################################### 
 def extract_stimulus_number(url: Optional[str]) -> Optional[int]:
     """استخراج شماره stimulus از URL فایل صوتی (مثل 102 از 102.WAV)"""
     if not url:
@@ -250,12 +275,6 @@ def extract_stimulus_number(url: Optional[str]) -> Optional[int]:
         return int(number_str)
     except (IndexError, ValueError):
         return None
-
-
-def build_audio_url(filename: str) -> str:
-    """ساخت URL کامل برای فایل صوتی در static"""
-    return staticfiles_storage.url(f'sounds/{filename}')
-
 
 def get_cues_mapping() -> Dict[str, str]:
     """ساخت mapping بین فایل‌های cue و sequence مورد انتظار"""
@@ -316,379 +335,372 @@ def get_stimuli_lists() -> Tuple[List[str], List[str]]:
     return neutral_files, negative_files
 
 
-class PCMProgress:
-    """کلاس یکپارچه برای محاسبه وضعیت و پیشرفت کاربر"""
-    
-    def __init__(self, user, practice_responses, main_responses):
-        self.user = user
-        self.practice_responses = practice_responses
-        self.main_responses = main_responses
-        
-        # ثابت‌ها
-        self.NUM_BLOCKS = 4
-        self.TRIALS_PER_BLOCK = 2
-        self.PRACTICE_TRIALS = 1
-        self.PRACTICE_SUCCESS_THRESHOLD = 0.8
-        VALENCE_PRACTICE_TRIALS = 3 
-        
-        self._calculate_progress()
-    
-    def _calculate_progress(self):
-        """محاسبه تمام متغیرهای پیشرفت"""
-        # مرحله تمرینی
-        self.practice_total = self.practice_responses.count()
-        self.practice_correct = self.practice_responses.filter(practice_correct=True).count()
-        self.practice_accuracy = (
-            self.practice_correct / self.practice_total 
-            if self.practice_total > 0 else 0
-        )
-        self.is_practice_completed = (
-            self.practice_total >= self.PRACTICE_TRIALS and
-            self.practice_accuracy >= self.PRACTICE_SUCCESS_THRESHOLD
-        )
-        
-        # مرحله اصلی
-        self.current_block = 1
-        self.current_trial = 1
-        self.completed_main_trials = 0
-        self.is_main_completed = False
-        
-        if self.main_responses.exists():
-            last_response = self.main_responses.last()
-            self.completed_main_trials = (
-                (last_response.block - 1) * self.TRIALS_PER_BLOCK + last_response.trial
-            )
-            self.current_block = last_response.block
-            self.current_trial = last_response.trial + 1
-            
-            if self.current_trial > self.TRIALS_PER_BLOCK:
-                self.current_trial = 1
-                self.current_block += 1
-            
-            if self.current_block > self.NUM_BLOCKS:
-                self.is_main_completed = True
-                self.current_block = self.NUM_BLOCKS
-                self.current_trial = self.TRIALS_PER_BLOCK
+def build_audio_url(filename: str) -> str:
+    return f"/static/sounds/{filename}"
+
+# متغیرهای مشترک برای همه مراحل
+CUE_URLS = list(get_cues_mapping().keys())
+
+# لیست همه صداهای استفاده‌شده در آزمون اصلی (برای مرحله ۵)
+def get_used_stimuli_urls(user):
+    stimuli = set()
+    for resp in PCMMainResponse.objects.filter(user=user):
+        if resp.stimulus1:
+            stimuli.add(resp.stimulus1)
+        if resp.stimulus2:
+            stimuli.add(resp.stimulus2)
+    return list(stimuli)
+
+SEQUENCES = ['Neutral-Neutral', 'Negative-Neutral', 'Neutral-Negative']
+def get_or_create_cue_mapping(user):
+    # ابتدا سعی می‌کنیم mapping موجود را بگیریم
+    try:
+        return PCMCueMapping.objects.get(user=user).mapping
+    except PCMCueMapping.DoesNotExist:
+        pass
+
+    # اگر وجود نداشت، mapping جدید می‌سازیم
+    random.seed(user.id or user.pk)  # اگر id هنوز نباشد pk هم کار می‌کند
+
+    seqs = SEQUENCES[:]
+    random.shuffle(seqs)
+
+    mapping = {}
+    for i, cue_url in enumerate(CUE_URLS):
+        # اگر تعداد cue بیشتر از ۳ باشد، از random.choice استفاده می‌کنیم
+        if i < len(seqs):
+            mapping[cue_url] = seqs[i]
         else:
-            self.completed_main_trials = 0
-        
-        self.total_main_trials = self.NUM_BLOCKS * self.TRIALS_PER_BLOCK
-        
-        # استراحت بین بلوک‌ها
-        self.is_at_block_break = False
-        self.block_break_message = ""
-        if (not self.is_main_completed and 
-            self.main_responses.exists() and
-            self.main_responses.last().trial == self.TRIALS_PER_BLOCK and
-            self.main_responses.last().block < self.NUM_BLOCKS):
-            self.is_at_block_break = True
-            next_block = self.main_responses.last().block + 1
-            self.block_break_message = (
-                f"بلوک {self.main_responses.last().block} با موفقیت به پایان رسید.<br>"
-                f"هر زمان که آماده بودید، روی دکمه زیر کلیک کنید تا بلوک {next_block} آغاز شود."
-            )
-    
-    def get_initial_stage(self) -> str:
-        """تعیین وضعیت یکپارچه کاربر (سلسله مراتبی)"""
-        if self.is_at_block_break:
-            return 'block_break'
-        
-        elif self.is_main_completed:
-            # بررسی Re-rating
-            used_stimuli = {
-                num for resp in self.main_responses
-                for num in [resp.stimulus1, resp.stimulus2] if num is not None
-            }
-            rerating_completed = PCMReRatingResponse.objects.filter(
-                user=self.user
-            ).count()
-            total_rerating = len(used_stimuli)
-            is_rerating_completed = total_rerating > 0 and rerating_completed >= total_rerating
-            
-            if total_rerating > 0 and not is_rerating_completed:
-                return 'rerating_intro' if rerating_completed == 0 else 'resume_rerating'
-            return 'final_thanks'
-        
-        elif self.is_practice_completed and self.main_responses.exists():
-            return 'resume_main'
-        
-        elif self.is_practice_completed:
-            return 'main_intro'
-        
-        elif self.practice_total > 0:
-            return 'resume_practice'
-        
-        else:
-            return 'intro'
-    
-    def get_resume_message(self, rerating_urls: List[str]) -> str:
-        """پیام راهنمای ادامه کار"""
-        initial_stage = self.get_initial_stage()
-        
-        if initial_stage == 'resume_practice':
-            return f"شما مرحله تمرینی را تا تریال {self.practice_total} از {self.PRACTICE_TRIALS} انجام داده‌اید."
-        
-        elif initial_stage == 'resume_main':
-            return (
-                f"شما {self.completed_main_trials} از {self.total_main_trials} تریال آزمون اصلی را انجام داده‌اید "
-                f"(بلوک {self.current_block}، تریال {self.current_trial})."
-            )
-        
-        elif initial_stage in ['rerating_intro', 'resume_rerating']:
-            rerating_completed = PCMReRatingResponse.objects.filter(user=self.user).count()
-            return f"شما {rerating_completed} از {len(rerating_urls)} صدای مرحله رتبه‌بندی مجدد را رتبه‌بندی کرده‌اید."
-        
-        return ""
+            mapping[cue_url] = random.choice(SEQUENCES)
+
+    # حالا با defaults ایجاد می‌کنیم تا فیلد mapping حتما پر باشد
+    obj, created = PCMCueMapping.objects.get_or_create(
+        user=user,
+        defaults={'mapping': mapping}
+    )
+    return obj.mapping
+
+
+def get_sequence_order(user, total_trials: int) -> List[str]:
+    """ساخت لیست متعادل و تصادفی توالی‌ها با seed بر اساس user.id"""
+    random.seed(user.id)  # برای تکرارپذیری در refreshها
+
+    possible_sequences = ["Neutral-Neutral", "Neutral-Negative", "Negative-Neutral"]
+    trials_per_seq = total_trials // 3
+    remainder = total_trials % 3
+
+    sequence_order = []
+    for _ in range(trials_per_seq):
+        sequence_order.extend(possible_sequences)
+
+    # اضافه کردن باقی‌مانده
+    extra_sequences = possible_sequences[:remainder]
+    sequence_order.extend(extra_sequences)
+
+    # shuffle کردن لیست
+    random.shuffle(sequence_order)
+    return sequence_order
 
 
 @login_required(login_url='login_or_signup')
 @questionnaires_required([1, 2, 3])
 def pcm_view(request):
-    if request.method == 'POST':
-        return _handle_post_request(request)
+    user = request.user
+    cues_mapping = get_or_create_cue_mapping(user)
+    neutral_raw, negative_raw = get_stimuli_lists()
+    NEUTRAL_URLS = [build_audio_url(f) for f in neutral_raw]
+    NEGATIVE_URLS = [build_audio_url(f) for f in negative_raw]
 
-    # داده‌های صوتی
-    cues_mapping = get_cues_mapping()
-    neutral_files, negative_files = get_stimuli_lists()
+    # --- مرحله ۱: تمرین تشخیص توالی ---
+    SEQ_TRIALS = 6  # تعداد کل مرحله تمرینی
+    SEQ_THRESHOLD = 0.83  # درصد پاسخ درست برای گذر از مرحله 
+    seq_responses = PCMSequencePracticeResponse.objects.filter(user=user)
+    seq_count = seq_responses.count()  # تعداد پاسخ های ثبت شده 
+    progress_percentage = (seq_count / SEQ_TRIALS) * 100
 
-    cue_urls = list(cues_mapping.keys())
-    neutral_urls = [build_audio_url(f) for f in neutral_files]
-    negative_urls = [build_audio_url(f) for f in negative_files]
+    if seq_count < SEQ_TRIALS:  # تغییر به < برای جلوگیری از >= که قبلاً بود
+        # محاسبه تعداد باقی‌مانده و ساخت لیست متعادل و تصادفی برای توالی‌های باقی‌مانده
+        remain_trials = SEQ_TRIALS - seq_count
+        possible_sequences = ["Neutral-Neutral", "Neutral-Negative", "Negative-Neutral"]
+        
+        # شمارش تعداد استفاده‌شده از هر توالی تا حالا (برای حفظ تعادل کلی)
+        used_sequences = [
+            f"{r.category_stim1}-{r.category_stim2}" 
+            for r in seq_responses if r.category_stim1 and r.category_stim2
+        ]
+        counts = Counter(used_sequences)
+        
+        # محاسبه تعداد هدف کلی برای هر توالی (برای کل SEQ_TRIALS)
+        target_per_seq = SEQ_TRIALS // len(possible_sequences)
+        remainder_total = SEQ_TRIALS % len(possible_sequences)
+        
+        # محاسبه تعداد باقی‌مانده برای هر توالی بر اساس هدف - استفاده‌شده
+        remaining_per_seq = {}
+        for i, seq in enumerate(possible_sequences):
+            target = target_per_seq + (1 if i < remainder_total else 0)
+            remaining_per_seq[seq] = max(0, target - counts.get(seq, 0))
+        
+        # ساخت لیست remaining_sequences بر اساس تعداد باقی‌مانده هر توالی
+        sequence_order = []
+        for seq, rem in remaining_per_seq.items():
+            sequence_order.extend([seq] * rem)
+        
+        # اگر مجموع باقی‌مانده برابر remain_trials نبود (به دلیل خطا)، تنظیم کنیم
+        if len(sequence_order) != remain_trials:
+            # این نباید اتفاق بیفتد، اما برای ایمنی
+            trials_per_seq = remain_trials // len(possible_sequences)
+            remainder = remain_trials % len(possible_sequences)
+            sequence_order = []
+            for i in range(trials_per_seq):
+                sequence_order.extend(possible_sequences)
+            for i in range(remainder):
+                sequence_order.append(possible_sequences[i])
+        
+        # shuffle تصادفی لیست
+        random.shuffle(sequence_order)
+        
+        context = {
+            'current_trial': seq_count,
+            'total_trials': SEQ_TRIALS,
+            'progress_percentage': progress_percentage,
+            'cue_urls': json.dumps(CUE_URLS),
+            'neutral_urls': json.dumps(NEUTRAL_URLS),
+            'negative_urls': json.dumps(NEGATIVE_URLS),
+            'cues_mapping': json.dumps(cues_mapping),
+            'remaining_sequences': json.dumps(sequence_order),  # لیست باقی‌مانده متعادل و shuffle‌شده
+        }
+        return render(request, '1_seq_practice.html', context)
+    else:
+        seq_correct = seq_responses.filter(is_correct=True).count()  # محاسبه پاسخ درست 
+        seq_accuracy = seq_correct / seq_count if seq_count > 0 else 0
+        if seq_accuracy >= SEQ_THRESHOLD:
+            pass
+        else:
+            text = "متاسفانه با توجه نتایج کسب شده حائز شرکت در ادامه آزمون نبودید "
+            context = {
+                'text': text,
+            }
+            return render(request, 'final_thanks.html', context)
+        
 
-    # لیست فایل‌های re-rating (همه محرک‌های استفاده‌شده)
-    all_rerating_files = neutral_files + negative_files
-    rerating_urls = [build_audio_url(f) for f in all_rerating_files]
-    random.shuffle(rerating_urls)
+    # --- مرحله ۲: تمرین رتبه‌بندی خوشایندی ---
+    VALENCE_PRACTICE_TRIALS = 4
+    valence_practice_responses = PCMValencePracticeResponse.objects.filter(user=user)
+    valence_practice_count = valence_practice_responses.count()
 
-    # پیشرفت کاربر
-    practice_responses = PCMPracticeResponse.objects.filter(user=request.user)
-    preparation_responses = PCMPreparationResponse.objects.filter(user=request.user)
-    main_responses = PCMResponse.objects.filter(user=request.user).order_by('block', 'trial')
-    rerating_responses = PCMReRatingResponse.objects.filter(user=request.user)
+    progress_percentage = (valence_practice_count / VALENCE_PRACTICE_TRIALS) * 100
 
-    practice_total = practice_responses.count()
-    practice_correct = practice_responses.filter(practice_correct=True).count()
-    practice_accuracy = practice_correct / practice_total if practice_total > 0 else 0
+    if valence_practice_count < VALENCE_PRACTICE_TRIALS:
+        # محاسبه تعداد باقی‌مانده
+        remain_trials = VALENCE_PRACTICE_TRIALS - valence_practice_count
 
-    preparation_responses_count = preparation_responses.count()
+        possible_sequences = ["Neutral-Neutral", "Neutral-Negative", "Negative-Neutral"]
 
-    print("valence_practice_count",preparation_responses_count)
+        # شمارش توالی‌های استفاده‌شده تا الان
+        used_sequences = [
+            f"{r.category_stim1}-{r.category_stim2}"
+            for r in valence_practice_responses
+            if r.category_stim1 and r.category_stim2
+        ]
+        counts = Counter(used_sequences)
 
-    # تنظیمات ثابت
+        # هدف: توزیع تقریباً برابر بین ۳ توالی در کل ۴ تریال
+        # مثلاً: 2 + 1 + 1 یا 1 + 2 + 1 و غیره
+        target_per_seq = VALENCE_PRACTICE_TRIALS // len(possible_sequences)  # 1
+        remainder_total = VALENCE_PRACTICE_TRIALS % len(possible_sequences)  # 1
+
+        remaining_per_seq = {}
+        for i, seq in enumerate(possible_sequences):
+            target = target_per_seq + (1 if i < remainder_total else 0)
+            remaining_per_seq[seq] = max(0, target - counts.get(seq, 0))
+
+        # ساخت لیست توالی‌های باقی‌مانده
+        sequence_order = []
+        for seq, rem in remaining_per_seq.items():
+            sequence_order.extend([seq] * rem)
+
+        # اگر به دلایلی مجموع باقی‌مانده با remain_trials برابر نبود (ایمنی)
+        if len(sequence_order) < remain_trials:
+            # پر کردن باقی‌مانده با توزیع متعادل
+            extra_needed = remain_trials - len(sequence_order)
+            for _ in range(extra_needed):
+                sequence_order.append(random.choice(possible_sequences))
+
+        # shuffle برای ترتیب تصادفی
+        random.shuffle(sequence_order)
+
+        context = {
+            'current_trial': valence_practice_count,  # تعداد انجام‌شده (شروع از 0)
+            'total_trials': VALENCE_PRACTICE_TRIALS,
+            'progress_percentage': round(progress_percentage, 1),
+
+            'cue_urls': json.dumps(CUE_URLS),
+            'neutral_urls': json.dumps(NEUTRAL_URLS),
+            'negative_urls': json.dumps(NEGATIVE_URLS),
+            'cues_mapping': json.dumps(cues_mapping),
+
+            # مهم: ارسال لیست توالی‌های باقی‌مانده به کلاینت
+            'remaining_sequences': json.dumps(sequence_order),
+        }
+        return render(request, '2_valence_practice.html', context)
+
+    # --- مرحله ۳: آزمون اصلی PCM ---
     NUM_BLOCKS = 4
     TRIALS_PER_BLOCK = 8
-    CATCH_TRIALS_PER_BLOCK = 2  # تعداد catch trial در ابتدای هر بلوک
-    PRACTICE_TRIALS = 6
-    PRACTICE_THRESHOLD = 0.83  # حداقل دقت برای عبور از تمرین توالی
-    PREPARATION_TRIALS = 4  # تعداد تریال تمرینی رتبه‌بندی خوشایندی
-
-    # وضعیت مرحله اصلی
-    current_block = 1
-    current_trial = 1
-    completed_main_trials = 0
-    is_main_completed = False
-    is_at_block_break = False
-    block_break_message = ""
-
-    if main_responses.exists():
+    INCONSISTENT_RATIO = 0.2
+    main_responses = PCMMainResponse.objects.filter(user=user).order_by('block', 'trial')
+    total_main_trials = NUM_BLOCKS * TRIALS_PER_BLOCK
+    if main_responses.count() < total_main_trials:
         last = main_responses.last()
-        completed_main_trials = (last.block - 1) * TRIALS_PER_BLOCK + last.trial
-        current_block = last.block
-        current_trial = last.trial + 1
-        if current_trial > TRIALS_PER_BLOCK:
-            current_trial = 1
+        current_block = last.block if last else 1
+        current_trial_in_block = (last.trial + 1 if last and last.trial < TRIALS_PER_BLOCK else 1)
+        if current_trial_in_block == 1 and last:
             current_block += 1
 
-        if current_block > NUM_BLOCKS:
-            is_main_completed = True
+        # محاسبه تعداد کل تریال‌های انجام‌شده
+        main_count = main_responses.count()
 
-        # تشخیص استراحت بین بلوک‌ها
-        if last.trial == TRIALS_PER_BLOCK and current_block <= NUM_BLOCKS:
-            is_at_block_break = True
-            block_break_message = f"بلوک {last.block} با موفقیت به پایان رسید.<br>هر زمان آماده بودید، بلوک {current_block} را شروع کنید."
+        # ساخت لیست کامل توالی‌ها برای آزمون اصلی
+        full_sequence_order = get_sequence_order(user, total_main_trials)
+        # باقی‌مانده توالی‌ها
+        remaining_sequences = full_sequence_order[main_count:]
 
-    # تعیین مرحله اولیه
-    if is_at_block_break:
-        initial_stage = 'block_break'
-    elif is_main_completed:
-        rerating_completed = rerating_responses.count()
-        total_rerating = len(rerating_urls)
-        if total_rerating > 0 and rerating_completed < total_rerating:
-            initial_stage = 'rerating_intro' if rerating_completed == 0 else 'resume_rerating'
-        else:
-            initial_stage = 'final_thanks'
-    elif preparation_responses_count < PREPARATION_TRIALS:
-        initial_stage = 'preparation_intro' if preparation_responses_count == 0 else 'resume_preparation'
-    elif main_responses.exists():
-        initial_stage = 'resume_main'
-    elif practice_accuracy >= PRACTICE_THRESHOLD and practice_total >= PRACTICE_TRIALS:
-        initial_stage = 'main_intro'
-    elif practice_total > 0:
-        initial_stage = 'resume_practice'
-    else:
-        initial_stage = 'intro'
+        context = {
+            'current_block': current_block,
+            'current_trial': current_trial_in_block,
+            'total_blocks': NUM_BLOCKS,
+            'trials_per_block': TRIALS_PER_BLOCK,
 
-    show_resume_screen = initial_stage in {'resume_practice', 'resume_main', 'resume_preparation', 'resume_rerating'}
-    resume_message = ""
-    if 'resume_practice' in initial_stage:
-        resume_message = f"شما {practice_total} از {PRACTICE_TRIALS} تریال تمرینی را انجام داده‌اید."
-    elif 'resume_main' in initial_stage:
-        resume_message = f"شما {completed_main_trials} از {NUM_BLOCKS * TRIALS_PER_BLOCK} تریال اصلی را انجام داده‌اید (بلوک {current_block}، تریال {current_trial})."
-    elif 'resume_valence_practice' in initial_stage:
-        resume_message = f"شما {preparation_responses_count} از {PREPARATION_TRIALS} تریال تمرینی رتبه‌بندی را انجام داده‌اید."
-    elif 'resume_rerating' in initial_stage:
-        resume_message = f"شما {rerating_responses.count()} از {len(rerating_urls)} صدا را در رتبه‌بندی مجدد ارزیابی کرده‌اید."
+            'cue_urls': json.dumps(CUE_URLS),
+            'neutral_urls': json.dumps(NEUTRAL_URLS),
+            'negative_urls': json.dumps(NEGATIVE_URLS),
+            'cues_mapping': json.dumps(cues_mapping),
+            'remaining_sequences': json.dumps(remaining_sequences),  # جدید: برای مدیریت توالی در کلاینت
+            'inconsistent_ratio': INCONSISTENT_RATIO,  # اگر لازم باشد به کلاینت ارسال شود
+        }
+        return render(request, '3_main_test.html', context)
 
-    context = {
-        'title': 'آزمایش حافظه کاری عاطفی (PCM)',
+    # --- مرحله ۴: تمرین رتبه‌بندی کامل (Valence + Arousal) ---
+    RATING_PRACTICE_TRIALS = 5
+    rating_practice_count = RatingPracticeResponse.objects.filter(user=user).count()
+    if rating_practice_count < RATING_PRACTICE_TRIALS:
+        context = {
+            'current_trial': rating_practice_count + 1,
+            'total_trials': RATING_PRACTICE_TRIALS,
 
-        # داده‌های صوتی
-        'cue_urls': json.dumps(cue_urls),
-        'neutral_urls': json.dumps(neutral_urls),
-        'negative_urls': json.dumps(negative_urls),
-        'cues_mapping': json.dumps(cues_mapping),
+            'neutral_urls': json.dumps(NEUTRAL_URLS),
+            'negative_urls': json.dumps(NEGATIVE_URLS),
+        }
+        return render(request, '4_rating_practice.html', context)
 
-        # تنظیمات
-        'NUM_BLOCKS': NUM_BLOCKS,
-        'TRIALS_PER_BLOCK': TRIALS_PER_BLOCK,
-        'CATCH_TRIALS_PER_BLOCK': CATCH_TRIALS_PER_BLOCK,
-        'PRACTICE_TRIALS': PRACTICE_TRIALS,
-        'PRACTICE_THRESHOLD': PRACTICE_THRESHOLD,
-        'PREPARATION_TRIALS': PREPARATION_TRIALS,
-        'INCONSISTENT_RATIO': 0.2,
+    # --- مرحله ۵: رتبه‌بندی نهایی همه صداها ---
+    used_stimuli = get_used_stimuli_urls(user)
+    rating_main_done = RatingMainResponse.objects.filter(user=user).count()
 
-        # پیشرفت
-        'CURRENT_BLOCK_INIT': current_block,
-        'CURRENT_TRIAL_INIT': current_trial,
-        'PRACTICE_CORRECT_INIT': practice_correct,
-        'PRACTICE_TOTAL_INIT': practice_total,
-        'PREPARATION_COMPLETED_COUNT': preparation_responses_count,
+    if rating_main_done < len(used_stimuli):
+        # shuffle برای ترتیب تصادفی
+        random.shuffle(used_stimuli)
+        context = {
+            'completed': rating_main_done,
+            'total': len(used_stimuli),
+            'rerating_files': json.dumps(used_stimuli),
+        }
+        return render(request, '5_rating_main.html', context)
 
-        # وضعیت‌ها
-        'IS_AT_BLOCK_BREAK': 'true' if is_at_block_break else 'false',
-        'BLOCK_BREAK_MESSAGE': block_break_message,
-        'HAS_RERATING': 'true' if len(rerating_urls) > 0 else 'false',
-        'rerating_files': json.dumps(rerating_urls),
-        'RERATING_COMPLETED_COUNT': rerating_responses.count(),
-        'TOTAL_RERATING_FILES': len(rerating_urls),
-
-        # مرحله اولیه
-        'INITIAL_STAGE': initial_stage,
-        'SHOW_RESUME_SCREEN': 'true' if show_resume_screen else 'false',
-        'RESUME_MESSAGE': resume_message,
-    }
-
-    return render(request, 'pcm.html', context)
+    # --- پایان آزمون ---
+    return render(request, 'final_thanks.html')
 
 
-def _handle_post_request(request) -> JsonResponse:
-    """مدیریت یکپارچه درخواست‌های POST (ذخیره پاسخ‌ها)"""
+@csrf_exempt
+def pcm_save_response(request):
+    if request.method != 'POST':
+        return JsonResponse({'status': 'error', 'message': 'فقط POST'}, status=405)
+
     try:
-        data = json.loads(request.body) if request.body else {}
+        data = json.loads(request.body)
     except json.JSONDecodeError:
-        return JsonResponse(
-            {'status': 'error', 'message': 'JSON نامعتبر'}, 
-            status=400
-        )
-    
-    # مرحله تمرینی
-    if data.get('is_practice'):
-        practice_trial = data.get('practice_trial')
-        if practice_trial is None:
-            return JsonResponse(
-                {'status': 'error', 'message': 'شماره تریال تمرینی الزامی است'}, 
-                status=400
-            )
+        return JsonResponse({'status': 'error', 'message': 'JSON نامعتبر'}, status=400)
+
+    user = request.user
+    # مرحله ۱: تمرین تشخیص توالی
+    if data.get('is_seq_practice'):
         
-        PCMPracticeResponse.objects.update_or_create(
-            user=request.user,
-            trial=practice_trial,
-            defaults={
-                'cue': extract_stimulus_number(data.get('cue')),
-                'stimulus1': extract_stimulus_number(data.get('stimulus1')),
-                'stimulus2': extract_stimulus_number(data.get('stimulus2')),
-                'category_stim1': data.get('category_stim1'),
-                'category_stim2': data.get('category_stim2'),
-                'practice_response': data.get('user_response'),
-                'practice_correct': data.get('practice_correct'),
-            }
+        PCMSequencePracticeResponse.objects.create(
+            user=user,
+            trial=data['trial'] ,
+            cue=extract_stimulus_number(data['cue']),
+            stimulus1=extract_stimulus_number(data.get('stimulus1')),
+            stimulus2=extract_stimulus_number(data.get('stimulus2')),
+            category_stim1=data.get('category_stim1'),
+            category_stim2=data.get('category_stim2'),
+            user_response=data['user_response'],
+            is_correct=data['is_correct'],
         )
-        return JsonResponse({'status': 'success'})
-    
-    # مرحله تمرینی رتبه‌بندی 
-    if data.get('is_preparation'):
-        trial = data.get('trial')
-        if trial is None:
-            return JsonResponse({'status': 'error', 'message': 'شماره تریال الزامی است'}, status=400)
-        
-        PCMPreparationResponse.objects.update_or_create(
-            user=request.user,
-            trial=trial,
-            defaults={
-                'cue': extract_stimulus_number(data.get('cue')),
-                'stimulus1': extract_stimulus_number(data.get('stimulus1')),
-                'stimulus2': extract_stimulus_number(data.get('stimulus2')),
-                'category_stim1': data.get('category_stim1'),
-                'category_stim2': data.get('category_stim2'),
-                'valence_stim1': data.get('valence_stim1'),
-                'valence_rt_stim1': data.get('valence_rt_stim1'),
-                'valence_stim2': data.get('valence_stim2'),
-                'valence_rt_stim2': data.get('valence_rt_stim2'),
-                'valence_sequence': data.get('valence_sequence'),
-                'valence_rt_sequence': data.get('valence_rt_sequence'),
-            }
+
+    # مرحله ۲: تمرین رتبه‌بندی خوشایندی
+    elif data.get('is_valence_practice'):
+        PCMValencePracticeResponse.objects.create(
+            user=user,
+            trial=data['trial'],
+            cue=extract_stimulus_number(data['cue']),
+            stimulus1=extract_stimulus_number(data.get('stimulus1')),
+            stimulus2=extract_stimulus_number(data.get('stimulus2')),
+            category_stim1=data.get('category_stim1'),
+            category_stim2=data.get('category_stim2'),
+            valence_stim1=data.get('valence_stim1'),
+            valence_rt_stim1=data.get('rt_stim1'),
+            valence_stim2=data.get('valence_stim2'),
+            valence_rt_stim2=data.get('rt_stim2'),
+            valence_sequence=data.get('valence_sequence'),
+            valence_rt_sequence=data.get('rt_sequence'),
         )
-        return JsonResponse({'status': 'success'})
-    
-    # مرحله اصلی PCM
-    block = data.get('block')
-    trial = data.get('trial')
-    if block is not None and trial is not None:
-        PCMResponse.objects.update_or_create(
-            user=request.user,
-            block=block,
-            trial=trial,
-            defaults={
-                'cue': extract_stimulus_number(data.get('cue')),
-                'stimulus1': extract_stimulus_number(data.get('stimulus1')),
-                'stimulus2': extract_stimulus_number(data.get('stimulus2')),
-                'expected_sequence': data.get('expected_sequence'),
-                'is_consistent': data.get('is_consistent'),
-                'category_stim1': data.get('category_stim1'),
-                'category_stim2': data.get('category_stim2'),
-                'valence_stim1': data.get('valence_stim1'),
-                'valence_rt_stim1': data.get('valence_rt_stim1'),
-                'valence_stim2': data.get('valence_stim2'),
-                'valence_rt_stim2': data.get('valence_rt_stim2'),
-                'valence_sequence': data.get('valence_sequence'),
-                'valence_rt_sequence': data.get('valence_rt_sequence'),
-            }
+
+    # مرحله ۳: آزمون اصلی
+    elif 'block' in data and 'trial' in data:
+        PCMMainResponse.objects.create(
+            user=user,
+            block=data['block'],
+            trial=data['trial'],
+            cue=data['cue'],
+            stimulus1=data.get('stimulus1'),
+            stimulus2=data.get('stimulus2'),
+            expected_sequence=data.get('expected_sequence'),
+            is_consistent=data.get('is_consistent', True),
+            valence_stim1=data.get('valence_stim1'),
+            valence_rt_stim1=data.get('valence_rt_stim1'),
+            valence_stim2=data.get('valence_stim2'),
+            valence_rt_stim2=data.get('valence_rt_stim2'),
+            valence_sequence=data.get('valence_sequence'),
+            valence_rt_sequence=data.get('valence_rt_sequence'),
         )
-        return JsonResponse({'status': 'success'})
-    
-    # مرحله رتبه‌بندی مجدد
-    if data.get('is_rerating'):
-        stimulus_number = data.get('stimulus_number')
-        if not stimulus_number:
-            return JsonResponse(
-                {'status': 'error', 'message': 'شماره محرک الزامی است'}, 
-                status=400
-            )
-        
-        PCMReRatingResponse.objects.update_or_create(
-            user=request.user,
-            stimulus_number=stimulus_number,
+
+    # مرحله ۴: تمرین رتبه‌بندی کامل
+    elif data.get('is_rating_practice'):
+        RatingPracticeResponse.objects.create(
+            user=user,
+            trial=data['trial'],
+            stimulus=data['stimulus'],
+            valence=data.get('valence'),
+            valence_rt=data.get('valence_rt'),
+            arousal=data.get('arousal'),
+            arousal_rt=data.get('arousal_rt'),
+        )
+
+    # مرحله ۵: رتبه‌بندی نهایی
+    elif data.get('is_rerating'):
+        RatingMainResponse.objects.update_or_create(
+            user=user,
+            stimulus_number=data['stimulus_number'],
             defaults={
-                'stimulus_file': data.get('stimulus_file'),
+                'stimulus_file': data['stimulus_file'],
                 'valence': data.get('valence'),
                 'valence_rt': data.get('valence_rt'),
                 'arousal': data.get('arousal'),
                 'arousal_rt': data.get('arousal_rt'),
             }
         )
-        return JsonResponse({'status': 'success'})
-    
-    return JsonResponse(
-        {'status': 'error', 'message': 'نوع درخواست نامعتبر'}, 
-        status=400
-    )
+
+    else:
+        return JsonResponse({'status': 'error', 'message': 'نوع داده نامعتبر'}, status=400)
+
+    return JsonResponse({'status': 'success'})

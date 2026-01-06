@@ -202,8 +202,49 @@ class RatingResponse(models.Model):
 
     def is_complete(self):
         return self.has_valence() and self.has_arousal()
-    
-class PCMResponse(models.Model):
+ 
+ 
+class PCMSequencePracticeResponse(models.Model):  # مرحله ۱
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
+    trial = models.PositiveIntegerField()
+    cue = models.CharField(max_length=100)
+    stimulus1 = models.CharField(max_length=100, null=True, blank=True)
+    stimulus2 = models.CharField(max_length=100, null=True, blank=True)
+    category_stim1 = models.CharField(max_length=10, null=True, blank=True)
+    category_stim2 = models.CharField(max_length=10, null=True, blank=True)
+    user_response = models.CharField(max_length=30, null=True, blank=True)  # توالی انتخابی
+    is_correct = models.BooleanField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('user', 'trial', 'created_at')
+        verbose_name = "1-تمرین تشخیص توالی"
+        ordering = ['created_at']
+
+
+class PCMValencePracticeResponse(models.Model):  # مرحله ۲
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
+    trial = models.PositiveIntegerField()
+    cue = models.CharField(max_length=100)
+    stimulus1 = models.CharField(max_length=100, null=True, blank=True)
+    stimulus2 = models.CharField(max_length=100, null=True, blank=True)
+    category_stim1 = models.CharField(max_length=10, null=True, blank=True)
+    category_stim2 = models.CharField(max_length=10, null=True, blank=True)
+    valence_stim1 = models.IntegerField(null=True, blank=True)
+    valence_rt_stim1 = models.PositiveIntegerField(null=True, blank=True)
+    valence_stim2 = models.IntegerField(null=True, blank=True)
+    valence_rt_stim2 = models.PositiveIntegerField(null=True, blank=True)
+    valence_sequence = models.IntegerField(null=True, blank=True)
+    valence_rt_sequence = models.PositiveIntegerField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('user', 'trial')
+        verbose_name = "2-تمرین رتبه‌بندی خوشایندی"
+        ordering = ['trial']
+
+
+class PCMMainResponse(models.Model):
     user = models.ForeignKey(
         CustomUser,
         on_delete=models.CASCADE,
@@ -299,8 +340,8 @@ class PCMResponse(models.Model):
 
     class Meta:
         unique_together = ('user', 'block', 'trial')
-        verbose_name = "2-PCM-main"
-        verbose_name_plural = "2-PCM-main"
+        verbose_name = "3-PCM-main"
+        verbose_name_plural = "3-PCM-main"
         ordering = ['-created_at', 'block', 'trial']
 
     def __str__(self):
@@ -312,220 +353,42 @@ class PCMResponse(models.Model):
             self.valence_stim2 is not None and
             self.valence_sequence is not None
         )
-    
-class PCMPracticeResponse(models.Model):
-    user = models.ForeignKey(
-        CustomUser,
-        on_delete=models.CASCADE,
-        verbose_name="کاربر"
-    )
-    trial = models.PositiveIntegerField(
-        verbose_name="شماره تریال"
-    )
-    cue = models.CharField(
-        max_length=100,
-        verbose_name="نام فایل کیو (Cue)"
-    )
-    stimulus1 = models.CharField(
-        max_length=100,
-        null=True,
-        blank=True,
-        verbose_name="نام فایل محرک اول"
-    )
-    stimulus2 = models.CharField(
-        max_length=100,
-        null=True,
-        blank=True,
-        verbose_name="نام فایل محرک دوم"
-    )
-    
-    category_stim1 = models.CharField(
-        max_length=10,
-        null=True,
-        blank=True,
-        verbose_name="دسته محرک اول"
-    )
-    category_stim2 = models.CharField(
-        max_length=10,
-        null=True,
-        blank=True,
-        verbose_name="دسته محرک دوم"
-    )
-    
-    practice_response = models.CharField(
-        max_length=20,
-        null=True,
-        blank=True,
-        verbose_name="توالی انتخابی"
-    )
-    practice_correct = models.BooleanField(
-        null=True,
-        blank=True,
-        verbose_name="پاسخ"
-    )
-    
-    created_at = models.DateTimeField(
-        auto_now_add=True,
-        verbose_name="زمان ایجاد"
-    )
 
-    class Meta:
-        verbose_name = "1-PCM-practice"
-        verbose_name_plural = "1-PCM-practice"
-        ordering = ['-created_at']
-
-    def __str__(self):
-        return f"{self.user.username} - Cue: {self.cue}"
-    
-
-
-class PCMReRatingResponse(models.Model):
-    """
-    پاسخ‌های رتبه‌بندی مجدد (Re-rating) محرک‌های استفاده‌شده در آزمون PCM
-    """
-    user = models.ForeignKey(
-        'CustomUser',  # یا settings.AUTH_USER_MODEL
-        on_delete=models.CASCADE,
-        verbose_name="کاربر"
-    )
-    stimulus_file = models.CharField(
-        max_length=200,
-        verbose_name="نام فایل محرک (مثل 5-MP-MA/102.WAV)"
-    )
-    stimulus_number = models.CharField(
-        max_length=50,
-        verbose_name="شماره محرک (مثل 102)"
-    )
-
-    # رتبه‌بندی خوشایندی
-    valence = models.IntegerField(
-        null=True,
-        blank=True,
-        choices=[(i, i) for i in range(1, 10)],
-        verbose_name="خوشایندی (Valence)"
-    )
-    valence_rt = models.PositiveIntegerField(
-        null=True,
-        blank=True,
-        verbose_name="زمان پاسخ خوشایندی (میلی‌ثانیه)"
-    )
-
-    # رتبه‌بندی برانگیختگی
-    arousal = models.IntegerField(
-        null=True,
-        blank=True,
-        choices=[(i, i) for i in range(1, 10)],
-        verbose_name="برانگیختگی (Arousal)"
-    )
-    arousal_rt = models.PositiveIntegerField(
-        null=True,
-        blank=True,
-        verbose_name="زمان پاسخ برانگیختگی (میلی‌ثانیه)"
-    )
-
-    created_at = models.DateTimeField(
-        auto_now_add=True,
-        verbose_name="زمان ایجاد"
-    )
-
-    class Meta:
-        unique_together = ('user', 'stimulus_number')  # هر محرک فقط یک بار رتبه‌بندی مجدد شود
-        verbose_name = "3-PCM-rating"
-        verbose_name_plural = "3-PCM-rating"
-        ordering = ['-created_at']
-
-    def __str__(self):
-        return f"Re-rate {self.stimulus_number} - V:{self.valence} A:{self.arousal} - {self.user.username}"
-
-    def is_complete(self):
-        return self.valence is not None and self.arousal is not None
-    
-
-class PCMPreparationResponse(models.Model):
-    user = models.ForeignKey(
-        CustomUser,
-        on_delete=models.CASCADE,
-        verbose_name="کاربر"
-    )
-    trial = models.PositiveIntegerField(
-        verbose_name="شماره تریال"
-    )
-    cue = models.CharField(
-        max_length=100,
-        verbose_name="نام فایل کیو (Cue)"
-    )
-    stimulus1 = models.CharField(
-        max_length=100,
-        null=True,
-        blank=True,
-        verbose_name="نام فایل محرک اول"
-    )
-    stimulus2 = models.CharField(
-        max_length=100,
-        null=True,
-        blank=True,
-        verbose_name="نام فایل محرک دوم"
-    )
-    category_stim1 = models.CharField(
-        max_length=10,
-        null=True,
-        blank=True,
-        verbose_name="دسته محرک اول"
-    )
-    category_stim2 = models.CharField(
-        max_length=10,
-        null=True,
-        blank=True,
-        verbose_name="دسته محرک دوم"
-    )
-    valence_stim1 = models.IntegerField(
-        null=True,
-        blank=True,
-        verbose_name="پاسخ خوشایندی محرک اول (Valence)"
-    )
-    valence_rt_stim1 = models.PositiveIntegerField(
-        null=True,
-        blank=True,
-        verbose_name="زمان پاسخ خوشایندی محرک اول (میلی‌ثانیه)"
-    )
-    valence_stim2 = models.IntegerField(
-        null=True,
-        blank=True,
-        verbose_name="پاسخ خوشایندی محرک دوم (Valence)"
-    )
-    valence_rt_stim2 = models.PositiveIntegerField(
-        null=True,
-        blank=True,
-        verbose_name="زمان پاسخ خوشایندی محرک دوم (میلی‌ثانیه)"
-    )
-    valence_sequence = models.IntegerField(
-        null=True,
-        blank=True,
-        verbose_name="پاسخ خوشایندی کل توالی (Valence)"
-    )
-    valence_rt_sequence = models.PositiveIntegerField(
-        null=True,
-        blank=True,
-        verbose_name="زمان پاسخ خوشایندی کل توالی (میلی‌ثانیه)"
-    )
-
-    created_at = models.DateTimeField(
-        auto_now_add=True,
-        verbose_name="زمان ایجاد"
-    )
+class RatingPracticeResponse(models.Model):  # مرحله ۴ - تمرین رتبه‌بندی Valence+Arousal
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
+    trial = models.PositiveIntegerField()
+    stimulus = models.CharField(max_length=100)
+    valence = models.IntegerField(null=True, blank=True)
+    valence_rt = models.PositiveIntegerField(null=True, blank=True)
+    arousal = models.IntegerField(null=True, blank=True)
+    arousal_rt = models.PositiveIntegerField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
         unique_together = ('user', 'trial')
-        verbose_name = "2-PCM-Preparation"
-        verbose_name_plural = "2-PCM-Preparation"
-        ordering = ['-created_at','trial']
+        verbose_name = "4-تمرین رتبه‌بندی (Valence+Arousal)"
+        ordering = ['trial']
 
-    def __str__(self):
-        return f"{self.user.username} - Trial {self.trial} - Cue: {self.cue}"
+class RatingMainResponse(models.Model):  # مرحله ۵ - رتبه‌بندی اصلی
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
+    stimulus_file = models.CharField(max_length=200)
+    stimulus_number = models.CharField(max_length=50)
+    valence = models.IntegerField(null=True, blank=True)
+    valence_rt = models.PositiveIntegerField(null=True, blank=True)
+    arousal = models.IntegerField(null=True, blank=True)
+    arousal_rt = models.PositiveIntegerField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
 
-    def is_complete(self):
-        return (
-            self.valence_stim1 is not None and
-            self.valence_stim2 is not None and
-            self.valence_sequence is not None
-        )
+    class Meta:
+        unique_together = ('user', 'stimulus_number')
+        verbose_name = "5-رتبه‌بندی اصلی"
+        ordering = ['-created_at']
+
+
+class PCMCueMapping(models.Model):
+    user = models.OneToOneField(CustomUser, on_delete=models.CASCADE, primary_key=True)
+    mapping = models.JSONField()
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = "نگاشت ثابت Cue به Sequence در PCM"

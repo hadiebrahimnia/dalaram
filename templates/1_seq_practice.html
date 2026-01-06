@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>مرحله ۱: تشخیص توالی</title>
+  {% load static %}
+  <link href="{% static 'plugins/bootstrap/css/bootstrap.rtl.min.css' %}" rel="stylesheet" />
+  <link href="{% static 'css/pcm.css' %}" rel="stylesheet" />
+</head>
+<body>
+
+  <!-- پیام چرخش گوشی -->
+  <div id="rotate-device">
+    <i>↻</i>
+    <h3>لطفاً گوشی را بچرخانید</h3>
+    <p>برای تجربه بهتر، صفحه را به حالت افقی ببرید</p>
+  </div>
+
+  <div class="content">
+
+    <!-- صفحه مقدمه -->
+    <div id="intro" class="card">
+      <div class="card-body text-center p-5">
+        <h2 class="mb-4">مرحله 1 : تشخیص توالی‌های صوتی</h2>
+        <h3 class="mb-4">در این بخش {{ total_trials }} توالی صوتی پخش خواهد شد</h3>
+        <div class="mb-5">
+          <ol class="text-start mx-auto" style="line-height: 40px; max-width: 500px">
+            <li>ابتدا یک <strong>نشانه صوتی</strong> خواهید شنید</li>
+            <li>سپس <strong>دو صدای هیجانی متوالی</strong></li>
+            <li>از ۳ گزینه ارائه شده <strong>توالی درست</strong> را انتخاب کنید</li>
+          </ol>
+        </div>
+
+        <div class="progress-container mb-4">
+          <div class="d-flex justify-content-between mb-2">
+            <span class="text-muted">پیشرفت مرحله</span>
+          </div>
+          <div class="progress" style="direction: ltr; height: 20px;">
+            <div class="progress-bar bg-success progress-bar-striped"
+                 role="progressbar"
+                 style="width: {{ progress_percentage }}%;"
+                 aria-valuenow="{{ progress_percentage }}"
+                 aria-valuemin="0"
+                 aria-valuemax="100">
+              <span class="fw-bold" style="direction: rtl;">{{ current_trial }} از {{ total_trials }}</span>
+            </div>
+          </div>
+        </div>
+
+        <button id="start-btn" class="btn btn-success btn-lg mt-4 px-5">شروع آزمون</button>
+      </div>
+    </div>
+
+    <!-- Fixation Cross -->
+    <div id="fixation" class="full-center hidden">
+      <div class="fixation">+</div>
+    </div>
+
+    <!-- صفحه انتخاب توالی -->
+    <div id="choice" class="hidden">
+      <div class="card p-5">
+        <div class="card-body text-center">
+          <h3 class="mb-4">کدام توالی شنیده شد؟</h3>
+          <div class="sam-buttons d-flex flex-column gap-3" style="max-width: 500px; margin: auto">
+            <button class="btn btn-outline-primary btn-lg sequence-btn" data-seq="Neutral-Neutral">
+              خنثی → خنثی
+            </button>
+            <button class="btn btn-outline-primary btn-lg sequence-btn" data-seq="Negative-Neutral">
+              خنثی → منفی
+            </button>
+            <button class="btn btn-outline-primary btn-lg sequence-btn" data-seq="Neutral-Negative">
+              منفی → خنثی
+            </button>
+          </div>
+          <div id="feedback" class="mt-5 fs-2 fw-bold"></div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <audio id="audio-player" preload="auto"></audio>
+
+  <script>
+    // درخواست تمام‌صفحه هنگام شروع
+    function requestFullscreen() {
+      const elem = document.documentElement;
+      if (elem.requestFullscreen) elem.requestFullscreen();
+      else if (elem.mozRequestFullScreen) elem.mozRequestFullScreen();
+      else if (elem.webkitRequestFullscreen) elem.webkitRequestFullscreen();
+      else if (elem.msRequestFullscreen) elem.msRequestFullscreen();
+    }
+
+    document.getElementById('start-btn').addEventListener('click', () => {
+      requestFullscreen();
+      setTimeout(startTrial, 300);
+    });
+
+    // داده‌های ارسالی از ویو
+    let trialIndex = {{ current_trial }} + 1;
+    const totalTrials = {{ total_trials }};
+    const cueUrls = {{ cue_urls|safe }};
+    const neutralUrls = {{ neutral_urls|safe }};
+    const negativeUrls = {{ negative_urls|safe }};
+    const cuesMapping = {{ cues_mapping|safe }};
+    const remainingSequences = {{ remaining_sequences|safe }}; // لیست متعادل و تصادفی باقی‌مانده
+
+    const audio = document.getElementById('audio-player');
+    const intro = document.getElementById('intro');
+    const fixation = document.getElementById('fixation');
+    const choice = document.getElementById('choice');
+    const feedback = document.getElementById('feedback');
+
+    let expectedSeq, currentCue, currentStim1, currentStim2;
+
+    function getCsrfToken() {
+      const name = 'csrftoken';
+      const cookies = document.cookie.split(';');
+      for (let cookie of cookies) {
+        const [key, value] = cookie.trim().split('=');
+        if (key === name) return decodeURIComponent(value);
+      }
+      return '';
+    }
+
+    function showFixation(cb) {
+      fixation.classList.remove('hidden');
+      setTimeout(() => {
+        fixation.classList.add('hidden');
+        cb();
+      }, 1000);
+    }
+
+    function play(url, next) {
+      audio.src = url;
+      audio.play().catch(e => console.error('خطا در پخش:', e));
+      audio.onended = () => setTimeout(next, 500);
+    }
+
+    function startTrial() {
+      intro.classList.add('hidden');
+
+      // گرفتن توالی بعدی از لیست باقی‌مانده (که در ویو متعادل شده)
+      expectedSeq = remainingSequences.shift();
+
+      // انتخاب cue متناسب با توالی
+      const validCues = Object.keys(cuesMapping).filter(cue => cuesMapping[cue] === expectedSeq);
+      currentCue = validCues[Math.floor(Math.random() * validCues.length)];
+
+      // انتخاب stimulusها
+      const [cat1, cat2] = expectedSeq.split('-');
+      const pool1 = cat1 === 'Neutral' ? neutralUrls : negativeUrls;
+      const pool2 = cat2 === 'Neutral' ? neutralUrls : negativeUrls;
+
+      currentStim1 = pool1[Math.floor(Math.random() * pool1.length)];
+      currentStim2 = pool2[Math.floor(Math.random() * pool2.length)];
+
+      showFixation(() => {
+        play(currentCue, () => {
+          play(currentStim1, () => {
+            play(currentStim2, () => {
+              choice.classList.remove('hidden');
+            });
+          });
+        });
+      });
+    }
+
+    // کلیک روی دکمه‌های انتخاب توالی
+    document.querySelectorAll('.sequence-btn').forEach(btn => {
+      btn.onclick = () => {
+        const correct = btn.dataset.seq === expectedSeq;
+        feedback.textContent = correct ? '✅ درست!' : '❌ غلط!';
+        feedback.style.color = correct ? '#28a745' : '#dc3545';
+
+        document.querySelectorAll('.sequence-btn').forEach(b => b.disabled = true);
+
+        fetch('/pcm/save/', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCsrfToken()
+          },
+          body: JSON.stringify({
+            is_seq_practice: true,
+            trial: trialIndex,
+            cue: currentCue,
+            stimulus1: currentStim1,
+            stimulus2: currentStim2,
+            category_stim1: expectedSeq.split('-')[0],
+            category_stim2: expectedSeq.split('-')[1],
+            user_response: btn.dataset.seq,
+            is_correct: correct
+          })
+        })
+        .then(res => res.json())
+        .then(data => {
+          if (data.status === 'success') {
+            trialIndex++
+            setTimeout(() => {
+              choice.classList.add('hidden');
+              feedback.textContent = '';
+              document.querySelectorAll('.sequence-btn').forEach(b => b.disabled = false);
+
+              if (trialIndex > totalTrials) {
+                setTimeout(() => location.href = '/experiment/pcm/', 1000);
+              } else {
+                showFixation(startTrial);
+              }
+            }, 1800);
+          }
+        })
+        .catch(err => console.error('خطا در ارسال:', err));
+      };
+    });
+
+    // پشتیبانی از کلیدهای کیبورد ۱، ۲، ۳
+    document.addEventListener('keydown', e => {
+      if (choice.classList.contains('hidden')) return;
+      if (e.key === '1') document.querySelector('[data-seq="Neutral-Neutral"]').click();
+      if (e.key === '2') document.querySelector('[data-seq="Neutral-Negative"]').click();
+      if (e.key === '3') document.querySelector('[data-seq="Negative-Neutral"]').click();
+    });
+  </script>
+
+</body>
+
+
+<script>
+      document.addEventListener('DOMContentLoaded', function () {
+          const welcomeModal = document.getElementById('welcomeModal');
+          const body = document.body;
+          function openModal() {
+              welcomeModal.classList.add('active');
+              body.style.overflow = 'hidden';  // قفل کامل اسکرول صفحه اصلی
+          }
+          function closeModal() {
+              welcomeModal.classList.remove('active');
+              body.style.overflow = '';  // بازگرداندن اسکرول
+          }
+          openModal();  // نمایش خودکار
+          document.getElementById('closeWelcomeModal').onclick = closeModal;
+          welcomeModal.querySelector('.modal-overlay').onclick = closeModal;
+      });
+    </script>
+
+    <div id="welcomeModal" class="custom-modal">
+      <div class="modal-overlay"></div>
+      <div class="modal-content">
+        <div class="modal-icon">⚠️</div>
+        <h3 class="modal-title">توجه مهم قبل از شروع</h3>
+        <p class="text-justify">
+          در این فرم، اطلاعاتی در مورد این پژوهش در اختیار شما قرار گرفته است.
+          لطفا آن را مطالعه نموده و در صورتی که ابهامی وجود دارد، قبل از تکمیل
+          آن مطرح نمایید. مشارکت شما در این پژوهش، ما را در پیشرفت تحقیقات علمی
+          یاری خواهد داد.
+        </p>
+        <p class="text-justify">
+          عنوان پژوهش: کدگذاری پیش‌بینانه هیجان در پردازش توالی‌های صوتی توسط
+          مغز
+        </p>
+
+        <p class="text-justify">
+          شما به عنوان شرکت‌کننده در این پژوهش، در یک آزمایش که شامل گوش دادن به
+          توالی‌های صوتی با بار هیجانی متفاوت است شرکت می‌کنید. آزمون شامل چندین
+          مرحله هست که در ابتدای هر بخش توضیحات لازم در خصوص آن بخش ارائه
+          میشود.بخش اصلی آزمون شامل ۴ بلوک آزمایشی است به همراه یک بلوک آموزشی
+          اولیه برای یادگیری توالی‌ها، و سه بلوک اصلی (هر کدام حدود ۱۵ دقیقه) که
+          در مجموع حدود ۱ ساعت طول می‌کشد.
+        </p>
+
+        <p class="text-justify">
+         همکاری شما داوطلبانه است و هر زمان که خواستید از آزمون خارج شوید.
+        </p>
+
+        <p class="text-justify ltr" style=" margin-left: 25px;">
+        با تشکر
+        </p>
+
+        <p class="text-justify ltr ">
+        هادی ابراهیم نیا
+        </p>
+
+        <p class="modal-message mt-5">
+          لطفاً قبل از آغاز آزمون موارد زیر را رعایت کنید:<br /><br />
+          • حتماً از <strong>هدفون یا هندزفیری</strong> استفاده کنید.<br />
+          • در محیطی <strong>آرام و بدون مزاحمت</strong> باشید.<br />
+          • حجم صدای دستگاه را <strong>مناسب</strong> تنظیم کنید.<br />
+          • با قطع اینترنت، در هر مرحله ای ،با رفرش صفحه ادامه آزمون ارائه خواهد
+          شد
+        </p>
+        <button class="modal-button" id="closeWelcomeModal">
+          قبول دارم و ادامه می‌دهم
+        </button>
+      </div>
+    </div>
+</html>

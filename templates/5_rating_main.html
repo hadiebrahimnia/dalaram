@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>مرحله ۵: رتبه‌بندی نهایی</title>
+    {% load static %}
+    <link href="{% static 'plugins/bootstrap/css/bootstrap.rtl.min.css' %}" rel="stylesheet">
+    <link href="{% static 'css/pcm.css' %}" rel="stylesheet">
+</head>
+<body>
+
+    <div id="rotate-device">
+        <i>↻</i>
+        <h3>لطفاً گوشی خود را بچرخانید</h3>
+        <p>برای تجربه بهتر، صفحه را به حالت افقی درآورید.</p>
+    </div>
+
+    <div class="content">
+
+        <div id="intro" class="card p-5 text-center" style="max-width: 700px;">
+            <h2 class="mb-4">مرحله ۵: رتبه‌بندی نهایی صداها</h2>
+            <p class="lead mb-4">
+                اکنون تمام صداهایی که در آزمون اصلی شنیدید، به صورت تک‌تک پخش می‌شوند.<br>
+                برای هر صدا، خوشایندی و برانگیختگی را رتبه‌بندی کنید.
+            </p>
+            <p class="text-muted">تعداد کل: {{ total }} — انجام‌شده: {{ completed }}</p>
+            <button id="start-btn" class="btn btn-info btn-lg mt-4 px-5">شروع رتبه‌بندی نهایی</button>
+        </div>
+
+        <div id="trial" class="hidden full-center sam-container">
+            <div class="text-center">
+                <p class="lead mb-4">صدا {{ completed }} از {{ total }}</p>
+
+                <div id="valence-section">
+                    <h3 class="my-5">لطفاً خوشایندی این صدا را رتبه‌بندی کنید</h3>
+                    <div class="sam-buttons">
+                        {% for i in "123456789" %}
+                        <button class="sam-btn valence-btn" data-value="{{ forloop.counter }}">
+                            <img src="{% static 'images/valence/' %}{{ forloop.counter }}.png">
+                            <div class="key-hint">{{ forloop.counter }}</div>
+                        </button>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <div id="arousal-section" class="hidden">
+                    <h3 class="my-5">لطفاً برانگیختگی این صدا را رتبه‌بندی کنید</h3>
+                    <div class="sam-buttons">
+                        {% for i in "123456789" %}
+                        <button class="sam-btn arousal-btn" data-value="{{ forloop.counter }}">
+                            <img src="{% static 'images/arousal/' %}{{ forloop.counter }}.jpg">
+                            <div class="key-hint">{{ forloop.counter }}</div>
+                        </button>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <audio id="audio-player" preload="auto"></audio>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        const reratingFiles = {{ rerating_files|safe }};
+        let currentIndex = {{ completed }};
+
+        const audio = document.getElementById('audio-player');
+        const valenceSection = document.getElementById('valence-section');
+        const arousalSection = document.getElementById('arousal-section');
+        const intro = document.getElementById('intro');
+        const trial = document.getElementById('trial');
+
+        let currentSound, stimulusNumber, valence, valenceRt, arousal, arousalRt;
+        let startTime;
+
+        function getCsrfToken() {
+            const name = 'csrftoken';
+            const cookies = document.cookie.split(';');
+            for (let cookie of cookies) {
+                const [key, value] = cookie.trim().split('=');
+                if (key === name) return decodeURIComponent(value);
+            }
+            return '';
+        }
+
+        function playNext() {
+            if (currentIndex >= reratingFiles.length) {
+                location.href = '/pcm/';
+                return;
+            }
+            currentSound = reratingFiles[currentIndex];
+            stimulusNumber = currentSound.split('/').pop().split('.')[0];
+            audio.src = currentSound;
+            audio.play();
+            audio.onended = () => {
+                valenceSection.classList.remove('hidden');
+                startTime = Date.now();
+            };
+        }
+
+        document.querySelectorAll('.valence-btn').forEach(btn => {
+            btn.onclick = () => {
+                valence = parseInt(btn.dataset.value);
+                valenceRt = Date.now() - startTime;
+                valenceSection.classList.add('hidden');
+                arousalSection.classList.remove('hidden');
+                startTime = Date.now();
+            };
+        });
+
+        document.querySelectorAll('.arousal-btn').forEach(btn => {
+            btn.onclick = () => {
+                arousal = parseInt(btn.dataset.value);
+                arousalRt = Date.now() - startTime;
+
+                fetch('/pcm/save/', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json', 'X-CSRFToken': getCsrfToken()},
+                    body: JSON.stringify({
+                        is_rerating: true,
+                        stimulus_file: currentSound,
+                        stimulus_number: stimulusNumber,
+                        valence: valence,
+                        valence_rt: valenceRt,
+                        arousal: arousal,
+                        arousal_rt: arousalRt
+                    })
+                }).then(() => {
+                    currentIndex++;
+                    setTimeout(playNext, 1000);
+                });
+            };
+        });
+
+        document.getElementById('start-btn').onclick = () => {
+            intro.classList.add('hidden');
+            trial.classList.remove('hidden');
+            playNext();
+        };
+    </script>
+</body>
+</html>

@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    {% load static %}
+    <link href="{% static 'plugins/bootstrap/css/bootstrap.rtl.min.css' %}" rel="stylesheet" />
+    <link href="{% static 'css/pcm.css' %}" rel="stylesheet" />
+    <title>پایان آزمون</title>
+  </head>
+  <body>
+    <div class="content">
+      <div id="intro" class="card">
+        <div class="card-body text-center p-5">
+          <!-- اینجا متن از context گرفته می‌شود -->
+          <h2 class="mb-4">{{ text }}</h2>
+          <p class="mt-4">از شرکت شما در این آزمون سپاسگزاریم.</p>
+          <a  href="/" class="btn btn-secondary btn-lg mt-5" id="start-trial"> بازگشت</a>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>
