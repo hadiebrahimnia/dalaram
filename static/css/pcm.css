@@ -74,7 +74,7 @@ body {
   margin-top: 5px;
 }
 .card {
-  margin: 200px;
+  margin: 100px;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
 }
 
@@ -162,7 +162,6 @@ body {
   display: flex;
   justify-content: center; /* وسط افقی */
   align-items: center; /* وسط عمودی */
-  height: 100vh; /* ارتفاع کامل صفحه (viewport height) */
   background-color: #f0f0f0; /* اختیاری */
 }
 
@@ -328,7 +327,38 @@ CSS.custom-modal {
   transform: translateY(1px);
 }
 
+.ltr {
+  direction: ltr;
+}
 
-.ltr{
-    direction:ltr;
+
+
+.arousal-scale {
+  display: flex;
+  align-items: center;
+  width: 90%;
+  position: relative;
+  margin-right: 60px;
+}
+
+.arrow-line {
+  flex: 1;
+  height: 5px;
+  background: linear-gradient(to right, transparent, #000, transparent);
+  margin: 0 10px;
+  position: relative;
+}
+
+.arrow {
+  position: absolute;
+  right: 0;
+  top: -8px;
+}
+
+/* حالت موبایلی */
+@media (max-width: 768px) {
+  .arousal-scale {
+    margin-right: 0;
+    width: 100%;
+  }
 }

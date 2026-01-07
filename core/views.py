@@ -17,7 +17,7 @@ from django.http import JsonResponse
 from django.core.exceptions import PermissionDenied
 from typing import Dict, List, Tuple, Optional
 from django.views.decorators.csrf import csrf_exempt
-from collections import Counter
+from collections import defaultdict, Counter
 
 ###################################################################################################### 
 ###################################################################################################### 
@@ -171,45 +171,32 @@ def respond_questionnaire(request, pk):
 @login_required(login_url='login_or_signup')
 @questionnaires_required([1,2,3])
 def rating_view(request):
-    if request.method == 'POST':
-        data = json.loads(request.body) if request.body else {}
-        audio_file = data.get('audio_file')
-        valence = data.get('valence')
-        arousal = data.get('arousal')
-        valence_rt = data.get('valence_rt')
-        arousal_rt = data.get('arousal_rt')
-
-        if audio_file:
-            parts = audio_file.split('/')
-            number = parts[4][:-4] 
-            stimulus = f"{number}"
-            rating_response, created = RatingResponse.objects.update_or_create(
-                user=request.user,
-                stimulus=stimulus,
-                defaults={
-                    'valence': valence if valence is not None else None,
-                    'valence_rt': valence_rt if valence is not None else None,
-                    'arousal': arousal if arousal is not None else None,
-                    'arousal_rt': arousal_rt if arousal is not None else None,
-                }
-            )
-
-        return JsonResponse({'status': 'success'})
-
-    base_dir = 'sounds'
-    practice_files = [
+    user = request.user
+    # --- مرحله 4: رتبه‌بندی همه صداها (لیست ثابت مشخص‌شده) ---
+    RATING_PRACTICE_TRIALS = 5
+    PRACTICE_FILES_RAW = [
         '0-practice/1.WAV',
-        # '0-practice/2.WAV',
-        # '0-practice/3.WAV',
-        # '0-practice/4.WAV',
-        # '0-practice/5.WAV',
-        # '0-practice/6.WAV',
-        # '0-practice/7.WAV',
-        # '0-practice/8.WAV',
-        # '0-practice/9.WAV',
-        # '0-practice/10.WAV',
+        '0-practice/2.WAV',
+        '0-practice/3.WAV',
+        '0-practice/4.WAV',
+        '0-practice/5.WAV',
     ]
-    main_files = [
+    practice_files = [build_audio_url(f) for f in PRACTICE_FILES_RAW[:RATING_PRACTICE_TRIALS]]
+    rating_practice_count = RatingPractice.objects.filter(user=user).count()
+    progress_percentage = (rating_practice_count / RATING_PRACTICE_TRIALS) * 100
+    if rating_practice_count < RATING_PRACTICE_TRIALS:
+        remaining_files = practice_files[rating_practice_count:]
+        context = {
+            'current_trial': rating_practice_count + 1,
+            'count':rating_practice_count,
+            'total_trials': RATING_PRACTICE_TRIALS,
+            'progress_percentage': progress_percentage,
+            'remaining_practice_files': json.dumps(remaining_files),
+        }
+        return render(request, 'rating_1.html', context)
+
+    # --- مرحله ۵: رتبه‌بندی نهایی همه صداها (لیست ثابت مشخص‌شده) ---
+    MAIN_RATING_FILES_RAW = [
         '1-HP-HA/110.WAV','1-HP-HA/200.WAV','1-HP-HA/201.WAV','1-HP-HA/202.WAV','1-HP-HA/205.WAV','1-HP-HA/215.WAV','1-HP-HA/220.WAV','1-HP-HA/311.WAV','1-HP-HA/352.WAV','1-HP-HA/353.WAV','1-HP-HA/355.WAV','1-HP-HA/360.WAV','1-HP-HA/363.WAV','1-HP-HA/365.WAV','1-HP-HA/366.WAV','1-HP-HA/367.WAV','1-HP-HA/378.WAV','1-HP-HA/415.WAV','1-HP-HA/716.WAV','1-HP-HA/717.WAV','1-HP-HA/808.WAV','1-HP-HA/815.WAV','1-HP-HA/817.WAV',
 
         '2-HP-MA/109.WAV','2-HP-MA/111.WAV','2-HP-MA/112.WAV','2-HP-MA/150.WAV','2-HP-MA/151.WAV','2-HP-MA/206.WAV','2-HP-MA/221.WAV','2-HP-MA/224.WAV','2-HP-MA/226.WAV','2-HP-MA/230.WAV','2-HP-MA/254.WAV','2-HP-MA/270.WAV','2-HP-MA/351.WAV','2-HP-MA/400.WAV','2-HP-MA/601.WAV','2-HP-MA/721.WAV','2-HP-MA/725.WAV','2-HP-MA/726.WAV','2-HP-MA/802.WAV','2-HP-MA/810.WAV','2-HP-MA/811.WAV','2-HP-MA/813.WAV','2-HP-MA/816.WAV','2-HP-MA/820.WAV','2-HP-MA/826.WAV',
@@ -227,39 +214,86 @@ def rating_view(request):
         '8-LP-MA/241.WAV','8-LP-MA/242.WAV','8-LP-MA/243.WAV','8-LP-MA/250.WAV','8-LP-MA/280.WAV','8-LP-MA/293.WAV','8-LP-MA/295.WAV','8-LP-MA/611.WAV','8-LP-MA/703.WAV',
 
     ]
-    main_files = list(set(main_files))
 
-    completed_stimuli = set(
-        RatingResponse.objects
-        .filter(user=request.user)
-        .exclude(valence__isnull=True)
-        .exclude(arousal__isnull=True)
-        .values_list('stimulus', flat=True)
-    )
+    # حذف تکراری‌ها
+    MAIN_RATING_FILES_RAW = list(set(MAIN_RATING_FILES_RAW))
+    # تبدیل به URL کامل
+    main_rating_files = [build_audio_url(f) for f in MAIN_RATING_FILES_RAW]
+    # تعداد کل محرک‌ها
+    TOTAL_MAIN_RATING_TRIALS = len(main_rating_files)
+    # تعداد رتبه‌بندی‌های تکمیل‌شده (هر دو valence و arousal پر باشند)
+    rating_main_done = RatingResponse.objects.filter(
+        user=user
+    ).exclude(
+        valence__isnull=True
+    ).exclude(
+        arousal__isnull=True
+    ).count()
+    progress_percentage = (rating_main_done / TOTAL_MAIN_RATING_TRIALS) * 100 if TOTAL_MAIN_RATING_TRIALS > 0 else 100
+    if rating_main_done < TOTAL_MAIN_RATING_TRIALS:
+        completed_stimuli_urls = set(
+            RatingResponse.objects.filter(
+                user=user,
+                valence__isnull=False,
+                arousal__isnull=False
+            ).values_list('stimulus_file', flat=True)
+        )
+        remaining_files = [f for f in main_rating_files if f not in completed_stimuli_urls]
+        random.shuffle(remaining_files)
+        context = {
+            'current_trial': rating_main_done + 1,
+            'count':rating_main_done,
+            'total_trials': TOTAL_MAIN_RATING_TRIALS,
+            'progress_percentage': progress_percentage,
+            'remaining_main_files': json.dumps(remaining_files),
+        }
+        return render(request, 'rating_2.html', context)
+    # --- پایان آزمون ---
+    return render(request, 'final_thanks.html')
 
-    remaining_main_files = []
-    for file in main_files:
-        parts = file.split('/')
-        number = parts[1][:-4]
-        stimulus = f"{number}"
-        if stimulus not in completed_stimuli:
-            remaining_main_files.append(file)
+@csrf_exempt
+def rating_save_response(request):
+    if request.method != 'POST':
+        return JsonResponse({'status': 'error', 'message': 'فقط POST'}, status=405)
 
-    random.shuffle(practice_files)
-    random.shuffle(remaining_main_files)
-    practice_files = practice_files[:10] 
-    def audio_url(filename):
-        return static(f'{base_dir}/{filename}')
+    try:
+        data = json.loads(request.body)
+    except json.JSONDecodeError:
+        return JsonResponse({'status': 'error', 'message': 'JSON نامعتبر'}, status=400)
 
-    practice_urls = [audio_url(f) for f in practice_files]
-    main_urls = [audio_url(f) for f in remaining_main_files]
+    user = request.user
+    # مرحله ۱: تمرین تشخیص توالی
 
-    context = {
-        'title': 'آزمایش رتبه‌بندی',
-        'practice_files': practice_urls,
-        'main_files': main_urls,
-    }
-    return render(request, 'rating.html', context)
+    if data.get('is_rating_practice'):
+        RatingPractice.objects.create(
+            user=user,
+            trial=data['trial'],
+            stimulus=extract_stimulus_number(data.get('stimulus')),
+            valence=data.get('valence'),
+            valence_rt=data.get('valence_rt'),
+            arousal=data.get('arousal'),
+            arousal_rt=data.get('arousal_rt'),
+        )
+
+    elif data.get('is_rerating'):
+        RatingResponse.objects.create(
+            user=user,
+            trial=data['trial'],
+            stimulus=extract_stimulus_number(data.get('stimulus_number')),
+            stimulus_file=data['stimulus_file'],
+            valence=data.get('valence'),
+            valence_rt=data.get('valence_rt'),
+            arousal=data.get('arousal'),
+            arousal_rt=data.get('arousal_rt'),
+        )
+
+    else:
+        return JsonResponse({'status': 'error', 'message': 'نوع داده نامعتبر'}, status=400)
+
+    return JsonResponse({'status': 'success'})
+
+
+
 
 ###################################################################################################### 
 ###################################################################################################### 
@@ -401,7 +435,6 @@ def get_sequence_order(user, total_trials: int) -> List[str]:
     random.shuffle(sequence_order)
     return sequence_order
 
-
 @login_required(login_url='login_or_signup')
 @questionnaires_required([1, 2, 3])
 def pcm_view(request):
@@ -414,6 +447,7 @@ def pcm_view(request):
     # --- مرحله ۱: تمرین تشخیص توالی ---
     SEQ_TRIALS = 6  # تعداد کل مرحله تمرینی
     SEQ_THRESHOLD = 0.83  # درصد پاسخ درست برای گذر از مرحله 
+    
     seq_responses = PCMSequencePracticeResponse.objects.filter(user=user)
     seq_count = seq_responses.count()  # تعداد پاسخ های ثبت شده 
     progress_percentage = (seq_count / SEQ_TRIALS) * 100
@@ -487,7 +521,7 @@ def pcm_view(request):
     VALENCE_PRACTICE_TRIALS = 4
     valence_practice_responses = PCMValencePracticeResponse.objects.filter(user=user)
     valence_practice_count = valence_practice_responses.count()
-
+    RESPONSE_TIMEOUT=3000
     progress_percentage = (valence_practice_count / VALENCE_PRACTICE_TRIALS) * 100
 
     if valence_practice_count < VALENCE_PRACTICE_TRIALS:
@@ -530,6 +564,7 @@ def pcm_view(request):
         random.shuffle(sequence_order)
 
         context = {
+
             'current_trial': valence_practice_count,  # تعداد انجام‌شده (شروع از 0)
             'total_trials': VALENCE_PRACTICE_TRIALS,
             'progress_percentage': round(progress_percentage, 1),
@@ -538,72 +573,214 @@ def pcm_view(request):
             'neutral_urls': json.dumps(NEUTRAL_URLS),
             'negative_urls': json.dumps(NEGATIVE_URLS),
             'cues_mapping': json.dumps(cues_mapping),
-
+            "RESPONSE_TIMEOUT":RESPONSE_TIMEOUT,
             # مهم: ارسال لیست توالی‌های باقی‌مانده به کلاینت
             'remaining_sequences': json.dumps(sequence_order),
         }
         return render(request, '2_valence_practice.html', context)
 
     # --- مرحله ۳: آزمون اصلی PCM ---
-    NUM_BLOCKS = 4
-    TRIALS_PER_BLOCK = 8
-    INCONSISTENT_RATIO = 0.2
-    main_responses = PCMMainResponse.objects.filter(user=user).order_by('block', 'trial')
-    total_main_trials = NUM_BLOCKS * TRIALS_PER_BLOCK
-    if main_responses.count() < total_main_trials:
-        last = main_responses.last()
-        current_block = last.block if last else 1
-        current_trial_in_block = (last.trial + 1 if last and last.trial < TRIALS_PER_BLOCK else 1)
-        if current_trial_in_block == 1 and last:
-            current_block += 1
+    NUM_BLOCKS = 2
+    CATCH_TRIALS_PER_BLOCK = 1
+    MAIN_TRIALS_PER_BLOCK = 2
 
-        # محاسبه تعداد کل تریال‌های انجام‌شده
-        main_count = main_responses.count()
+    # محاسبه بلاک فعلی و پیشرفت کلی
+    current_block = None
+    all_catch_sequences = {}  # {block_num: [sequences]}
+    all_main_trials = {}      # {block_num: [trials dict]}
 
-        # ساخت لیست کامل توالی‌ها برای آزمون اصلی
-        full_sequence_order = get_sequence_order(user, total_main_trials)
-        # باقی‌مانده توالی‌ها
-        remaining_sequences = full_sequence_order[main_count:]
+    total_completed = 0
+    total_trials_all = NUM_BLOCKS * (CATCH_TRIALS_PER_BLOCK + MAIN_TRIALS_PER_BLOCK)
 
+    for block_num in range(1, NUM_BLOCKS + 1):
+        catch_count = PCMCatchResponse.objects.filter(user=user, block=block_num).count()
+        main_count = PCMMainResponse.objects.filter(user=user, block=block_num).count()
+
+        completed_in_block = catch_count + main_count
+        total_completed += completed_in_block
+
+        # اگر این بلاک ناتمام است → بلاک فعلی
+        if catch_count < CATCH_TRIALS_PER_BLOCK or main_count < MAIN_TRIALS_PER_BLOCK:
+            if current_block is None:
+                current_block = block_num
+
+        # --- ساخت توالی‌های catch برای این بلاک (اگر نیاز باشد) ---
+        if catch_count < CATCH_TRIALS_PER_BLOCK:
+            remain_catch = CATCH_TRIALS_PER_BLOCK - catch_count
+            possible_sequences = ["Neutral-Neutral", "Neutral-Negative", "Negative-Neutral"]
+
+            used = [f"{r.category_stim1}-{r.category_stim2}" for r in PCMCatchResponse.objects.filter(user=user, block=block_num) if r.category_stim1 and r.category_stim2]
+            counts = Counter(used)
+
+            target_per_seq = CATCH_TRIALS_PER_BLOCK // 3
+            remainder = CATCH_TRIALS_PER_BLOCK % 3
+
+            remaining_per_seq = {}
+            for i, seq in enumerate(possible_sequences):
+                target = target_per_seq + (1 if i < remainder else 0)
+                remaining_per_seq[seq] = max(0, target - counts.get(seq, 0))
+
+            sequence_order = []
+            for seq, rem in remaining_per_seq.items():
+                sequence_order.extend([seq] * rem)
+
+            if len(sequence_order) != remain_catch:
+                sequence_order = possible_sequences * (remain_catch // 3) + possible_sequences[:remain_catch % 3]
+
+            random.shuffle(sequence_order)
+            all_catch_sequences[block_num] = sequence_order
+
+        # --- ساخت توالی‌های main برای این بلاک (اگر نیاز باشد) ---
+        if main_count < MAIN_TRIALS_PER_BLOCK:
+            remain_main = MAIN_TRIALS_PER_BLOCK - main_count
+
+            possible_consistent = ["Neutral-Neutral", "Neutral-Negative", "Negative-Neutral"]
+            possible_inconsistent = ["Negative-Negative"]
+
+            used_seqs = [f"{r.category_stim1}-{r.category_stim2}" for r in PCMMainResponse.objects.filter(user=user, block=block_num) if r.category_stim1 and r.category_stim2]
+            used_consistent = sum(1 for s in used_seqs if s in possible_consistent)
+            used_inconsistent = len(used_seqs) - used_consistent
+
+            target_consistent = int(MAIN_TRIALS_PER_BLOCK * 0.75)
+            target_inconsistent = MAIN_TRIALS_PER_BLOCK - target_consistent
+
+            remain_consistent = max(0, target_consistent - used_consistent)
+            remain_inconsistent = max(0, target_inconsistent - used_inconsistent)
+
+            trial_list = (
+                [{'type': 'consistent'}] * remain_consistent +
+                [{'type': 'inconsistent'}] * remain_inconsistent
+            )
+
+            if len(trial_list) < remain_main:
+                extra = remain_main - len(trial_list)
+                trial_list += [{'type': 'consistent' if random.random() < 0.75 else 'inconsistent'} for _ in range(extra)]
+
+            # ساخت final_trials
+            final_trials = []
+            cons_counts = Counter([s for s in used_seqs if s in possible_consistent])
+
+            for item in trial_list:
+                if item['type'] == 'inconsistent':
+                    seq = random.choice(possible_inconsistent)
+                    cue_candidates = [c for c, exp in cues_mapping.items() if exp != seq]
+                    cue = random.choice(cue_candidates) if cue_candidates else list(cues_mapping.keys())[0]
+                    final_trials.append({'actual_seq': seq, 'cue': cue})
+                else:
+                    weights = [max(0, (remain_consistent // 3) - cons_counts.get(seq, 0)) for seq in possible_consistent]
+                    if sum(weights) == 0:
+                        seq = random.choice(possible_consistent)
+                    else:
+                        seq = random.choices(possible_consistent, weights=weights)[0]
+                    cue = random.choice([c for c, exp in cues_mapping.items() if exp == seq])
+                    final_trials.append({'actual_seq': seq, 'cue': cue})
+                    cons_counts[seq] += 1
+
+            random.shuffle(final_trials)
+            all_main_trials[block_num] = final_trials
+
+    progress_percentage = (total_completed / total_trials_all) * 100 if total_trials_all > 0 else 0
+
+    # اگر همه بلاک‌ها تمام شد → به مرحله بعدی برو
+    if current_block is None:
+        # ادامه کد مراحل بعدی (rating practice و ...)
+        pass
+    else:
         context = {
+            'perior_block': current_block-1,
             'current_block': current_block,
-            'current_trial': current_trial_in_block,
             'total_blocks': NUM_BLOCKS,
-            'trials_per_block': TRIALS_PER_BLOCK,
+            'catch_trials_per_block': CATCH_TRIALS_PER_BLOCK,
+            'trials_per_block': MAIN_TRIALS_PER_BLOCK,
+            'progress_percentage': round(progress_percentage, 1),
+            'completed': total_completed,
+            'trials': total_trials_all,
 
             'cue_urls': json.dumps(CUE_URLS),
             'neutral_urls': json.dumps(NEUTRAL_URLS),
             'negative_urls': json.dumps(NEGATIVE_URLS),
             'cues_mapping': json.dumps(cues_mapping),
-            'remaining_sequences': json.dumps(remaining_sequences),  # جدید: برای مدیریت توالی در کلاینت
-            'inconsistent_ratio': INCONSISTENT_RATIO,  # اگر لازم باشد به کلاینت ارسال شود
-        }
-        return render(request, '3_main_test.html', context)
 
-    # --- مرحله ۴: تمرین رتبه‌بندی کامل (Valence + Arousal) ---
+            # مهم: تمام داده‌های همه بلاک‌ها
+            'all_catch_sequences': json.dumps(all_catch_sequences),
+            'all_main_trials': json.dumps(all_main_trials),
+        }
+        return render(request, '3_pcm_main.html', context)
+
     RATING_PRACTICE_TRIALS = 5
+    PRACTICE_FILES_RAW = [
+        '0-practice/1.WAV',
+        '0-practice/2.WAV',
+        '0-practice/3.WAV',
+        '0-practice/4.WAV',
+        '0-practice/5.WAV',
+    ]
+    practice_files = [build_audio_url(f) for f in PRACTICE_FILES_RAW[:RATING_PRACTICE_TRIALS]]
     rating_practice_count = RatingPracticeResponse.objects.filter(user=user).count()
+    progress_percentage = (rating_practice_count / RATING_PRACTICE_TRIALS) * 100
     if rating_practice_count < RATING_PRACTICE_TRIALS:
+        remaining_files = practice_files[rating_practice_count:]
         context = {
             'current_trial': rating_practice_count + 1,
+            'count':rating_practice_count,
             'total_trials': RATING_PRACTICE_TRIALS,
-
-            'neutral_urls': json.dumps(NEUTRAL_URLS),
-            'negative_urls': json.dumps(NEGATIVE_URLS),
+            'progress_percentage': progress_percentage,
+            'remaining_practice_files': json.dumps(remaining_files),
         }
         return render(request, '4_rating_practice.html', context)
 
-    # --- مرحله ۵: رتبه‌بندی نهایی همه صداها ---
-    used_stimuli = get_used_stimuli_urls(user)
-    rating_main_done = RatingMainResponse.objects.filter(user=user).count()
+    # --- مرحله ۵: رتبه‌بندی نهایی همه صداها (لیست ثابت مشخص‌شده) ---
+    MAIN_RATING_FILES_RAW = [
+        '5-MP-MA/102.WAV',
+        '5-MP-MA/104.WAV',
+        '5-MP-MA/107.WAV',
+        # '5-MP-MA/111.WAV','5-MP-MA/113.WAV','5-MP-MA/120.WAV','5-MP-MA/130.WAV','5-MP-MA/132.WAV','5-MP-MA/152.WAV','5-MP-MA/170.WAV','5-MP-MA/225.WAV','5-MP-MA/245.WAV','5-MP-MA/246.WAV','5-MP-MA/251.WAV','5-MP-MA/252.WAV','5-MP-MA/320.WAV','5-MP-MA/322.WAV','5-MP-MA/358.WAV','5-MP-MA/361.WAV','5-MP-MA/364.WAV','5-MP-MA/368.WAV','5-MP-MA/370.WAV','5-MP-MA/373.WAV','5-MP-MA/374.WAV','5-MP-MA/375.WAV','5-MP-MA/376.WAV','5-MP-MA/382.WAV','5-MP-MA/403.WAV','5-MP-MA/410.WAV','5-MP-MA/425.WAV','5-MP-MA/500.WAV','5-MP-MA/627.WAV','5-MP-MA/698.WAV','5-MP-MA/700.WAV','5-MP-MA/701.WAV','5-MP-MA/702.WAV','5-MP-MA/705.WAV','5-MP-MA/706.WAV','5-MP-MA/720.WAV','5-MP-MA/722.WAV','5-MP-MA/723.WAV','5-MP-MA/724.WAV','5-MP-MA/728.WAV','5-MP-MA/729.WAV',
 
-    if rating_main_done < len(used_stimuli):
-        # shuffle برای ترتیب تصادفی
-        random.shuffle(used_stimuli)
+        # '6-MP-LA/171.WAV','6-MP-LA/262.WAV','6-MP-LA/377.WAV','6-MP-LA/602.WAV','6-MP-LA/708.WAV',
+
+        # '7-LP-HA/105.WAV','7-LP-HA/106.WAV','7-LP-HA/115.WAV','7-LP-HA/116.WAV','7-LP-HA/133.WAV','7-LP-HA/134.WAV','7-LP-HA/244.WAV','7-LP-HA/255.WAV','7-LP-HA/260.WAV','7-LP-HA/261.WAV','7-LP-HA/275.WAV','7-LP-HA/276.WAV','7-LP-HA/277.WAV','7-LP-HA/278.WAV','7-LP-HA/279.WAV','7-LP-HA/281.WAV','7-LP-HA/282.WAV','7-LP-HA/283.WAV','7-LP-HA/284.WAV','7-LP-HA/285.WAV','7-LP-HA/286.WAV','7-LP-HA/288.WAV','7-LP-HA/289.WAV','7-LP-HA/290.WAV','7-LP-HA/292.WAV','7-LP-HA/296.WAV','7-LP-HA/310.WAV','7-LP-HA/312.WAV','7-LP-HA/319.WAV','7-LP-HA/380.WAV','7-LP-HA/420.WAV','7-LP-HA/422.WAV','7-LP-HA/423.WAV','7-LP-HA/424.WAV','7-LP-HA/501.WAV','7-LP-HA/502.WAV','7-LP-HA/600.WAV','7-LP-HA/624.WAV','7-LP-HA/625.WAV','7-LP-HA/626.WAV','7-LP-HA/699.WAV','7-LP-HA/709.WAV','7-LP-HA/711.WAV','7-LP-HA/712.WAV','7-LP-HA/713.WAV','7-LP-HA/714.WAV','7-LP-HA/719.WAV','7-LP-HA/730.WAV','7-LP-HA/732.WAV','7-LP-HA/910.WAV',
+
+        # '8-LP-MA/241.WAV','8-LP-MA/242.WAV','8-LP-MA/243.WAV','8-LP-MA/250.WAV','8-LP-MA/280.WAV','8-LP-MA/293.WAV','8-LP-MA/295.WAV','8-LP-MA/611.WAV','8-LP-MA/703.WAV',
+    ]
+
+    # حذف تکراری‌ها
+    MAIN_RATING_FILES_RAW = list(set(MAIN_RATING_FILES_RAW))
+
+    # تبدیل به URL کامل
+    main_rating_files = [build_audio_url(f) for f in MAIN_RATING_FILES_RAW]
+
+    # تعداد کل محرک‌ها
+    TOTAL_MAIN_RATING_TRIALS = len(main_rating_files)
+
+    # تعداد رتبه‌بندی‌های تکمیل‌شده (هر دو valence و arousal پر باشند)
+    rating_main_done = RatingMainResponse.objects.filter(
+        user=user
+    ).exclude(
+        valence__isnull=True
+    ).exclude(
+        arousal__isnull=True
+    ).count()
+
+    progress_percentage = (rating_main_done / TOTAL_MAIN_RATING_TRIALS) * 100 if TOTAL_MAIN_RATING_TRIALS > 0 else 100
+
+    if rating_main_done < TOTAL_MAIN_RATING_TRIALS:
+        completed_stimuli_urls = set(
+            RatingMainResponse.objects.filter(
+                user=user,
+                valence__isnull=False,
+                arousal__isnull=False
+            ).values_list('stimulus_file', flat=True)
+        )
+
+        remaining_files = [f for f in main_rating_files if f not in completed_stimuli_urls]
+        random.shuffle(remaining_files)
+
         context = {
-            'completed': rating_main_done,
-            'total': len(used_stimuli),
-            'rerating_files': json.dumps(used_stimuli),
+            'current_trial': rating_main_done + 1,
+            'count':rating_main_done,
+            'total_trials': TOTAL_MAIN_RATING_TRIALS,
+            'progress_percentage': progress_percentage,
+            'remaining_main_files': json.dumps(remaining_files),
         }
         return render(request, '5_rating_main.html', context)
 
@@ -656,16 +833,33 @@ def pcm_save_response(request):
         )
 
     # مرحله ۳: آزمون اصلی
-    elif 'block' in data and 'trial' in data:
+    elif data.get('is_catch'):
+        PCMCatchResponse.objects.create(
+            user=user,
+            block=data.get('block', None),
+            trial=data['trial'],
+            cue=extract_stimulus_number(data['cue']),
+            stimulus1=extract_stimulus_number(data.get('stimulus1')),
+            stimulus2=extract_stimulus_number(data.get('stimulus2')),
+            category_stim1=data.get('category_stim1'),
+            category_stim2=data.get('category_stim2'),
+            user_response=data.get('user_response'),
+            is_correct=data.get('is_correct')
+        )
+
+    # در create برای main، اضافه کردن category_stim1 و category_stim2
+    elif 'block' in data and 'trial' in data and not data.get('is_catch'):
         PCMMainResponse.objects.create(
             user=user,
             block=data['block'],
             trial=data['trial'],
-            cue=data['cue'],
-            stimulus1=data.get('stimulus1'),
-            stimulus2=data.get('stimulus2'),
+            cue=extract_stimulus_number(data['cue']),
+            stimulus1=extract_stimulus_number(data.get('stimulus1')),
+            stimulus2=extract_stimulus_number(data.get('stimulus2')),
             expected_sequence=data.get('expected_sequence'),
             is_consistent=data.get('is_consistent', True),
+            category_stim1=data.get('category_stim1'),
+            category_stim2=data.get('category_stim2'),
             valence_stim1=data.get('valence_stim1'),
             valence_rt_stim1=data.get('valence_rt_stim1'),
             valence_stim2=data.get('valence_stim2'),
@@ -679,7 +873,7 @@ def pcm_save_response(request):
         RatingPracticeResponse.objects.create(
             user=user,
             trial=data['trial'],
-            stimulus=data['stimulus'],
+            stimulus=extract_stimulus_number(data.get('stimulus')),
             valence=data.get('valence'),
             valence_rt=data.get('valence_rt'),
             arousal=data.get('arousal'),
@@ -688,16 +882,15 @@ def pcm_save_response(request):
 
     # مرحله ۵: رتبه‌بندی نهایی
     elif data.get('is_rerating'):
-        RatingMainResponse.objects.update_or_create(
+        RatingMainResponse.objects.create(
             user=user,
-            stimulus_number=data['stimulus_number'],
-            defaults={
-                'stimulus_file': data['stimulus_file'],
-                'valence': data.get('valence'),
-                'valence_rt': data.get('valence_rt'),
-                'arousal': data.get('arousal'),
-                'arousal_rt': data.get('arousal_rt'),
-            }
+            trial=data['trial'],
+            stimulus_number=extract_stimulus_number(data.get('stimulus_number')),
+            stimulus_file=data['stimulus_file'],
+            valence=data.get('valence'),
+            valence_rt=data.get('valence_rt'),
+            arousal=data.get('arousal'),
+            arousal_rt=data.get('arousal_rt'),
         )
 
     else:

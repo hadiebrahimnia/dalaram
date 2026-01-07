@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>مرحله ۴: تمرین رتبه‌بندی کامل</title>
+    <title> آزمون اصلی</title>
     {% load static %}
     <link href="{% static 'plugins/bootstrap/css/bootstrap.rtl.min.css' %}" rel="stylesheet">
     <link href="{% static 'css/pcm.css' %}" rel="stylesheet">
@@ -16,18 +16,12 @@
     <p>برای تجربه بهتر، صفحه را به حالت افقی درآورید.</p>
 </div>
 
-<!-- Fixation Cross -->
-<div id="fixation" class="full-center hidden">
-    <div class="fixation">+</div>
-</div>
-
 <div id="intro" class="card m-5">
   <div class="card-body text-center p-5">
-    <h2 class="mb-4">مرحله ۴: تمرین رتبه‌بندی کامل</h2>
+    <h2 class="mb-4">آزمون اصلی</h2>
     <p class="lead mb-4">
-        در این مرحله، یک صدا خواهید شنید و باید دو بعد زیر را رتبه‌بندی کنید:
+        در این مرحله نیز ، یک صدا خواهید شنید و باید دو بعد زیر را رتبه‌بندی کنید:
     </p>
-
     <h3 class="mb-4">خوشایندی:</h3>
     <div class="sam-buttons mt-0 mb-4">
       {% for i in "123456789" %}
@@ -73,6 +67,12 @@
 
     <button id="start-btn" class="btn btn-success btn-lg mt-4 px-5">شروع تمرین</button>
   </div>
+</div>
+
+
+<!-- Fixation Cross -->
+<div id="fixation" class="full-center hidden">
+    <div class="fixation">+</div>
 </div>
 
 <!-- رتبه‌بندی خوشایندی -->
@@ -122,7 +122,7 @@
 <audio id="audio-player" preload="auto"></audio>
 
 <script>
-    const remainingFiles = {{ remaining_practice_files|safe }};
+    const remainingFiles = {{ remaining_main_files|safe }};
     const audio = document.getElementById('audio-player');
     const intro = document.getElementById('intro');
     const fixation = document.getElementById('fixation');
@@ -227,16 +227,17 @@
             arousal = parseInt(btn.dataset.value);
             arousalRt = Date.now() - startTime;
 
-            fetch('/pcm/save/', {
+            fetch('/rating/save/', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                     'X-CSRFToken': getCsrfToken()
                 },
                 body: JSON.stringify({
-                    is_rating_practice: true,
+                    is_rerating: true,
                     trial: {{ current_trial }} + currentIndex,
-                    stimulus: currentSound,
+                    stimulus_file: currentSound,
+                    stimulus_number: currentSound,
                     valence: valence,
                     valence_rt: valenceRt,
                     arousal: arousal,
@@ -249,7 +250,7 @@
               }).finally(() => {
                   currentIndex++;
                   if (currentIndex >= remainingFiles.length) {
-                      setTimeout(() => location.href = '/experiment/pcm/', 1000);
+                      setTimeout(() => location.href = '/experiment/rating/', 1000);
                   } else {
                       startCurrentTrial();
                   }
@@ -259,7 +260,7 @@
 
     function startCurrentTrial() {
         if (currentIndex >= remainingFiles.length) {
-            location.href = '/experiment/pcm/';
+            location.href = '/experiment/rating/';
             return;
         }
         valence = arousal = null;

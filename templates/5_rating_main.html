@@ -3,142 +3,278 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>مرحله ۵: رتبه‌بندی نهایی</title>
+    <title>مرحله 5 : رتبه‌بندی</title>
     {% load static %}
     <link href="{% static 'plugins/bootstrap/css/bootstrap.rtl.min.css' %}" rel="stylesheet">
     <link href="{% static 'css/pcm.css' %}" rel="stylesheet">
 </head>
 <body>
 
-    <div id="rotate-device">
-        <i>↻</i>
-        <h3>لطفاً گوشی خود را بچرخانید</h3>
-        <p>برای تجربه بهتر، صفحه را به حالت افقی درآورید.</p>
+<div id="rotate-device">
+    <i>↻</i>
+    <h3>لطفاً گوشی خود را بچرخانید</h3>
+    <p>برای تجربه بهتر، صفحه را به حالت افقی درآورید.</p>
+</div>
+
+<div id="intro" class="card m-5">
+  <div class="card-body text-center p-5">
+    <h2 class="mb-4">مرحله 5 : رتبه‌بندی</h2>
+    <p class="lead mb-4">
+        در این مرحله نیز ، یک صدا خواهید شنید و باید دو بعد زیر را رتبه‌بندی کنید:
+    </p>
+    <h3 class="mb-4">خوشایندی:</h3>
+    <div class="sam-buttons mt-0 mb-4">
+      {% for i in "123456789" %}
+        <button type="button" class="sam-btn" data-value="{{ forloop.counter }}">
+          <img src="{% static 'images/valence/' %}{{ forloop.counter }}.png">
+          <div class="key-hint mt-2 fw-bold">{{ forloop.counter }}</div>
+        </button>
+      {% endfor %}
+    </div>
+    <div class="arousal-scale">
+        <span>9 = خوشایندی زیاد</span>
+        <div class="arrow-line"><span class="arrow">➤</span></div>
+        <span>1 = خوشایندی کم</span>
     </div>
 
-    <div class="content">
-
-        <div id="intro" class="card p-5 text-center" style="max-width: 700px;">
-            <h2 class="mb-4">مرحله ۵: رتبه‌بندی نهایی صداها</h2>
-            <p class="lead mb-4">
-                اکنون تمام صداهایی که در آزمون اصلی شنیدید، به صورت تک‌تک پخش می‌شوند.<br>
-                برای هر صدا، خوشایندی و برانگیختگی را رتبه‌بندی کنید.
-            </p>
-            <p class="text-muted">تعداد کل: {{ total }} — انجام‌شده: {{ completed }}</p>
-            <button id="start-btn" class="btn btn-info btn-lg mt-4 px-5">شروع رتبه‌بندی نهایی</button>
-        </div>
-
-        <div id="trial" class="hidden full-center sam-container">
-            <div class="text-center">
-                <p class="lead mb-4">صدا {{ completed }} از {{ total }}</p>
-
-                <div id="valence-section">
-                    <h3 class="my-5">لطفاً خوشایندی این صدا را رتبه‌بندی کنید</h3>
-                    <div class="sam-buttons">
-                        {% for i in "123456789" %}
-                        <button class="sam-btn valence-btn" data-value="{{ forloop.counter }}">
-                            <img src="{% static 'images/valence/' %}{{ forloop.counter }}.png">
-                            <div class="key-hint">{{ forloop.counter }}</div>
-                        </button>
-                        {% endfor %}
-                    </div>
-                </div>
-
-                <div id="arousal-section" class="hidden">
-                    <h3 class="my-5">لطفاً برانگیختگی این صدا را رتبه‌بندی کنید</h3>
-                    <div class="sam-buttons">
-                        {% for i in "123456789" %}
-                        <button class="sam-btn arousal-btn" data-value="{{ forloop.counter }}">
-                            <img src="{% static 'images/arousal/' %}{{ forloop.counter }}.jpg">
-                            <div class="key-hint">{{ forloop.counter }}</div>
-                        </button>
-                        {% endfor %}
-                    </div>
-                </div>
-
-                <audio id="audio-player" preload="auto"></audio>
-            </div>
-        </div>
-
+    <h3 class="mb-4 mt-5">برانگیختگی:</h3>
+    <div class="sam-buttons mt-0 mb-4">
+      {% for i in "123456789" %}
+        <button type="button" class="sam-btn" data-value="{{ forloop.counter }}">
+          <img src="{% static 'images/arousal/' %}{{ forloop.counter }}.jpg">
+          <div class="key-hint mt-2 fw-bold">{{ forloop.counter }}</div>
+        </button>
+      {% endfor %}
+    </div>
+    <div class="arousal-scale">
+        <span>9 = برانگیختگی زیاد</span>
+        <div class="arrow-line"><span class="arrow">➤</span></div>
+        <span>1 = برانگیختگی کم</span>
     </div>
 
-    <script>
-        const reratingFiles = {{ rerating_files|safe }};
-        let currentIndex = {{ completed }};
+    <p class="text-muted mt-5">برای پاسخ می‌توانید از کلیک یا کلیدهای ۱ تا ۹ استفاده کنید.</p>
+    <p class="text-danger fw-bold">برای هر رتبه‌بندی فقط ۳ ثانیه فرصت دارید. لطفاً سریع پاسخ دهید.</p>
 
-        const audio = document.getElementById('audio-player');
-        const valenceSection = document.getElementById('valence-section');
-        const arousalSection = document.getElementById('arousal-section');
-        const intro = document.getElementById('intro');
-        const trial = document.getElementById('trial');
+    <div class="progress-container mb-4">
+      <div class="d-flex justify-content-between mb-2">
+        <span class="text-muted">پیشرفت</span>
+        <span class="text-muted">{{ count }} از {{ total_trials }}</span>
+      </div>
+      <div class="progress" style="direction: ltr; height: 20px;">
+        <div class="progress-bar bg-success progress-bar-striped" style="width: {{ progress_percentage }}%;"></div>
+      </div>
+    </div>
 
-        let currentSound, stimulusNumber, valence, valenceRt, arousal, arousalRt;
-        let startTime;
+    <button id="start-btn" class="btn btn-success btn-lg mt-4 px-5">شروع تمرین</button>
+  </div>
+</div>
 
-        function getCsrfToken() {
-            const name = 'csrftoken';
-            const cookies = document.cookie.split(';');
-            for (let cookie of cookies) {
-                const [key, value] = cookie.trim().split('=');
-                if (key === name) return decodeURIComponent(value);
-            }
-            return '';
+
+<!-- Fixation Cross -->
+<div id="fixation" class="full-center hidden">
+    <div class="fixation">+</div>
+</div>
+
+<!-- رتبه‌بندی خوشایندی -->
+<div id="valence-rating" class="hidden">
+    <div class="card p-5">
+        <div class="card-body text-center">
+        <h3 id="rating-question" class="mb-5">خوشایندی</h3>
+        <div class="sam-buttons" style="margin: auto;">
+            {% for i in "123456789" %}
+            <button type="button" class="btn sam-btn valence-btn" data-value="{{ forloop.counter }}">
+            <img src="{% static 'images/valence/' %}{{ forloop.counter }}.png" alt="امتیاز {{ forloop.counter }}" style="width: 106px;height: 136px;">
+            <div class="key-hint mt-2 fw-bold">{{ forloop.counter }}</div>
+            </button>
+            {% endfor %}
+        </div>
+        </div>
+    </div>
+</div>
+
+<!-- رتبه‌بندی برانگیختگی -->
+<div id="arousal-rating" class="hidden">
+    <div class="card p-5">
+        <div class="card-body text-center">
+        <h3 id="rating-question" class="mb-5">برانگیختگی</h3>
+        <div class="sam-buttons" style="margin: auto;">
+            {% for i in "123456789" %}
+            <button type="button" class="btn sam-btn arousal-btn" data-value="{{ forloop.counter }}">
+            <img src="{% static 'images/arousal/' %}{{ forloop.counter }}.jpg" alt="امتیاز {{ forloop.counter }}" style="width: 106px;height: 136px;">
+            <div class="key-hint mt-2 fw-bold">{{ forloop.counter }}</div>
+            </button>
+            {% endfor %}
+        </div>
+        </div>
+    </div>
+</div>
+
+<!-- مدال هشدار -->
+<div id="welcomeModal" class="custom-modal">
+  <div class="modal-overlay"></div>
+  <div class="modal-content">
+    <div class="modal-icon">⚠️</div>
+    <h3 class="modal-title">لطفاً سریع‌تر پاسخ دهید</h3>
+    <button class="modal-button btn btn-warning" id="closeModal">ادامه</button>
+  </div>
+</div>
+
+<audio id="audio-player" preload="auto"></audio>
+
+<script>
+    const remainingFiles = {{ remaining_main_files|safe }};
+    const audio = document.getElementById('audio-player');
+    const intro = document.getElementById('intro');
+    const fixation = document.getElementById('fixation');
+    const valenceRating = document.getElementById('valence-rating');
+    const arousalRating = document.getElementById('arousal-rating');
+    const welcomeModal = document.getElementById('welcomeModal');
+
+    let currentIndex = 0;
+    let currentSound = null;
+    let currentPhase = null; // 'valence' یا 'arousal'
+    let valence = null, valenceRt = null;
+    let arousal = null, arousalRt = null;
+    let startTime = null;
+    let timeoutId = null;
+    let isModalActive = false;
+
+    const RESPONSE_TIMEOUT = 3000;
+    const FIXATION_DURATION = 1000;
+
+    function getCsrfToken() {
+        const cookies = document.cookie.split(';');
+        for (let cookie of cookies) {
+            const [key, value] = cookie.trim().split('=');
+            if (key === 'csrftoken') return decodeURIComponent(value);
         }
+        return '';
+    }
 
-        function playNext() {
-            if (currentIndex >= reratingFiles.length) {
-                location.href = '/pcm/';
-                return;
-            }
-            currentSound = reratingFiles[currentIndex];
-            stimulusNumber = currentSound.split('/').pop().split('.')[0];
-            audio.src = currentSound;
-            audio.play();
-            audio.onended = () => {
-                valenceSection.classList.remove('hidden');
-                startTime = Date.now();
-            };
-        }
+    function showFixation(callback) {
+        valenceRating.classList.add('hidden');
+        arousalRating.classList.add('hidden');
+        fixation.classList.remove('hidden');
+        setTimeout(() => {
+            fixation.classList.add('hidden');
+            callback();
+        }, FIXATION_DURATION);
+    }
 
-        document.querySelectorAll('.valence-btn').forEach(btn => {
-            btn.onclick = () => {
-                valence = parseInt(btn.dataset.value);
-                valenceRt = Date.now() - startTime;
-                valenceSection.classList.add('hidden');
-                arousalSection.classList.remove('hidden');
-                startTime = Date.now();
-            };
-        });
+    function playSound(url, onEnded) {
+        currentSound = url;
+        audio.src = url;
+        audio.play();
+        audio.onended = onEnded;
+    }
 
-        document.querySelectorAll('.arousal-btn').forEach(btn => {
-            btn.onclick = () => {
-                arousal = parseInt(btn.dataset.value);
-                arousalRt = Date.now() - startTime;
+    function startTimer() {
+        clearTimeout(timeoutId);
+        timeoutId = setTimeout(showTimeoutModal, RESPONSE_TIMEOUT);
+    }
 
-                fetch('/pcm/save/', {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json', 'X-CSRFToken': getCsrfToken()},
-                    body: JSON.stringify({
-                        is_rerating: true,
-                        stimulus_file: currentSound,
-                        stimulus_number: stimulusNumber,
-                        valence: valence,
-                        valence_rt: valenceRt,
-                        arousal: arousal,
-                        arousal_rt: arousalRt
-                    })
-                }).then(() => {
-                    currentIndex++;
-                    setTimeout(playNext, 1000);
-                });
-            };
-        });
+    function showTimeoutModal() {
+        if (isModalActive) return;
+        welcomeModal.classList.add('active');
+        document.body.style.overflow = 'hidden';
+        isModalActive = true;
+        clearTimeout(timeoutId);
+    }
 
-        document.getElementById('start-btn').onclick = () => {
-            intro.classList.add('hidden');
-            trial.classList.remove('hidden');
-            playNext();
+    function closeModalAndRepeat() {
+        welcomeModal.classList.remove('active');
+        document.body.style.overflow = '';
+        isModalActive = false;
+        // تکرار همان تریال از ابتدا
+        startCurrentTrial();
+    }
+
+    document.getElementById('closeModal').onclick = closeModalAndRepeat;
+    welcomeModal.querySelector('.modal-overlay').onclick = closeModalAndRepeat;
+
+    function showValenceRating() {
+        currentPhase = 'valence';
+        arousalRating.classList.add('hidden');
+        valenceRating.classList.remove('hidden');
+        startTime = Date.now();
+        startTimer();
+    }
+
+    function showArousalRating() {
+        currentPhase = 'arousal';
+        valenceRating.classList.add('hidden');
+        arousalRating.classList.remove('hidden');
+        startTime = Date.now();
+        startTimer();
+    }
+
+    // پاسخ خوشایندی
+    document.querySelectorAll('#valence-rating .valence-btn').forEach(btn => {
+        btn.onclick = () => {
+            if (currentPhase !== 'valence' || isModalActive) return;
+            clearTimeout(timeoutId);
+            valence = parseInt(btn.dataset.value);
+            valenceRt = Date.now() - startTime;
+            showArousalRating();
         };
-    </script>
+    });
+
+    // پاسخ برانگیختگی
+    document.querySelectorAll('#arousal-rating .arousal-btn').forEach(btn => {
+        btn.onclick = () => {
+            if (currentPhase !== 'arousal' || isModalActive) return;
+            clearTimeout(timeoutId);
+            arousal = parseInt(btn.dataset.value);
+            arousalRt = Date.now() - startTime;
+
+            fetch('/pcm/save/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCsrfToken()
+                },
+                body: JSON.stringify({
+                    is_rerating: true,
+                    trial: {{ current_trial }} + currentIndex,
+                    stimulus_file: currentSound,
+                    stimulus_number: currentSound,
+                    valence: valence,
+                    valence_rt: valenceRt,
+                    arousal: arousal,
+                    arousal_rt: arousalRt
+                })
+            }).then(response => response.json())
+              .then(data => {
+              }).catch(err => {
+                  console.error('Save failed:', err);
+              }).finally(() => {
+                  currentIndex++;
+                  if (currentIndex >= remainingFiles.length) {
+                      setTimeout(() => location.href = '/experiment/pcm/', 1000);
+                  } else {
+                      startCurrentTrial();
+                  }
+              });
+        };
+    });
+
+    function startCurrentTrial() {
+        if (currentIndex >= remainingFiles.length) {
+            location.href = '/experiment/pcm/';
+            return;
+        }
+        valence = arousal = null;
+        valenceRt = arousalRt = null;
+
+        showFixation(() => {
+            playSound(remainingFiles[currentIndex], showValenceRating);
+        });
+    }
+
+    document.getElementById('start-btn').onclick = () => {
+        intro.classList.add('hidden');
+        startCurrentTrial();
+    };
+</script>
 </body>
 </html>

@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>مرحله ۳: آزمون اصلی PCM</title>
+  {% load static %}
+  <link href="{% static 'plugins/bootstrap/css/bootstrap.rtl.min.css' %}" rel="stylesheet" />
+  <link href="{% static 'css/pcm.css' %}" rel="stylesheet" />
+</head>
+<body>
+
+<div id="rotate-device">
+  <i>↻</i>
+  <h3>لطفاً گوشی را بچرخانید</h3>
+  <p>برای تجربه بهتر، صفحه را به حالت افقی ببرید</p>
+</div>
+
+<!-- دستورالعمل اولیه -->
+<div id="intro" class="card m-5">
+  <div class="card-body text-center p-5">
+    <h2 class="mb-4">مرحله 3 : آزمون اصلی</h2>
+    <p class="lead mb-4">این مرحله از {{ total_blocks }} بلوک تشکیل شده است.</p>
+    <p class="lead mb-4">هر بلوک شامل دو بخش است:</p>
+    <ol class="text-start mx-auto mb-4" style="max-width: 600px;">
+      <li>{{ catch_trials_per_block }} توالی برای <strong>تشخیص نوع هیجانی توالی</strong></li>
+      <li>{{ trials_per_block }} توالی برای <strong>رتبه‌بندی خوشایندی</strong> (صدای اول، صدای دوم، کل توالی)</li>
+    </ol>
+    <h3 class="mb-4">تشخیص توالی:</h3>
+    <div class="sam-buttons d-flex flex-column gap-3" style="max-width: 500px; margin: auto">
+      <button class="btn btn-outline-primary btn-lg sequence-btn" data-seq="Neutral-Neutral">خنثی → خنثی</button>
+      <button class="btn btn-outline-primary btn-lg sequence-btn" data-seq="Neutral-Negative">خنثی → منفی</button>
+      <button class="btn btn-outline-primary btn-lg sequence-btn" data-seq="Negative-Neutral">منفی → خنثی</button>
+    </div>
+    <h3 class="mb-4 mt-5">رتبه‌بندی خوشایندی:</h3>
+    <div class="sam-buttons mt-0 mb-4">
+      {% for i in "123456789" %}
+        <button type="button" class="sam-btn valence-btn" data-value="{{ forloop.counter }}">
+          <img src="{% static 'images/valence/' %}{{ forloop.counter }}.png" alt="{{ forloop.counter }}">
+          <div class="key-hint mt-2 fw-bold">{{ forloop.counter }}</div>
+        </button>
+      {% endfor %}
+    </div>
+    <div class="arousal-scale">
+        <span>9 = خوشایندی زیاد</span>
+        <div class="arrow-line">
+            <span class="arrow">➤</span>
+        </div>
+        <span>1 = خوشایندی کم </span>
+    </div>
+
+    <p class="text-muted mt-5">در صورتی که از کامپیوتر استفاده میکنید برای پاسخ میتوانید از کلیک موس روی آدمک ها و یا از کلیدهای 1 تا 9 بالای کیبورد را استفاده نمایید</p>
+    <p class="text-danger">در اینجا برای پاسخ به هر سوال تنها 3 ثانیه زمان دارید ، لطفا در زمان تعیین شده پاسخ دهید</p><br>
+
+    <div class="progress-container mb-4">
+      <div class="d-flex justify-content-between mb-2">
+        <span class="text-muted">پیشرفت کل آزمون</span>
+        <span class="text-muted">بلاک {{current_block}} از {{total_blocks}}</span>
+      </div>
+      <div class="progress" style="direction: ltr; height: 20px;">
+        <div class="progress-bar bg-success progress-bar-striped" role="progressbar"
+             style="width: {{ progress_percentage }}%;" aria-valuenow="{{ progress_percentage }}" aria-valuemin="0" aria-valuemax="100">
+          <span class="fw-bold" style="direction: rtl;">{{ completed }} از {{ trials }}</span>
+        </div>
+      </div>
+    </div>
+
+
+    <button id="start-btn" class="btn btn-success btn-lg mt-4 px-5">شروع آزمون</button>
+  </div>
+</div>
+
+
+<div id="rest-screen" class="card m-5 hidden">
+  <div class="card-body text-center p-5">
+    <h2 class="mb-4">بلوک <span id="completed-block">{{ perior_block }}</span> به پایان رسید.</h2>
+    <h2>کمی استراحت کنید</h2>
+    <p>وقتی آماده شدید، ادامه دهید.</p>
+    <button id="continue-btn" class="btn btn-primary btn-lg mt-4 px-5">ادامه آزمون</button>
+  </div>
+</div>
+
+<!-- Fixation -->
+<div id="fixation" class="full-center hidden"><div class="fixation">+</div></div>
+
+<!-- Catch Trial -->
+<div id="catch-trial" class="hidden">
+  <div class="card p-5" style="max-width: 700px; margin: 20px auto;">
+    <div class="card-body text-center">
+      <h3 class="mb-5">کدام توالی شنیده شد؟</h3>
+      <div class="sam-buttons d-flex flex-column gap-3" style="max-width: 500px; margin: auto">
+        <button class="btn btn-outline-primary btn-lg sequence-btn" data-seq="Neutral-Neutral">خنثی → خنثی</button>
+        <button class="btn btn-outline-primary btn-lg sequence-btn" data-seq="Neutral-Negative">خنثی → منفی</button>
+        <button class="btn btn-outline-primary btn-lg sequence-btn" data-seq="Negative-Neutral">منفی → خنثی</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Rating Trial -->
+<div id="rating-trial" class="hidden">
+  <div class="card p-5">
+    <div class="card-body text-center">
+      <h3 id="rating-question" class="mb-5"></h3>
+      <div class="sam-buttons" style="margin: auto;">
+        {% for i in "123456789" %}
+        <button type="button" class="btn sam-btn valence-btn" data-value="{{ forloop.counter }}">
+          <img src="{% static 'images/valence/' %}{{ forloop.counter }}.png" alt="{{ forloop.counter }}" style="width: 106px;height: 136px;">
+          <div class="key-hint mt-2 fw-bold">{{ forloop.counter }}</div>
+        </button>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- مدال شروع Catch -->
+<div id="catchIntroModal" class="custom-modal">
+  <div class="modal-overlay"></div>
+  <div class="modal-content">
+    <div class="modal-icon">ℹ️</div>
+    <h3 class="modal-title">تشخیص توالی — بلوک <span id="block-num">{{ current_block }}</span></h3>
+    <p>لطفاً با دقت به نشانه و دو صدا گوش دهید و توالی هیجانی را مشخص کنید.</p>
+    <button class="btn btn-primary btn-lg" id="startCatchBtn">شروع</button>
+  </div>
+</div>
+
+<!-- مدال شروع رتبه‌بندی -->
+<div id="ratingIntroModal" class="custom-modal">
+  <div class="modal-overlay"></div>
+  <div class="modal-content">
+    <div class="modal-icon">ℹ️</div>
+    <h3 class="modal-title">رتبه‌بندی خوشایندی — بلوک <span id="block-num-rating">{{ current_block }}</span></h3>
+    <p>حالا {{ trials_per_block }} توالی را رتبه‌بندی کنید:</p>
+    <ol class="text-start mx-auto mb-3" style="max-width: 400px;">
+      <li>خوشایندی صدای اول</li>
+      <li>خوشایندی صدای دوم</li>
+      <li>خوشایندی کل توالی</li>
+    </ol>
+    <p class="text-danger fw-bold">برای هر سوال فقط ۳ ثانیه زمان دارید!</p>
+    <button class="btn btn-primary btn-lg" id="startRatingBtn">شروع</button>
+  </div>
+</div>
+
+<audio id="audio-player" preload="auto"></audio>
+
+<script>
+  // داده‌های ثابت از سرور
+  const totalBlocks = {{ total_blocks }};
+  const catchPerBlock = {{ catch_trials_per_block }};
+  const trialsPerBlock = {{ trials_per_block }};
+
+  const cueUrls = {{ cue_urls|safe }};
+  const neutralUrls = {{ neutral_urls|safe }};
+  const negativeUrls = {{ negative_urls|safe }};
+  const cuesMapping = {{ cues_mapping|safe }};
+
+  // تمام توالی‌های باقی‌مانده برای همه بلاک‌ها (از view ارسال شده)
+  const allCatchSequences = {{ all_catch_sequences|safe }};   // مثال: {1: ["Neutral-Neutral", ...], 2: [...]}
+  const allMainTrials = {{ all_main_trials|safe }};           // مثال: {1: [{"actual_seq": "...", "cue": "..."}, ...], 2: [...]}
+
+  // بلاک فعلی (از سرور)
+  let currentBlock = {{ current_block }};
+  let remainingCatch = allCatchSequences[currentBlock] || [];
+  let remainingTrials = allMainTrials[currentBlock] || [];
+
+  let currentTrialInBlock = 1;
+
+  // عناصر DOM
+  const audio = document.getElementById('audio-player');
+  const intro = document.getElementById('intro');
+  const restScreen = document.getElementById('rest-screen');
+  const fixation = document.getElementById('fixation');
+  const catchTrial = document.getElementById('catch-trial');
+  const ratingTrial = document.getElementById('rating-trial');
+  const questionEl = document.getElementById('rating-question');
+
+  const catchIntroModal = document.getElementById('catchIntroModal');
+  const ratingIntroModal = document.getElementById('ratingIntroModal');
+
+  // متغیرهای موقت تریال
+  let currentCue, currentStim1, currentStim2, actualSeq, expectedSeq;
+  let ratingStep = 0;
+  let ratings = { stim1: null, stim2: null, sequence: null };
+  let rts = { stim1: null, stim2: null, sequence: null };
+  let ratingStartTime, timeoutHandle;
+
+  const ratingQuestions = [
+    "خوشایندی صدای اول چقدر بود؟",
+    "خوشایندی صدای دوم چقدر بود؟",
+    "خوشایندی کل توالی چقدر بود؟"
+  ];
+
+  // توابع کمکی
+  function updateBlockNumbers() {
+    document.querySelectorAll('#block-num, #block-num-rating, #completed-block').forEach(el => {
+      el.textContent = currentBlock;
+    });
+  }
+
+  function getCsrfToken() {
+    const name = 'csrftoken';
+    let cookieValue = '';
+    if (document.cookie && document.cookie !== '') {
+      document.cookie.split(';').forEach(c => {
+        const [k, v] = c.trim().split('=');
+        if (k === name) cookieValue = decodeURIComponent(v);
+      });
+    }
+    return cookieValue;
+  }
+
+  function showFixation(cb) {
+    fixation.classList.remove('hidden');
+    setTimeout(() => {
+      fixation.classList.add('hidden');
+      cb();
+    }, 1000);
+  }
+
+  function play(url, next) {
+    audio.src = url;
+    audio.play().catch(e => console.error('Audio play error:', e));
+    audio.onended = () => setTimeout(next, 500);
+  }
+
+  // شروع تریال catch بعدی
+  function startNextCatchTrial() {
+    if (remainingCatch.length === 0) {
+      // catch این بلاک تمام شد → برو به مدال رتبه‌بندی
+      ratingIntroModal.classList.add('active');
+      updateBlockNumbers();
+      return;
+    }
+
+    actualSeq = remainingCatch.shift();
+    // انتخاب cue که با توالی واقعی مطابقت دارد
+    const matchingCues = Object.keys(cuesMapping).filter(c => cuesMapping[c] === actualSeq);
+    currentCue = matchingCues.length > 0 ? randomChoice(matchingCues) : Object.keys(cuesMapping)[0];
+    expectedSeq = actualSeq;
+
+    const [cat1, cat2] = actualSeq.split('-');
+    const pool1 = cat1 === 'Neutral' ? neutralUrls : negativeUrls;
+    const pool2 = cat2 === 'Neutral' ? neutralUrls : negativeUrls;
+
+    currentStim1 = randomChoice(pool1);
+    currentStim2 = randomChoice(pool2);
+
+    showFixation(() => {
+      play(cueUrls[currentCue] || currentCue, () => 
+        play(currentStim1, () => 
+          play(currentStim2, () => {
+            catchTrial.classList.remove('hidden');
+          })
+        )
+      );
+    });
+  }
+
+  // شروع تریال rating بعدی
+  function startNextRatingTrial() {
+    {% comment %} if (remainingTrials.length === 0) {
+      finishBlock();
+      return;
+    } {% endcomment %}
+
+    const trial = remainingTrials.shift();
+    actualSeq = trial.actual_seq;
+    currentCue = trial.cue;
+    expectedSeq = cuesMapping[currentCue];
+
+    const [cat1, cat2] = actualSeq.split('-');
+    const pool1 = cat1 === 'Neutral' ? neutralUrls : negativeUrls;
+    const pool2 = cat2 === 'Neutral' ? neutralUrls : negativeUrls;
+
+    currentStim1 = randomChoice(pool1);
+    currentStim2 = randomChoice(pool2);
+
+    showFixation(() => {
+      play(cueUrls[currentCue] || currentCue, () => 
+        play(currentStim1, () => 
+          play(currentStim2, () => {
+            ratingStep = 0;
+            ratings = { stim1: null, stim2: null, sequence: null };
+            rts = { stim1: null, stim2: null, sequence: null };
+            showRatingQuestion();
+          })
+        )
+      );
+    });
+  }
+
+  function showRatingQuestion() {
+    questionEl.textContent = ratingQuestions[ratingStep];
+    ratingTrial.classList.remove('hidden');
+    ratingStartTime = Date.now();
+
+    clearTimeout(timeoutHandle);
+    timeoutHandle = setTimeout(() => {
+      alert("زمان تمام شد! لطفاً سریع‌تر پاسخ دهید.");
+    }, 3000);
+  }
+
+  function randomChoice(arr) {
+    return arr[Math.floor(Math.random() * arr.length)];
+  }
+
+  // ذخیره پاسخ catch
+  function saveCatchResponse(userResponse) {
+    const isCorrect = userResponse === expectedSeq;
+
+    fetch('/pcm/save/', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCsrfToken() },
+      body: JSON.stringify({
+        is_catch: true,
+        block: currentBlock,
+        trial: catchPerBlock - remainingCatch.length,  // شماره تریال در بلاک
+        cue: currentCue,
+        stimulus1: currentStim1,
+        stimulus2: currentStim2,
+        category_stim1: actualSeq.split('-')[0],
+        category_stim2: actualSeq.split('-')[1],
+        user_response: userResponse,
+        is_correct: isCorrect
+      })
+    }).finally(() => {
+      catchTrial.classList.add('hidden');
+
+      setTimeout(startNextCatchTrial, 800);
+    });
+  }
+
+function saveMainResponse() {
+    fetch('/pcm/save/', {
+        method: 'POST',
+        headers: { 
+            'Content-Type': 'application/json', 
+            'X-CSRFToken': getCsrfToken() 
+        },
+        body: JSON.stringify({
+            block: currentBlock,
+            trial: currentTrialInBlock,
+            cue: currentCue,
+            stimulus1: currentStim1,
+            stimulus2: currentStim2,
+            expected_sequence: expectedSeq,
+            is_consistent: expectedSeq === actualSeq,
+            category_stim1: actualSeq.split('-')[0],
+            category_stim2: actualSeq.split('-')[1],
+            valence_stim1: ratings.stim1,
+            valence_rt_stim1: rts.stim1,
+            valence_stim2: ratings.stim2,
+            valence_rt_stim2: rts.stim2,
+            valence_sequence: ratings.sequence,
+            valence_rt_sequence: rts.sequence
+        })
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+        currentTrialInBlock++;
+        ratingTrial.classList.add('hidden');
+        const isLastTrialOfLastBlock = (remainingTrials.length === 0) && (currentBlock === totalBlocks);
+        if (isLastTrialOfLastBlock) {
+            setTimeout(() => location.href = '/experiment/pcm/', 1000);
+        } else if (remainingTrials.length === 0) {
+            setTimeout(finishBlock, 800);
+        } else {
+            setTimeout(startNextRatingTrial, 800);
+        }
+    })
+    .catch(error => {
+        alert('❌ خطا در ذخیره پاسخ!\nلطفاً صفحه را رفرش کنید و دوباره تلاش کنید.');
+    });
+}
+
+  // پایان یک بلاک
+  function finishBlock() {
+    currentBlock++;
+    if (currentBlock > totalBlocks) {
+      setTimeout(() => location.href = '/experiment/pcm/', 2000);
+      return;
+    }
+    remainingCatch = allCatchSequences[currentBlock] || [];
+    remainingTrials = allMainTrials[currentBlock] || [];
+    currentTrialInBlock = 1;
+    restScreen.classList.remove('hidden');
+    updateBlockNumbers();
+    
+  }
+
+  // Event Listeners
+  document.getElementById('start-btn').onclick = () => {
+    intro.classList.add('hidden');
+    document.documentElement.requestFullscreen?.();
+    updateBlockNumbers();
+
+    // تصمیم‌گیری خودکار: اگر catch باقی مانده، مدال catch؛ در غیر اینصورت rating
+    if (remainingCatch.length > 0) {
+      catchIntroModal.classList.add('active');
+    } else {
+      ratingIntroModal.classList.add('active');
+    }
+  };
+
+  document.getElementById('startCatchBtn').onclick = () => {
+    catchIntroModal.classList.remove('active');
+    startNextCatchTrial();
+  };
+
+  document.getElementById('startRatingBtn').onclick = () => {
+    ratingIntroModal.classList.remove('active');
+    currentTrialInBlock = 1;
+    startNextRatingTrial();
+  };
+
+  document.getElementById('continue-btn').onclick = () => {
+    restScreen.classList.add('hidden');
+    // بلاک جدید همیشه از catch شروع می‌شود
+    catchIntroModal.classList.add('active');
+  };
+
+  // دکمه‌های تشخیص توالی (catch)
+  document.querySelectorAll('#catch-trial .sequence-btn').forEach(btn => {
+    btn.onclick = () => saveCatchResponse(btn.dataset.seq);
+  });
+
+  // دکمه‌های رتبه‌بندی valence
+  document.querySelectorAll('.valence-btn').forEach(btn => {
+    btn.onclick = () => {
+      clearTimeout(timeoutHandle);
+      const value = parseInt(btn.dataset.value);
+      const rt = Date.now() - ratingStartTime;
+
+      if (ratingStep === 0) { ratings.stim1 = value; rts.stim1 = rt; }
+      else if (ratingStep === 1) { ratings.stim2 = value; rts.stim2 = rt; }
+      else { ratings.sequence = value; rts.sequence = rt; }
+
+      ratingStep++;
+      if (ratingStep < 3) {
+        setTimeout(showRatingQuestion, 600);
+      } else {
+        saveMainResponse();
+      }
+    };
+  });
+
+  // پشتیبانی از کیبورد
+  document.addEventListener('keydown', e => {
+    if (!catchTrial.classList.contains('hidden')) {
+      if (e.key === '1') document.querySelector('#catch-trial [data-seq="Neutral-Neutral"]').click();
+      if (e.key === '2') document.querySelector('#catch-trial [data-seq="Neutral-Negative"]').click();
+      if (e.key === '3') document.querySelector('#catch-trial [data-seq="Negative-Neutral"]').click();
+    }
+    if (!ratingTrial.classList.contains('hidden') && e.key >= '1' && e.key <= '9') {
+      const btn = document.querySelector(`.valence-btn[data-value="${e.key}"]`);
+      if (btn) btn.click();
+    }
+  });
+</script>
+</body>
+</html>

@@ -86,45 +86,34 @@ class ResponseAdmin(admin.ModelAdmin):
 
 
 # ------------------- مرحله ۰: Rating اصلی (Valence + Arousal) -------------------
-class RatingResponseInline(admin.TabularInline):
-    model = RatingResponse
-    extra = 0
-    can_delete = False
-    readonly_fields = ('stimulus', 'valence', 'arousal', 'valence_rt_ms', 'arousal_rt_ms', 'created_at_formatted', 'status')
-    fields = readonly_fields
-    ordering = ('-created_at',)
+@admin.register(RatingPractice)
+class RatingPracticeAdmin(admin.ModelAdmin):
+    list_display = ('user_username', 'trial', 'stimulus_short', 'valence', 'arousal', 'v_rt', 'a_rt', 'complete', 'created_at')
+    list_filter = ('trial', 'created_at')
+    search_fields = ('user__username', 'stimulus')
+    readonly_fields = ('user', 'trial', 'stimulus', 'valence', 'arousal', 'created_at')
+    ordering = ('-created_at', 'trial')
 
-    def valence_rt_ms(self, obj): return f"{obj.valence_rt} ms" if obj.valence_rt else '-'
-    def arousal_rt_ms(self, obj): return f"{obj.arousal_rt} ms" if obj.arousal_rt else '-'
-    def created_at_formatted(self, obj): return obj.created_at.strftime("%Y-%m-%d %H:%M")
-    def status(self, obj):
-        if obj.is_complete(): return "✓ کامل"
-        elif obj.has_valence() or obj.has_arousal(): return "◐ ناقص"
-        else: return "✗ خالی"
-    status.short_description = 'وضعیت'
+    def user_username(self, obj): return obj.user.username
+    def stimulus_short(self, obj): return obj.stimulus[-40:] if obj.stimulus else '-'
+    def v_rt(self, obj): return f"{obj.valence_rt} ms" if obj.valence_rt else '-'
+    def a_rt(self, obj): return f"{obj.arousal_rt} ms" if obj.arousal_rt else '-'
+    def complete(self, obj): return "✓" if (obj.valence and obj.arousal) else "◐"
 
 
 @admin.register(RatingResponse)
 class RatingResponseAdmin(admin.ModelAdmin):
-    list_display = ('user_username', 'stimulus', 'valence', 'arousal', 'valence_rt_ms', 'arousal_rt_ms', 'created_at', 'status')
+    list_display = ('user_username', 'stimulus', 'stimulus_file_short', 'valence', 'arousal', 'v_rt', 'a_rt', 'created_at')
     list_filter = ('valence', 'arousal', 'created_at')
-    search_fields = ('user__username', 'stimulus')
-    readonly_fields = ('user', 'stimulus', 'valence', 'arousal', 'valence_rt', 'arousal_rt', 'created_at')
-    inlines = []
-    date_hierarchy = 'created_at'
+    search_fields = ('user__username', 'stimulus_', 'stimulus_file')
+    readonly_fields = ('user', 'stimulus_file', 'stimulus', 'valence', 'arousal', 'created_at')
     ordering = ('-created_at',)
 
     def user_username(self, obj): return obj.user.username
-    user_username.short_description = 'کاربر'
-    user_username.admin_order_field = 'user__username'
-
-    def valence_rt_ms(self, obj): return f"{obj.valence_rt} ms" if obj.valence_rt else '-'
-    def arousal_rt_ms(self, obj): return f"{obj.arousal_rt} ms" if obj.arousal_rt else '-'
-    def status(self, obj):
-        if obj.is_complete(): return "✓ کامل"
-        elif obj.has_valence() or obj.has_arousal(): return "◐ ناقص"
-        else: return "✗ خالی"
-    status.short_description = 'وضعیت'
+    def stimulus_file_short(self, obj): return obj.stimulus_file[-60:] + '...' if len(obj.stimulus_file) > 60 else obj.stimulus_file
+    def v_rt(self, obj): return f"{obj.valence_rt} ms" if obj.valence_rt else '-'
+    def a_rt(self, obj): return f"{obj.arousal_rt} ms" if obj.arousal_rt else '-'
+    
 
 
 # ------------------- مرحله ۱: تمرین تشخیص توالی -------------------
@@ -176,6 +165,35 @@ class PCMValencePracticeResponseAdmin(admin.ModelAdmin):
 
 
 # ------------------- مرحله ۳: آزمون اصلی PCM -------------------
+
+class PCMCatchResponseInline(admin.TabularInline):
+    model = PCMCatchResponse
+    extra = 0
+    can_delete = False
+    readonly_fields = ('trial', 'cue_short', 'stimulus1_short', 'stimulus2_short','category_stim1','category_stim2', 'user_response', 'is_correct_display', 'created_at')
+    fields = readonly_fields
+    ordering = ('trial',)
+
+    def cue_short(self, obj): return obj.cue[-30:]
+    def stimulus1_short(self, obj): return obj.stimulus1[-30:] if obj.stimulus1 else '-'
+    def stimulus2_short(self, obj): return obj.stimulus2[-30:] if obj.stimulus2 else '-'
+    def is_correct_display(self, obj): return "✓" if obj.is_correct else "✗" if obj.is_correct is False else "-"
+
+
+@admin.register(PCMCatchResponse)
+class PCMCatchResponseAdmin(admin.ModelAdmin):
+    list_display = ('user_username', 'trial','block', 'cue_short','category_stim2','category_stim1', 'user_response', 'is_correct_display', 'created_at')
+    list_filter = ('user', 'created_at')
+    search_fields = ('user__username', 'cue', 'user_response')
+    readonly_fields = ('user', 'trial','block', 'cue', 'stimulus1', 'stimulus2','category_stim1','category_stim2', 'user_response', 'is_correct', 'created_at')
+    ordering = ('-created_at', 'trial')
+
+    def user_username(self, obj): return obj.user.username
+    def cue_short(self, obj): return obj.cue[-40:]
+    def is_correct_display(self, obj): return "✓ درست" if obj.is_correct else "✗ غلط" if obj.is_correct is False else "—"
+
+
+
 @admin.register(PCMMainResponse)
 class PCMMainResponseAdmin(admin.ModelAdmin):
     list_display = ('user_username', 'block', 'trial', 'cue_short', 'v1', 'v2', 'v_seq', 'consistent', 'complete', 'created_at')
@@ -212,7 +230,7 @@ class RatingPracticeResponseAdmin(admin.ModelAdmin):
 # ------------------- مرحله ۵: رتبه‌بندی نهایی صداها -------------------
 @admin.register(RatingMainResponse)
 class RatingMainResponseAdmin(admin.ModelAdmin):
-    list_display = ('user_username', 'stimulus_number', 'stimulus_file_short', 'valence', 'arousal', 'v_rt', 'a_rt', 'complete', 'created_at')
+    list_display = ('user_username', 'stimulus_number', 'stimulus_file_short', 'valence', 'arousal', 'v_rt', 'a_rt', 'created_at')
     list_filter = ('valence', 'arousal', 'created_at')
     search_fields = ('user__username', 'stimulus_number', 'stimulus_file')
     readonly_fields = ('user', 'stimulus_file', 'stimulus_number', 'valence', 'arousal', 'created_at')
@@ -222,4 +240,4 @@ class RatingMainResponseAdmin(admin.ModelAdmin):
     def stimulus_file_short(self, obj): return obj.stimulus_file[-60:] + '...' if len(obj.stimulus_file) > 60 else obj.stimulus_file
     def v_rt(self, obj): return f"{obj.valence_rt} ms" if obj.valence_rt else '-'
     def a_rt(self, obj): return f"{obj.arousal_rt} ms" if obj.arousal_rt else '-'
-    def complete(self, obj): return "✓" if obj.is_complete() else "◐"
+    

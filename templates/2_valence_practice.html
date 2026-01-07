@@ -10,86 +10,91 @@
 </head>
 <body>
 
-  <!-- پیام چرخش گوشی -->
-  <div id="rotate-device">
-    <i>↻</i>
-    <h3>لطفاً گوشی را بچرخانید</h3>
-    <p>برای تجربه بهتر، صفحه را به حالت افقی ببرید</p>
-  </div>
+<!-- پیام چرخش گوشی -->
+<div id="rotate-device">
+  <i>↻</i>
+  <h3>لطفاً گوشی را بچرخانید</h3>
+  <p>برای تجربه بهتر، صفحه را به حالت افقی ببرید</p>
+</div>
 
-  <div class="content">
+<!-- دستور اعمل  -->
+<div id="intro" class="card m-5" style="">
+  <div class="card-body text-center p-5">
+    <h2 class="mb-4">مرحله ۲: رتبه‌بندی خوشایندی</h2>
+    <p class="lead mb-4">
+        در این مرحله، پس از شنیدن نشانه و دو صدای هیجانی، باید میزان خوشایندی را رتبه‌بندی کنید که به ترتیب شامل:
+    </p>
+    <ol class="text-start mx-auto mb-4" style="max-width: 500px;">
+        <li>خوشایندی محرک اول</li>
+        <li>خوشایندی محرک دوم</li>
+        <li>خوشایندی کل توالی</li>
+    </ol>
+    <p class="text-muted">در اینجا 9 آدمک روی صفحه نمایش داده میشود که خوشایندی صدا ها را با انتخاب آن ها مشخص میکند </p><br>
+    <div class="sam-buttons mt-0 mb-4">
+        {% for i in "123456789" %}
+            <button type="button" class="sam-btn" data-value="{{ forloop.counter }}">
+                <img src="{% static 'images/valence/' %}{{ forloop.counter }}.png" alt="{{ forloop.counter }}">
+                <div class="key-hint">{{ forloop.counter }}</div>
+            </button>
+        {% endfor %}
+    </div>
+    <div class="arousal-scale">
+        <span>9 = خوشایندی زیاد</span>
+        <div class="arrow-line">
+            <span class="arrow">➤</span>
+        </div>
+        <span>1 = خوشایندی کم </span>
+    </div>
+    
+    <p class="text-muted mt-5">در صورتی که از کامپیوتر استفاده میکنید برای پاسخ میتوانید از کلیک موس روی آدمک ها و یا از کلیدهای 1 تا 9 بالای کیبورد را استفاده نمایید</p>
+    <p class="text-danger">در اینجا برای پاسخ به هر سوال تنها 3 ثانیه زمان دارید ، لطفا در زمان تعیین شده پاسخ دهید</p><br>
 
-    <!-- صفحه مقدمه -->
-    <div id="intro" class="card" style="margin-top:400px;margin-top:400px ">
-            <div class="card-body text-center p-5">
-                <h2 class="mb-4">مرحله ۲: رتبه‌بندی خوشایندی</h2>
-                <p class="lead mb-4">
-                    در این مرحله، پس از شنیدن نشانه و دو صدای هیجانی، باید میزان خوشایندی را رتبه‌بندی کنید که به ترتیب شامل:
-                </p>
-                <ol class="text-start mx-auto mb-4" style="max-width: 500px;">
-                    <li>خوشایندی محرک اول</li>
-                    <li>خوشایندی محرک دوم</li>
-                    <li>خوشایندی کل توالی</li>
-                </ol>
-                <p class="text-muted">در اینجا 9 آدمک روی صفحه نمایش داده میشود که خوشایندی صدا ها را با انتخاب آن ها مشخص میکند </p><br>
-                <div class="sam-buttons mt-0 mb-4">
-                    {% for i in "123456789" %}
-                        <button type="button" class="sam-btn" data-value="{{ forloop.counter }}">
-                            <img src="{% static 'images/valence/' %}{{ forloop.counter }}.png" alt="{{ forloop.counter }}">
-                            <div class="key-hint">{{ forloop.counter }}</div>
-                        </button>
-                    {% endfor %}
-                </div>
-                <p class="text-muted">9 = خیلی خوشایند	&nbsp; &nbsp; &nbsp; &nbsp;	&nbsp;،	&nbsp; &nbsp; &nbsp; &nbsp;	&nbsp; 1 = خیلی ناخوشایند</p><br>
-                <p class="text-muted">در صورتی که از کامپیوتر استفاده میکنید برای پاسخ میتوانید از کلیک موس استفاده نمیوده و یا کلید های 1 تا 9 بالی ی صفحه را انتخاب نمایید</p>
-                <p class="text-danger">در اینجا برای پاسخ به هر سوال تنها 3 ثانیه زمان دارید ، لطفا در زمان تعیین شده پاسخ دهید</p><br>
-
-                <div class="progress-container mb-4">
-                    <div class="d-flex justify-content-between mb-2">
-                        <span class="text-muted">پیشرفت مرحله</span>
-                    </div>
-                    <div class="progress" style="direction: ltr; height: 20px;">
-                        <div class="progress-bar bg-success progress-bar-striped"
-                            role="progressbar"
-                            style="width: {{ progress_percentage }}%;"
-                            aria-valuenow="{{ progress_percentage }}"
-                            aria-valuemin="0"
-                            aria-valuemax="100">
-                        <span class="fw-bold" style="direction: rtl;">{{ current_trial }} از {{ total_trials }}</span>
-                        </div>
-                    </div>
-                </div>
-                <button id="start-btn" class="btn btn-success btn-lg mt-4 px-5">شروع آزمون</button>
+    <div class="progress-container mb-4">
+        <div class="d-flex justify-content-between mb-2">
+            <span class="text-muted">پیشرفت مرحله</span>
+        </div>
+        <div class="progress" style="direction: ltr; height: 20px;">
+            <div class="progress-bar bg-success progress-bar-striped"
+                role="progressbar"
+                style="width: {{ progress_percentage }}%;"
+                aria-valuenow="{{ progress_percentage }}"
+                aria-valuemin="0"
+                aria-valuemax="100">
+            <span class="fw-bold" style="direction: rtl;">{{ current_trial }} از {{ total_trials }}</span>
             </div>
         </div>
-
-    <!-- Fixation Cross -->
-    <div id="fixation" class="full-center hidden">
-      <div class="fixation">+</div>
     </div>
+    <button id="start-btn" class="btn btn-success btn-lg mt-4 px-5">شروع آزمون</button>
+  </div>
+</div>
 
-    <!-- صفحه ارزیابی خوشایندی -->
-    <div id="rating" class="hidden">
-      <div class="card p-5">
-        <div class="card-body text-center">
+<!-- content-->
+<div class="content">
+  <!-- Fixation Cross -->
+  <div id="fixation" class="full-center hidden">
+    <div class="fixation">+</div>
+  </div>
+  <!-- صفحه ارزیابی خوشایندی -->
+  <div id="rating" class="hidden">
+    <div class="card p-5">
+      <div class="card-body text-center">
 
-          <h3 id="rating-question" class="mb-5"></h3>
+        <h3 id="rating-question" class="mb-5"></h3>
 
-          <div class="sam-buttons" style="margin: auto;">
-            {% for i in "123456789" %}
-            <button type="button" class="btn sam-btn valence-btn" data-value="{{ forloop.counter }}">
-              <img src="{% static 'images/valence/' %}{{ forloop.counter }}.png" alt="امتیاز {{ forloop.counter }}" style="width: 106px;height: 136px;">
-              <div class="key-hint mt-2 fw-bold">{{ forloop.counter }}</div>
-            </button>
-            {% endfor %}
-          </div>
-
-          <div id="feedback" class="mt-4 fs-3 fw-bold text-danger"></div>
+        <div class="sam-buttons" style="margin: auto;">
+          {% for i in "123456789" %}
+          <button type="button" class="btn sam-btn valence-btn" data-value="{{ forloop.counter }}">
+            <img src="{% static 'images/valence/' %}{{ forloop.counter }}.png" alt="امتیاز {{ forloop.counter }}" style="width: 106px;height: 136px;">
+            <div class="key-hint mt-2 fw-bold">{{ forloop.counter }}</div>
+          </button>
+          {% endfor %}
         </div>
+
+        <div id="feedback" class="mt-4 fs-3 fw-bold text-danger"></div>
       </div>
     </div>
-
   </div>
+</div>
 
   <audio id="audio-player" preload="auto"></audio>
 
@@ -132,13 +137,13 @@
     
     let ratingTimeout; // تایمر هشدار 3 ثانیه‌ای
     let isModalActive = false; // وضعیت مدال
-    const RESPONSE_TIMEOUT = 3000; // زمان مجاز: ۳۰۰۰ میلی‌ثانیه (۳ ثانیه)
+    const RESPONSE_TIMEOUT = {{RESPONSE_TIMEOUT}}; // زمان مجاز: ۳۰۰۰ میلی‌ثانیه (۳ ثانیه)
 
 
     const questions = [
-      "صداي اول براي شما چقدر خوشايند يا ناخوشايند بود؟",
-      "صداي دوم براي شما چقدر خوشايند يا ناخوشايند بود؟",
-      "کل اين توالي صوتي (دو صدا با هم) براي شما چقدر خوشايند يا ناخوشايند بود؟"
+      "صداي اول ",
+      "صداي دوم ",
+      "کل (دو صدا با هم) "
     ];
 
     function getCsrfToken() {
@@ -150,8 +155,6 @@
       }
       return '';
     }
-
-    
 
     function showFixation(cb) {
       fixation.classList.remove('hidden');
@@ -326,7 +329,6 @@
         welcomeModal.querySelector('.modal-overlay').onclick = closeModal;
       });
 </script>
-
     <div id="welcomeModal" class="custom-modal">
       <div class="modal-overlay"></div>
       <div class="modal-content">

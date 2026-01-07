@@ -142,18 +142,34 @@ class Result(models.Model):
         return f"نتیجه {self.attribute.title} برای {self.user.username} در {self.questionnaire.title}"
     
 
+class RatingPractice(models.Model):  # مرحله ۴ - تمرین رتبه‌بندی Valence+Arousal
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
+    trial = models.PositiveIntegerField()
+    stimulus = models.CharField(max_length=100)
+    valence = models.IntegerField(null=True, blank=True)
+    valence_rt = models.PositiveIntegerField(null=True, blank=True)
+    arousal = models.IntegerField(null=True, blank=True)
+    arousal_rt = models.PositiveIntegerField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('user', 'trial')
+        verbose_name = "0-practice"
+        ordering = ['trial']
+
+
 class RatingResponse(models.Model):
     user = models.ForeignKey(
         CustomUser,
         on_delete=models.CASCADE,
         verbose_name="کاربر"
     )
+    trial = models.PositiveIntegerField(null=True, blank=True)
     stimulus = models.CharField(
         max_length=50,
         verbose_name="محرک"
     )
-
-    # نمره خوشایندی (Valence) - از 1 تا 9
+    stimulus_file = models.CharField(max_length=200,null=True, blank=True)
     valence = models.IntegerField(
         null=True,
         blank=True,
@@ -244,6 +260,26 @@ class PCMValencePracticeResponse(models.Model):  # مرحله ۲
         ordering = ['trial']
 
 
+class PCMCatchResponse(models.Model):  # مرحله ۱
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
+    block = models.PositiveIntegerField(
+        verbose_name="شماره بلاک", null=True, blank=True
+    )
+    trial = models.PositiveIntegerField()
+    cue = models.CharField(max_length=100)
+    stimulus1 = models.CharField(max_length=100, null=True, blank=True)
+    stimulus2 = models.CharField(max_length=100, null=True, blank=True)
+    category_stim1 = models.CharField(max_length=10, null=True, blank=True)
+    category_stim2 = models.CharField(max_length=10, null=True, blank=True)
+    user_response = models.CharField(max_length=30, null=True, blank=True)  # توالی انتخابی
+    is_correct = models.BooleanField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('user', 'trial', 'created_at')
+        verbose_name = "3-PCM-Catch"
+        ordering = ['created_at']
+
 class PCMMainResponse(models.Model):
     user = models.ForeignKey(
         CustomUser,
@@ -276,11 +312,6 @@ class PCMMainResponse(models.Model):
     expected_sequence = models.CharField(
         max_length=30,
         verbose_name="توالی مورد انتظار",
-        choices=[
-            ('Neutral-Neutral', 'Neutral-Neutral'),
-            ('Negative-Neutral', 'Negative-Neutral'),
-            ('Neutral-Negative', 'Neutral-Negative'),
-        ],
         blank=True,
         null=True
     )
@@ -340,8 +371,8 @@ class PCMMainResponse(models.Model):
 
     class Meta:
         unique_together = ('user', 'block', 'trial')
-        verbose_name = "3-PCM-main"
-        verbose_name_plural = "3-PCM-main"
+        verbose_name = "3-PCM-Main"
+        verbose_name_plural = "3-PCM-Main"
         ordering = ['-created_at', 'block', 'trial']
 
     def __str__(self):
@@ -371,6 +402,7 @@ class RatingPracticeResponse(models.Model):  # مرحله ۴ - تمرین رتب
 
 class RatingMainResponse(models.Model):  # مرحله ۵ - رتبه‌بندی اصلی
     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
+    trial = models.PositiveIntegerField(null=True, blank=True)
     stimulus_file = models.CharField(max_length=200)
     stimulus_number = models.CharField(max_length=50)
     valence = models.IntegerField(null=True, blank=True)

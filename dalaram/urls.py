@@ -30,6 +30,7 @@ urlpatterns = [
     ),
     path('complete-profile/', complete_profile, name='complete_profile'),
     path('experiment/rating/', rating_view, name='rating'),
+    path('rating/save/', rating_save_response, name='rating_save'),
     path('experiment/pcm/', pcm_view, name='pcm'),
     path('pcm/save/', pcm_save_response, name='pcm_save'),
 
