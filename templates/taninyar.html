@@ -1,0 +1,738 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>سامانه‌ی مراکز مشاوره — صفحه اصلی</title>
+    <meta
+      name="description"
+      content="سامانه مدیریت، نوبت‌دهی و پرونده‌سازی برای مراکز مشاوره. طراحی، پیاده‌سازی و پشتیبانی اختصاصی برای کلینیک‌ها و مشاوران." />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;600;700&display=swap"
+      rel="stylesheet" />
+    <style>
+      :root {
+        --bg: #f7f9fc;
+        --primary: #0f6ef0;
+        --muted: #6b7280;
+        --card: #ffffff;
+        --accent: #06b6d4;
+        --radius: 12px;
+        --maxw: 1200px;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      html,
+      body {
+        height: 100%;
+      }
+      body {
+        margin: 0;
+        padding: 0;
+        font-family: "Vazirmatn", system-ui, -apple-system, "Segoe UI", Roboto,
+          "Helvetica Neue", Arial;
+        background: var(--bg);
+        color: #0b1220;
+        line-height: 1.5;
+        font-size: 16px;
+      }
+      .container {
+        max-width: var(--maxw);
+        margin: 0 auto;
+        padding: 28px;
+      }
+
+      /* header */
+      header {
+        background: linear-gradient(
+          90deg,
+          rgba(15, 110, 240, 0.08),
+          rgba(6, 182, 212, 0.06)
+        );
+        backdrop-filter: blur(4px);
+      }
+      .nav {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 18px 0;
+      }
+      .brand {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+      .logo {
+        width: 52px;
+        height: 52px;
+        border-radius: 12px;
+        background: linear-gradient(135deg, var(--primary), var(--accent));
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #fff;
+        font-weight: 700;
+        font-size: 18px;
+      }
+      .nav-links {
+        display: flex;
+        gap: 18px;
+        align-items: center;
+      }
+      .nav-links a {
+        color: var(--muted);
+        text-decoration: none;
+        padding: 8px 12px;
+        border-radius: 8px;
+      }
+      .nav-links a.cta {
+        background: var(--primary);
+        color: #fff;
+      }
+      .hamburger {
+        display: none;
+        border: 0;
+        background: none;
+        font-size: 22px;
+      }
+
+      /* hero */
+      .hero {
+        display: flex;
+        gap: 30px;
+        align-items: center;
+        padding: 36px 0;
+      }
+      .hero-left {
+        flex: 1;
+      }
+      .headline {
+        font-size: 28px;
+        font-weight: 700;
+        margin: 0 0 12px;
+      }
+      .sub {
+        color: var(--muted);
+        margin-bottom: 20px;
+      }
+      .hero-cta {
+        display: flex;
+        gap: 12px;
+      }
+      .btn {
+        padding: 12px 18px;
+        border-radius: 10px;
+        border: 0;
+        cursor: pointer;
+        font-weight: 600;
+      }
+      .btn-primary {
+        background: var(--primary);
+        color: #fff;
+      }
+      .btn-outline {
+        background: transparent;
+        border: 1px solid rgba(11, 18, 32, 0.06);
+      }
+
+      .hero-right {
+        flex: 1;
+      }
+      .mockup {
+        background: linear-gradient(180deg, #fff, #fbfdff);
+        border-radius: 18px;
+        padding: 18px;
+        box-shadow: 0 8px 30px rgba(15, 30, 60, 0.06);
+      }
+      .features-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 12px;
+        margin-top: 12px;
+      }
+      .feature-pill {
+        background: linear-gradient(
+          90deg,
+          rgba(6, 182, 212, 0.08),
+          rgba(15, 110, 240, 0.06)
+        );
+        padding: 10px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      /* sections */
+      section {
+        padding: 28px 0;
+      }
+      .cards {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 18px;
+      }
+      .card {
+        background: var(--card);
+        padding: 18px;
+        border-radius: 14px;
+        box-shadow: 0 6px 20px rgba(10, 20, 40, 0.04);
+      }
+      .card h3 {
+        margin: 0 0 8px;
+      }
+      .muted {
+        color: var(--muted);
+      }
+
+      /* pricing */
+      .pricing {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 24px;
+        margin-top: 32px;
+      }
+      .price {
+        position: relative;
+        background: linear-gradient(180deg, #ffffff, #f9fbff);
+        border-radius: 18px;
+        box-shadow: 0 8px 24px rgba(15, 30, 60, 0.08);
+        padding: 32px 24px;
+        text-align: center;
+        transition: all 0.3s ease;
+        overflow: hidden;
+      }
+      .price::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(
+          135deg,
+          rgba(15, 110, 240, 0.05),
+          rgba(6, 182, 212, 0.05)
+        );
+        opacity: 0;
+        transition: opacity 0.3s ease;
+        border-radius: 18px;
+      }
+      .price:hover::before {
+        opacity: 1;
+      }
+      .price:hover {
+        transform: translateY(-8px) scale(1.02);
+        box-shadow: 0 10px 32px rgba(15, 110, 240, 0.15);
+      }
+      .price h3 {
+        font-size: 20px;
+        font-weight: 700;
+        color: var(--primary);
+        margin-bottom: 6px;
+      }
+      .price p {
+        color: var(--muted);
+        margin-bottom: 20px;
+      }
+      .price div[style*="font-size:20px"] {
+        color: #111;
+        background: linear-gradient(90deg, var(--primary), var(--accent));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        font-size: 24px !important;
+        font-weight: 800;
+      }
+      .price ul {
+        list-style: none;
+        padding: 0;
+        margin: 16px 0;
+        text-align: right;
+      }
+      .price ul li {
+        margin-bottom: 8px;
+        padding-right: 20px;
+        position: relative;
+      }
+      .price ul li::before {
+        content: "✔";
+        position: absolute;
+        right: 0;
+        color: var(--accent);
+        font-weight: bold;
+      }
+      .price .btn {
+        width: 100%;
+        margin-top: 16px;
+        padding: 12px 0;
+        font-size: 15px;
+      }
+      .price.popular {
+        background: linear-gradient(180deg, #ffffff, #eef6ff);
+        border: 2px solid var(--primary);
+        transform: translateY(-10px);
+      }
+      .price.popular::after {
+        content: "پیشنهاد ویژه";
+        position: absolute;
+        top: -10px;
+        right: 16px;
+        background: var(--primary);
+        color: #fff;
+        font-size: 12px;
+        padding: 4px 10px;
+        border-radius: 10px;
+        box-shadow: 0 4px 10px rgba(15, 110, 240, 0.2);
+      }
+      @media (max-width: 720px) {
+        .pricing {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      /* footer */
+      footer {
+        padding: 22px 0;
+        border-top: 1px solid rgba(11, 18, 32, 0.04);
+        margin-top: 30px;
+      }
+
+      /* responsive */
+      @media (max-width: 1000px) {
+        .cards {
+          grid-template-columns: repeat(2, 1fr);
+        }
+        .pricing {
+          grid-template-columns: repeat(2, 1fr);
+        }
+      }
+      @media (max-width: 720px) {
+        .hero {
+          flex-direction: column;
+        }
+        .nav-links {
+          display: none;
+        }
+        .hamburger {
+          display: block;
+        }
+        .cards {
+          grid-template-columns: 1fr;
+        }
+        .pricing {
+          grid-template-columns: 1fr;
+        }
+        .features-grid {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      /* tiny helpers */
+      .kbd {
+        background: #eef2ff;
+        padding: 6px 8px;
+        border-radius: 8px;
+        font-weight: 700;
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <div class="container nav">
+        <div class="brand">
+          <div class="logo">م</div>
+          <div>
+            <div style="font-weight: 700">سامانه طنین یار</div>
+            <div style="font-size: 12px; color: var(--muted)">
+              راهکار کامل برای مراکز مشاوره
+            </div>
+          </div>
+        </div>
+        <nav class="nav-links" aria-label="منو اصلی">
+          <a href="#features">ویژگی‌ها</a>
+          <a href="#pricing">تعرفه</a>
+          <a href="#testimonials">نظرات</a>
+          <a href="#contact">تماس</a>
+          <a class="cta" href="#demo">درخواست دموی رایگان</a>
+        </nav>
+        <button
+          class="hamburger"
+          aria-label="باز کردن منو"
+          onclick="toggleMenu()">
+          ☰
+        </button>
+      </div>
+    </header>
+
+    <main class="container">
+      <section class="hero">
+        <div class="hero-left">
+          <h1 class="headline">سامانه‌ی مدیریت و نوبت‌دهی برای مراکز مشاوره</h1>
+          <p class="sub">
+            پرونده الکترونیک، نوبت‌دهی آنلاین، پرداخت و گزارش‌گیری پیشرفته —
+            همه‌چیز در یک پنل امن و ساده برای مشاوران و مدیران کلینیک.
+          </p>
+          <div class="hero-cta">
+            <button class="btn btn-primary" onclick="openDemo()">
+              درخواست دموی رایگان
+            </button>
+            <button
+              class="btn btn-outline"
+              onclick="scrollToSection('features')">
+              مشاهده ویژگی‌ها
+            </button>
+          </div>
+          <div style="margin-top: 18px; color: var(--muted); font-size: 14px">
+            ارائه پشتیبانی ۲۴/۷، نصب داخلی و آموزش تیمی
+          </div>
+        </div>
+
+        <div class="hero-right">
+          <div class="mockup">
+            <div
+              style="
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+              ">
+              <div style="font-weight: 700">پیش‌نمایش پنل مدیر</div>
+              <div class="kbd">نسخه آزمایشی</div>
+            </div>
+            <div class="features-grid">
+              <div class="feature-pill">
+                <strong>نوبت‌دهی</strong
+                ><span class="muted">آنلاین و خودکار</span>
+              </div>
+              <div class="feature-pill">
+                <strong>پرونده</strong
+                ><span class="muted">ثبت تاریخچه درمان</span>
+              </div>
+              <div class="feature-pill">
+                <strong>گزارش</strong><span class="muted">شاخص‌های کلیدی</span>
+              </div>
+              <div class="feature-pill">
+                <strong>پرداخت</strong><span class="muted">درگاه امن</span>
+              </div>
+            </div>
+            <div
+              style="
+                margin-top: 14px;
+                display: flex;
+                gap: 8px;
+                align-items: center;
+              ">
+              <div
+                style="
+                  flex: 1;
+                  height: 8px;
+                  background: linear-gradient(
+                    90deg,
+                    var(--primary),
+                    var(--accent)
+                  );
+                  border-radius: 8px;
+                "></div>
+              <div
+                style="width: 60px; text-align: center; font-size: 12px"
+                class="muted">
+                100+ مراکز
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="features">
+        <h2 style="margin-top: 0">ویژگی‌های کلیدی</h2>
+        <div class="cards">
+          <div class="card">
+            <h3>سیستم پرونده الکترونیک</h3>
+            <p class="muted">
+              ثبت امن سوابق، امکان پیوست پرونده، و تاریخچه جلسات با امکان فیلتر
+              و جستجو.
+            </p>
+          </div>
+          <div class="card">
+            <h3>نوبت‌دهی و تقویم</h3>
+            <p class="muted">
+              رزرو آنلاین، مدیریت ظرفیت مشاوران و یادآوری پیامکی/ایمیلی برای
+              مراجعه‌کنندگان.
+            </p>
+          </div>
+          <div class="card">
+            <h3>پنل مدیریتی</h3>
+            <p class="muted">
+              گزارش سود و زیان، مانیتورینگ جلسات، مدیریت کاربران و نقش‌ها.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <section id="benefits">
+        <h2>چرا سامانه ما؟</h2>
+        <div style="display: flex; gap: 14px; flex-wrap: wrap">
+          <div class="card" style="flex: 1; min-width: 220px">
+            <h3>امنیت و حریم‌ خصوصی</h3>
+            <p class="muted">
+              رمزنگاری داده‌ها، پشتیبانی از بک‌آپ دوره‌ای و رعایت استانداردهای
+              حریم خصوصی.
+            </p>
+          </div>
+          <div class="card" style="flex: 1; min-width: 220px">
+            <h3>سفارشی‌سازی</h3>
+            <p class="muted">
+              ما ماژول‌ها را مطابق نیاز مرکز شما فعال یا غیرفعال می‌کنیم.
+            </p>
+          </div>
+          <div class="card" style="flex: 1; min-width: 220px">
+            <h3>آموزش و پشتیبانی</h3>
+            <p class="muted">
+              آموزش کارکنان، انتقال داده و پشتیبانی فنی مداوم.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <section id="pricing">
+        <h2>تعرفه‌ها</h2>
+        <div class="pricing">
+          <div class="price">
+            <h3>پلان پایه</h3>
+            <p class="muted">مناسب برای مراکز کوچک</p>
+            <div style="font-size: 20px; font-weight: 700; margin: 12px 0">
+              ₩ 1,500,000/سال
+            </div>
+            <ul class="muted">
+              <li>نوبت‌دهی آنلاین</li>
+              <li>پرونده پایه</li>
+              <li>پشتیبانی ایمیلی</li>
+            </ul>
+            <div style="margin-top: 12px">
+              <button
+                class="btn btn-outline"
+                onclick="openContact('پلان پایه')">
+                انتخاب
+              </button>
+            </div>
+          </div>
+
+          <div class="price popular">
+            <h3>پلان استاندارد</h3>
+            <p class="muted">پیشنهاد ما برای کلینیک‌ها</p>
+            <div style="font-size: 20px; font-weight: 700; margin: 12px 0">
+              ₩ 3,800,000/سال
+            </div>
+            <ul class="muted">
+              <li>همه امکانات پایه</li>
+              <li>گزارش‌گیری پیشرفته</li>
+              <li>ادغام با درگاه پرداخت</li>
+            </ul>
+            <div style="margin-top: 12px">
+              <button
+                class="btn btn-primary"
+                onclick="openContact('پلان استاندارد')">
+                انتخاب
+              </button>
+            </div>
+          </div>
+
+          <div class="price">
+            <h3>پلان سازمانی</h3>
+            <p class="muted">سفارشی‌سازی و نصب داخلی</p>
+            <div style="font-size: 20px; font-weight: 700; margin: 12px 0">
+              قیمت توافقی
+            </div>
+            <ul class="muted">
+              <li>نصب داخلی و انتقال داده</li>
+              <li>رابط‌های اختصاصی</li>
+              <li>اس‌اس‌ال و SLA سطح بالا</li>
+            </ul>
+            <div style="margin-top: 12px">
+              <button
+                class="btn btn-outline"
+                onclick="openContact('پلان سازمانی')">
+                تماس فروش
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="testimonials">
+        <h2>نظرات مشتریان</h2>
+        <div
+          style="
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 14px;
+          ">
+          <div class="card">
+            <p>
+              «سامانه باعث شد فرایند نوبت‌دهی ما خودکار شود و زمان انتظار به شدت
+              کم شد. پشتیبانی هم عالی است.»
+            </p>
+            <div style="margin-top: 8px; font-weight: 700">
+              دکتر رضایی — کلینیک امید
+            </div>
+          </div>
+          <div class="card">
+            <p>
+              «گزارش‌های مدیریتی بسیار شفاف است و به تصمیم‌گیری ما کمک زیادی
+              کرد.»
+            </p>
+            <div style="margin-top: 8px; font-weight: 700">
+              سرکار خانم امیری — مرکز رشد ذهن
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="contact">
+        <h2>تماس & درخواست دموی رایگان</h2>
+        <div style="display: flex; gap: 14px; flex-wrap: wrap">
+          <form
+            id="contactForm"
+            class="card"
+            style="flex: 1; min-width: 300px"
+            onsubmit="submitForm(event)">
+            <label>نام مرکز / نام شما</label>
+            <input
+              id="name"
+              type="text"
+              required
+              style="
+                width: 100%;
+                padding: 10px;
+                margin: 8px 0;
+                border-radius: 8px;
+                border: 1px solid #e6eefc;
+              " />
+            <label>ایمیل</label>
+            <input
+              id="email"
+              type="email"
+              required
+              style="
+                width: 100%;
+                padding: 10px;
+                margin: 8px 0;
+                border-radius: 8px;
+                border: 1px solid #e6eefc;
+              " />
+            <label>شماره تماس</label>
+            <input
+              id="phone"
+              type="tel"
+              style="
+                width: 100%;
+                padding: 10px;
+                margin: 8px 0;
+                border-radius: 8px;
+                border: 1px solid #e6eefc;
+              " />
+            <label>پیام</label>
+            <textarea
+              id="message"
+              rows="4"
+              style="
+                width: 100%;
+                padding: 10px;
+                margin: 8px 0;
+                border-radius: 8px;
+                border: 1px solid #e6eefc;
+              "></textarea>
+            <div
+              style="
+                display: flex;
+                gap: 8px;
+                align-items: center;
+                margin-top: 8px;
+              ">
+              <button class="btn btn-primary" type="submit">
+                ارسال درخواست
+              </button>
+              <div class="muted">
+                یا <a href="#demo" onclick="openDemo()">درخواست دموی زنده</a>
+              </div>
+            </div>
+          </form>
+
+          <div class="card" style="flex: 1; min-width: 260px">
+            <h3>اطلاعات تماس</h3>
+            <p class="muted">تلفن: ۰۲۱-۱۲۳۴۵۶۷۸</p>
+            <p class="muted">ایمیل: sales@counselnet.example</p>
+            <p class="muted">آدرس: تهران، خیابان نمونه، پلاک ۱۰</p>
+          </div>
+        </div>
+      </section>
+
+      <footer>
+        <div
+          style="
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+          ">
+          <div class="muted">
+            © 2026 سامانه مشاوره‌نت — تمامی حقوق محفوظ است
+          </div>
+          <div style="display: flex; gap: 12px">
+            <a class="muted" href="#">حریم خصوصی</a>
+            <a class="muted" href="#">سوالات متداول</a>
+          </div>
+        </div>
+      </footer>
+    </main>
+
+    <script>
+      // mobile menu
+      function toggleMenu() {
+        const nav = document.querySelector(".nav-links");
+        if (nav.style.display === "flex") nav.style.display = "none";
+        else nav.style.display = "flex";
+      }
+
+      function scrollToSection(id) {
+        const el = document.getElementById(id);
+        if (el) el.scrollIntoView({ behavior: "smooth" });
+      }
+
+      // demo modal (simple)
+      function openDemo() {
+        alert(
+          "برای درخواست دموی رایگان لطفاً فرم تماس را پر کنید یا با شماره پشتیبانی تماس بگیرید."
+        );
+        scrollToSection("contact");
+      }
+
+      function openContact(plan) {
+        document.getElementById("message").value = "درخواست انتخاب: " + plan;
+        scrollToSection("contact");
+        document.getElementById("name").focus();
+      }
+
+      // simple form submission (mock)
+      function submitForm(e) {
+        e.preventDefault();
+        const name = document.getElementById("name").value.trim();
+        const email = document.getElementById("email").value.trim();
+        if (!name || !email) {
+          alert("لطفاً نام و ایمیل را وارد کنید.");
+          return;
+        }
+        // here normally you'd send to server via fetch
+        alert("درخواست شما ثبت شد. ما در اسرع وقت با شما تماس خواهیم گرفت.");
+        e.target.reset();
+      }
+
+      // small progressive enhancement: Auto-fill demo message if UTM or query present
+      (function () {
+        try {
+          const q = new URLSearchParams(location.search);
+          if (q.get("demo") === "1") openDemo();
+        } catch (e) {}
+      })();
+    </script>
+  </body>
+</html>

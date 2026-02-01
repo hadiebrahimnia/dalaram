@@ -25,6 +25,12 @@ from collections import defaultdict, Counter
 ###################################################################################################### 
 def home_view(request):
     return render(request, 'index.html')
+
+def temp_home_view(request):
+    return render(request, 'temp_home.html')
+
+def taninyar(request):
+    return render(request, 'taninyar.html')
 ###################################################################################################### 
 ###################################################################################################### 
 ###################################################################################################### 
@@ -51,6 +57,7 @@ def login_or_signup(request):
         username_form = usernameEntryForm()
 
     return render(request, 'username_entry.html', {'form': username_form})
+
 
 ###################################################################################################### 
 ###################################################################################################### 
@@ -445,7 +452,7 @@ def pcm_view(request):
     NEGATIVE_URLS = [build_audio_url(f) for f in negative_raw]
 
     # --- مرحله ۱: تمرین تشخیص توالی ---
-    SEQ_TRIALS = 6  # تعداد کل مرحله تمرینی
+    SEQ_TRIALS = 2  # تعداد کل مرحله تمرینی
     SEQ_THRESHOLD = 0.83  # درصد پاسخ درست برای گذر از مرحله 
     
     seq_responses = PCMSequencePracticeResponse.objects.filter(user=user)
@@ -518,7 +525,7 @@ def pcm_view(request):
         
 
     # --- مرحله ۲: تمرین رتبه‌بندی خوشایندی ---
-    VALENCE_PRACTICE_TRIALS = 4
+    VALENCE_PRACTICE_TRIALS = 9
     valence_practice_responses = PCMValencePracticeResponse.objects.filter(user=user)
     valence_practice_count = valence_practice_responses.count()
     RESPONSE_TIMEOUT=3000
@@ -706,7 +713,9 @@ def pcm_view(request):
             'all_main_trials': json.dumps(all_main_trials),
         }
         return render(request, '3_pcm_main.html', context)
+    
 
+    # --- مرحله 4: تمرین رتبه بندی خوشایندی و برانگیختگی---
     RATING_PRACTICE_TRIALS = 5
     PRACTICE_FILES_RAW = [
         '0-practice/1.WAV',
@@ -729,7 +738,7 @@ def pcm_view(request):
         }
         return render(request, '4_rating_practice.html', context)
 
-    # --- مرحله ۵: رتبه‌بندی نهایی همه صداها (لیست ثابت مشخص‌شده) ---
+    # --- مرحله ۵: رتبه‌بندی  همه صداهای ارائه شده (خوشایندی و برانگیختگی) ---
     MAIN_RATING_FILES_RAW = [
         '5-MP-MA/102.WAV',
         '5-MP-MA/104.WAV',

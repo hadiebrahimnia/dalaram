@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>دلارام</title>
+  <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --primary:#0f6ef0;
+      --accent:#06b6d4;
+      --muted:#6b7280;
+      --bg:#f0f6ff;
+      --card:#ffffff;
+      --gradient:linear-gradient(135deg,var(--primary),var(--accent));
+    }
+    *{box-sizing:border-box;transition:all .3s ease}
+    body{
+      margin:0;font-family:'Vazirmatn',sans-serif;background:var(--bg);color:#0b1220;text-align:center;overflow-x:hidden}
+    header{
+      background:var(--gradient);color:#fff;padding:40px 20px;position:relative;overflow:hidden;
+    }
+    header::after{
+      content:'';position:absolute;bottom:-60px;left:50%;transform:translateX(-50%);width:120%;height:120px;background:#fff;border-radius:50%;}
+    h1{font-size:34px;margin-bottom:12px;position:relative;z-index:2}
+    p.lead{color:#e0f2fe;max-width:650px;margin:0 auto 30px;font-size:18px;position:relative;z-index:2}
+
+    .systems{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:28px;max-width:1100px;margin:60px auto;padding:0 20px;position:relative;z-index:2}
+
+    .card{background:var(--card);padding:28px;border-radius:18px;box-shadow:0 8px 30px rgba(0,0,0,0.08);position:relative;overflow:hidden}
+    .card:hover{transform:translateY(-6px) scale(1.02);box-shadow:0 10px 40px rgba(15,110,240,0.15)}
+
+    .card::before{content:'';position:absolute;top:-40%;left:-40%;width:180%;height:180%;background:radial-gradient(circle at 30% 20%,rgba(15,110,240,0.15),transparent 70%);z-index:0}
+    .card-content{position:relative;z-index:1}
+
+    .icon{width:70px;height:70px;border-radius:18px;display:flex;align-items:center;justify-content:center;margin:0 auto 18px;font-weight:700;color:#fff;font-size:26px;box-shadow:0 6px 16px rgba(0,0,0,0.1)}
+    .tanin{background:linear-gradient(135deg,#0f6ef0,#06b6d4);}
+    .maghz{background:linear-gradient(135deg,#8b5cf6,#6366f1);}
+    .shen{background:linear-gradient(135deg,#14b8a6,#0d9488);}
+
+    h2{margin-bottom:8px}
+    p{color:var(--muted)}
+
+    .btn{margin-top:18px;padding:12px 20px;border:0;border-radius:12px;background:var(--primary);color:#fff;font-weight:600;cursor:pointer;box-shadow:0 6px 20px rgba(15,110,240,0.25)}
+    .btn:hover{background:var(--accent)}
+
+    footer{margin-top:80px;padding:20px;background:#fff;color:var(--muted);font-size:14px;border-top:1px solid rgba(0,0,0,0.05)}
+    footer span{color:var(--primary);font-weight:700}
+
+    /* animation */
+    @keyframes floaty{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+    .card:hover .icon{animation:floaty 1.6s ease-in-out infinite}
+  </style>
+</head>
+<body>
+  <header>
+    <h1>مجموعه سامانه های  <span style="color:#fff;font-weight:800">دلارام</span></h1>
+    <p class="lead">با راهکارهای هوشمند دلارام، مدیریت کلینیک، ارزیابی روان‌سنجی و خودشناسی را ساده‌تر، دقیق‌تر و حرفه‌ای‌تر تجربه کنید.</p>
+  </header>
+
+  <div class="systems">
+    <div class="card">
+      <div class="card-content">
+        <div class="icon tanin">ط</div>
+        <h2>طنین‌یار</h2>
+        <p>سامانه‌ی مدیریت کلینیک‌های مشاوره و روانشناسی با نوبت‌دهی آنلاین، پرونده الکترونیک و گزارش‌های مدیریتی پیشرفته.</p>
+        <button class="btn" onclick="goTo('tanin')">ورود به طنین‌یار</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-content">
+        <div class="icon maghz">م</div>
+        <h2>مغزنگار</h2>
+        <p>سامانه‌ی تخصصی ثبت، تحلیل و مقایسه نتایج آزمون‌های روان‌سنجی و نوروفیدبک با داشبوردهای علمی و گرافیکی.</p>
+        <button class="btn" onclick="goTo('maghz')">مشاهده مغزنگار</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-content">
+        <div class="icon shen">ش</div>
+        <h2>شناسو</h2>
+        <p>پلتفرم هوشمند خودشناسی و ارزیابی شخصیت برای کاربران و مشاوران با تست‌های معتبر و گزارش تفصیلی.</p>
+        <button class="btn" onclick="goTo('shen')">مشاهده شناسو</button>
+      </div>
+    </div>
+  </div>
+
+  <footer>© 2026 <span>مجموعه دلارام</span> — تمامی حقوق محفوظ است</footer>
+
+  <script>
+    function goTo(name){
+      switch(name){
+        case 'tanin': window.location.href = '/taninyar/'; break;
+        case 'maghz': alert('صفحه مغزنگار به‌زودی فعال می‌شود.'); break;
+        case 'shen': alert('صفحه شناسو در حال توسعه است.'); break;
+      }
+    }
+  </script>
+</body>
+</html>
