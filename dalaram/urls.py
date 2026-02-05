@@ -38,4 +38,11 @@ urlpatterns = [
     path('pcm/save/', pcm_save_response, name='pcm_save'),
 
     path('questionnaire/<int:pk>/respond/', respond_questionnaire, name='respond_questionnaire'),
+
+    path('result/', result_view, name='result'),
+    path('result/pcm/', pcm_result_view, name='pcm_result'),
+    path('result/rating/', rating_result_view, name='rating_result'),
+    # path('detail/<int:id>/', detail_result_view, name='detail_result'),
 ]
+
+

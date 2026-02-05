@@ -5,7 +5,64 @@ from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from .models import *
 
 # ------------------- CustomUser -------------------
-admin.site.register(CustomUser, BaseUserAdmin)
+admin.site.register(CustomUser)
+class CustomUserAdmin(BaseUserAdmin):
+    # فیلدهایی که در لیست کاربران نمایش داده می‌شوند
+    list_display = (
+        "username",
+        "first_name",
+        "last_name",
+        "gender",
+        "hand",
+        "birth_date",
+        "is_staff",
+        "is_active",
+    )
+    list_filter = ("is_staff", "is_active", "gender", "hand")
+
+    # فیلدهایی که در فرم ویرایش کاربر نمایش داده می‌شوند
+    fieldsets = (
+        (None, {"fields": ("username", "password")}),
+        (("اطلاعات شخصی"), {
+            "fields": (
+                "first_name",
+                "last_name",
+                "birth_date",
+                "gender",
+                "hand",
+                "disorder",
+                "drug",
+            )
+        }),
+        (("دسترسی‌ها"), {"fields": ("is_active", "is_staff", "is_superuser", "groups", "user_permissions")}),
+        (("تاریخ‌ها"), {"fields": ("last_login", "date_joined")}),
+    )
+
+    # فیلدهایی که در فرم ایجاد کاربر جدید نمایش داده می‌شوند
+    add_fieldsets = (
+        (None, {
+            "classes": ("wide",),
+            "fields": (
+                "username",
+                "password1",
+                "password2",
+                "first_name",
+                "last_name",
+                "birth_date",
+                "gender",
+                "hand",
+                "disorder",
+                "drug",
+                "is_active",
+                "is_staff",
+                "is_superuser",
+            ),
+        }),
+    )
+
+    search_fields = ("username", "first_name", "last_name")
+    ordering = ("username",)
+
 admin.site.register(PCMCueMapping)
 
 # ------------------- Questionnaire & Related -------------------
@@ -67,7 +124,7 @@ class ResultInline(admin.TabularInline):
     model = Result
     extra = 0
     can_delete = False
-    readonly_fields = ('attribute', 'raw_score', 'average_score', 'average_rt')
+    readonly_fields = ('attribute', 'raw_score', 'average_score','sum_rt','average_rt')
     fields = readonly_fields
 
 

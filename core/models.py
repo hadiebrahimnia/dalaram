@@ -1,6 +1,10 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 
+###################################################################################################### 
+###################################################################################################### 
+###################################################################################################### 
+###################################################################################################### 
 class CustomUser(AbstractUser):
     username = models.CharField(
         "شماره موبایل",
@@ -27,6 +31,11 @@ class CustomUser(AbstractUser):
     def __str__(self):
         return self.username
     
+
+###################################################################################################### 
+###################################################################################################### 
+###################################################################################################### 
+###################################################################################################### 
 
 # پرسشنامه
 class Questionnaire(models.Model):
@@ -126,8 +135,8 @@ class Result(models.Model):
         verbose_name="Response"
     )
     attribute = models.ForeignKey(Attribute, on_delete=models.CASCADE, verbose_name="Attribute")
-    raw_score = models.FloatField(verbose_name="نمره خام", default=0.0)
     num_questions = models.IntegerField(verbose_name="تعداد سوالات مربوط به ویژگی", default=0)
+    raw_score = models.FloatField(verbose_name="نمره خام", default=0.0)
     average_score = models.FloatField(verbose_name="میانگین نمره", default=0.0)
     sum_rt = models.PositiveIntegerField(verbose_name="جمع RT", default=0)
     average_rt = models.FloatField(verbose_name="میانگین RT", default=0.0)
@@ -142,7 +151,11 @@ class Result(models.Model):
         return f"نتیجه {self.attribute.title} برای {self.user.username} در {self.questionnaire.title}"
     
 
-class RatingPractice(models.Model):  # مرحله ۴ - تمرین رتبه‌بندی Valence+Arousal
+###################################################################################################### 
+###################################################################################################### 
+###################################################################################################### 
+###################################################################################################### 
+class RatingPractice(models.Model):
     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
     trial = models.PositiveIntegerField()
     stimulus = models.CharField(max_length=100)
@@ -154,7 +167,7 @@ class RatingPractice(models.Model):  # مرحله ۴ - تمرین رتبه‌ب�
 
     class Meta:
         unique_together = ('user', 'trial')
-        verbose_name = "0-practice"
+        verbose_name = "A-0)practice"
         ordering = ['trial']
 
 
@@ -200,8 +213,8 @@ class RatingResponse(models.Model):
 
     class Meta:
         unique_together = ('user', 'stimulus')  # هر کاربر فقط یک بار برای هر محرک رتبه بدهد
-        verbose_name = "0-Rating"
-        verbose_name_plural = "0-Rating"
+        verbose_name = "A-1)Rating"
+        verbose_name_plural = "A-1)Rating"
         ordering = ['-created_at']
 
     def __str__(self):
@@ -218,8 +231,14 @@ class RatingResponse(models.Model):
 
     def is_complete(self):
         return self.has_valence() and self.has_arousal()
- 
- 
+    
+
+
+
+###################################################################################################### 
+###################################################################################################### 
+###################################################################################################### 
+###################################################################################################### 
 class PCMSequencePracticeResponse(models.Model):  # مرحله ۱
     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
     trial = models.PositiveIntegerField()
@@ -234,7 +253,7 @@ class PCMSequencePracticeResponse(models.Model):  # مرحله ۱
 
     class Meta:
         unique_together = ('user', 'trial', 'created_at')
-        verbose_name = "1-تمرین تشخیص توالی"
+        verbose_name = "B-1)تمرین تشخیص توالی"
         ordering = ['created_at']
 
 
@@ -256,7 +275,7 @@ class PCMValencePracticeResponse(models.Model):  # مرحله ۲
 
     class Meta:
         unique_together = ('user', 'trial')
-        verbose_name = "2-تمرین رتبه‌بندی خوشایندی"
+        verbose_name = "B-2)تمرین رتبه‌بندی خوشایندی"
         ordering = ['trial']
 
 
@@ -277,7 +296,7 @@ class PCMCatchResponse(models.Model):  # مرحله ۱
 
     class Meta:
         unique_together = ('user', 'trial', 'created_at')
-        verbose_name = "3-PCM-Catch"
+        verbose_name = "B-3)PCM-Catch"
         ordering = ['created_at']
 
 class PCMMainResponse(models.Model):
@@ -371,8 +390,8 @@ class PCMMainResponse(models.Model):
 
     class Meta:
         unique_together = ('user', 'block', 'trial')
-        verbose_name = "3-PCM-Main"
-        verbose_name_plural = "3-PCM-Main"
+        verbose_name = "B-3)PCM-Main"
+        verbose_name_plural = "B-3)PCM-Main"
         ordering = ['-created_at', 'block', 'trial']
 
     def __str__(self):
@@ -397,10 +416,10 @@ class RatingPracticeResponse(models.Model):  # مرحله ۴ - تمرین رتب
 
     class Meta:
         unique_together = ('user', 'trial')
-        verbose_name = "4-تمرین رتبه‌بندی (Valence+Arousal)"
+        verbose_name = "B-4)تمرین رتبه‌بندی (Valence+Arousal)"
         ordering = ['trial']
 
-class RatingMainResponse(models.Model):  # مرحله ۵ - رتبه‌بندی اصلی
+class RatingMainResponse(models.Model):  # مرحله ۵ - رتبه‌بندی
     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
     trial = models.PositiveIntegerField(null=True, blank=True)
     stimulus_file = models.CharField(max_length=200)
@@ -413,7 +432,7 @@ class RatingMainResponse(models.Model):  # مرحله ۵ - رتبه‌بندی �
 
     class Meta:
         unique_together = ('user', 'stimulus_number')
-        verbose_name = "5-رتبه‌بندی اصلی"
+        verbose_name = "B-5)رتبه‌بندی اصلی"
         ordering = ['-created_at']
 
 
@@ -424,3 +443,9 @@ class PCMCueMapping(models.Model):
 
     class Meta:
         verbose_name = "نگاشت ثابت Cue به Sequence در PCM"
+
+
+###################################################################################################### 
+###################################################################################################### 
+###################################################################################################### 
+###################################################################################################### 

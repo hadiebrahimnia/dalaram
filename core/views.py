@@ -18,6 +18,46 @@ from django.core.exceptions import PermissionDenied
 from typing import Dict, List, Tuple, Optional
 from django.views.decorators.csrf import csrf_exempt
 from collections import defaultdict, Counter
+from jdatetime import datetime as jdatetime
+import datetime
+from django.db.models import Avg, Count
+
+
+# _LATIN_TO_PERSIAN_DIGITS = str.maketrans('0123456789', '۰۱۲۳۴۵۶۷۸۹')
+
+def convert_birth_to_jalali_view(user):
+    """
+    تبدیل تاریخ تولد کاربر به تاریخ شمسی با اعداد فارسی
+    """
+    try:
+        if not user.birth_date:
+            return '-'
+
+        jalali_date = jdatetime.fromgregorian(date=user.birth_date)
+        jalali_full = jalali_date.strftime('%Y/%m/%d')
+        # jalali_full_persian = jalali_full.translate(_LATIN_TO_PERSIAN_DIGITS)
+        return jalali_full
+
+    except Exception:
+        return '-'
+
+
+def calculate_age_view(user):
+    """
+    محاسبه سن کاربر بر اساس تاریخ تولد
+    """
+    try:
+        if not user.birth_date:
+            return '-'
+
+        today = date.today()
+        age_years = today.year - user.birth_date.year
+        if (today.month, today.day) < (user.birth_date.month, user.birth_date.day):
+            age_years -= 1
+        return age_years
+
+    except Exception:
+        return '-'
 
 ###################################################################################################### 
 ###################################################################################################### 
@@ -179,14 +219,18 @@ def respond_questionnaire(request, pk):
 @questionnaires_required([1,2,3])
 def rating_view(request):
     user = request.user
-    # --- مرحله 4: رتبه‌بندی همه صداها (لیست ثابت مشخص‌شده) ---
-    RATING_PRACTICE_TRIALS = 5
+    RATING_PRACTICE_TRIALS = 10
     PRACTICE_FILES_RAW = [
-        '0-practice/1.WAV',
-        '0-practice/2.WAV',
-        '0-practice/3.WAV',
-        '0-practice/4.WAV',
-        '0-practice/5.WAV',
+        '0-practice/1.mp3',
+        '0-practice/2.mp3',
+        '0-practice/3.mp3',
+        '0-practice/4.mp3',
+        '0-practice/5.mp3',
+        '0-practice/6.mp3',
+        '0-practice/7.mp3',
+        '0-practice/8.mp3',
+        '0-practice/9.mp3',
+        '0-practice/10.mp3',
     ]
     practice_files = [build_audio_url(f) for f in PRACTICE_FILES_RAW[:RATING_PRACTICE_TRIALS]]
     rating_practice_count = RatingPractice.objects.filter(user=user).count()
@@ -272,6 +316,7 @@ def rating_save_response(request):
     # مرحله ۱: تمرین تشخیص توالی
 
     if data.get('is_rating_practice'):
+        print("Here")
         RatingPractice.objects.create(
             user=user,
             trial=data['trial'],
@@ -718,11 +763,16 @@ def pcm_view(request):
     # --- مرحله 4: تمرین رتبه بندی خوشایندی و برانگیختگی---
     RATING_PRACTICE_TRIALS = 5
     PRACTICE_FILES_RAW = [
-        '0-practice/1.WAV',
-        '0-practice/2.WAV',
-        '0-practice/3.WAV',
-        '0-practice/4.WAV',
-        '0-practice/5.WAV',
+        '0-practice/1.mp3',
+        '0-practice/2.mp3',
+        '0-practice/3.mp3',
+        '0-practice/4.mp3',
+        '0-practice/5.mp3',
+        '0-practice/6.mp3',
+        '0-practice/7.mp3',
+        '0-practice/8.mp3',
+        '0-practice/9.mp3',
+        '0-practice/10.mp3',
     ]
     practice_files = [build_audio_url(f) for f in PRACTICE_FILES_RAW[:RATING_PRACTICE_TRIALS]]
     rating_practice_count = RatingPracticeResponse.objects.filter(user=user).count()
@@ -906,3 +956,187 @@ def pcm_save_response(request):
         return JsonResponse({'status': 'error', 'message': 'نوع داده نامعتبر'}, status=400)
 
     return JsonResponse({'status': 'success'})
+
+
+def result_view(request):
+    return render(request, 'result.html')
+
+
+def pcm_result_view(request):
+    users = CustomUser.objects.all().order_by('id')
+    data = {
+        'users': [],
+        'rates': [],
+    }
+
+    ratingresponse = (
+        RatingMainResponse.objects
+        .values('stimulus_number', 'stimulus_file')
+        .annotate(
+            avg_valence=Avg('valence'),
+            avg_valence_rt=Avg('valence_rt'),
+            avg_arousal=Avg('arousal'),
+            avg_arousal_rt=Avg('arousal_rt'),
+            n_responses=Count('id'),
+        )
+        .order_by('stimulus_number')
+    )
+    
+    for rate in ratingresponse:
+        
+        rate_data = {
+            'stimulus': rate['stimulus'],
+            'N': rate['n_responses'],
+            'stimulus_file': rate['stimulus_file'][17:22],
+            'valence': round(rate['avg_valence'] or 0, 2),
+            'valence_rt': round(rate['avg_valence_rt'] or 0, 2),
+            'arousal': round(rate['avg_arousal'] or 0, 2),
+            'arousal_rt': round(rate['avg_arousal_rt'] or 0, 2),
+        }
+        data['rates'].append(rate_data)
+
+    for user in users:
+        results = Result.objects.filter(user=user)
+        rating_response = RatingMainResponse.objects.filter(user=user)
+        PCM_main_response = PCMMainResponse.objects.filter(user=user)
+
+        # --- محاسبه میانگین‌های کلی (از RatingMainResponse) ---
+        avg_data = rating_response.aggregate(
+            avg_valence=Avg('valence'),
+            avg_valence_rt=Avg('valence_rt'),
+            avg_arousal=Avg('arousal'),
+            avg_arousal_rt=Avg('arousal_rt'),
+            n_responses=Count('id'),
+        )
+
+        # --- محاسبه میانگین‌های PCM بر اساس انتظار ---
+        pcm_expected = PCM_main_response.filter(is_consistent=True).aggregate(
+            n_responses=Count('id'),
+            avg_valence_stim1=Avg('valence_stim1'),
+            avg_valence_rt_stim1=Avg('valence_rt_stim1'),
+            avg_valence_stim2=Avg('valence_stim2'),
+            avg_valence_rt_stim2=Avg('valence_rt_stim2'),
+            avg_valence_sequence=Avg('valence_sequence'),
+            avg_valence_rt_sequence=Avg('valence_rt_sequence'),
+        )
+
+        pcm_unexpected = PCM_main_response.filter(is_consistent=False).aggregate(
+            n_responses=Count('id'),
+            avg_valence_stim1=Avg('valence_stim1'),
+            avg_valence_rt_stim1=Avg('valence_rt_stim1'),
+            avg_valence_stim2=Avg('valence_stim2'),
+            avg_valence_rt_stim2=Avg('valence_rt_stim2'),
+            avg_valence_sequence=Avg('valence_sequence'),
+            avg_valence_rt_sequence=Avg('valence_rt_sequence'),
+        )
+
+        if PCM_main_response :
+            user_data = {
+                'name': user.get_full_name() or user.username,
+                'email': user.email,
+                'mobile': user.username,
+                'birth_date': convert_birth_to_jalali_view(user),
+                'age': calculate_age_view(user),
+                'gender': dict(CustomUser.GENDER_CHOICES).get(user.gender, 'نامشخص'),
+                'hand': dict(CustomUser.HAND_CHOICES).get(user.hand, 'نامشخص'),
+                'disorder': user.disorder,
+                'drug': user.drug,
+
+                # داده‌های RatingMainResponse
+                'n_responses': avg_data['n_responses'],
+                'avg_valence': round(avg_data['avg_valence'] or 0, 2),
+                'avg_valence_rt': round(avg_data['avg_valence_rt'] or 0, 2),
+                'avg_arousal': round(avg_data['avg_arousal'] or 0, 2),
+                'avg_arousal_rt': round(avg_data['avg_arousal_rt'] or 0, 2),
+
+                # داده‌های PCM (قابل انتظار)
+                'pcm_expected_count': pcm_expected['n_responses'],
+                'pcm_expected_valence_stim1': round(pcm_expected['avg_valence_stim1'] or 0, 2),
+                'pcm_expected_valence_rt_stim1': round(pcm_expected['avg_valence_rt_stim1'] or 0, 2),
+                'pcm_expected_valence_stim2': round(pcm_expected['avg_valence_stim2'] or 0, 2),
+                'pcm_expected_valence_rt_stim2': round(pcm_expected['avg_valence_rt_stim2'] or 0, 2),
+                'pcm_expected_valence_seq': round(pcm_expected['avg_valence_sequence'] or 0, 2),
+                'pcm_expected_valence_rt_seq': round(pcm_expected['avg_valence_rt_sequence'] or 0, 2),
+
+                # داده‌های PCM (غیرقابل انتظار)
+                'pcm_unexpected_count': pcm_unexpected['n_responses'],
+                'pcm_unexpected_valence_stim1': round(pcm_unexpected['avg_valence_stim1'] or 0, 2),
+                'pcm_unexpected_valence_rt_stim1': round(pcm_unexpected['avg_valence_rt_stim1'] or 0, 2),
+                'pcm_unexpected_valence_stim2': round(pcm_unexpected['avg_valence_stim2'] or 0, 2),
+                'pcm_unexpected_valence_rt_stim2': round(pcm_unexpected['avg_valence_rt_stim2'] or 0, 2),
+                'pcm_unexpected_valence_seq': round(pcm_unexpected['avg_valence_sequence'] or 0, 2),
+                'pcm_unexpected_valence_rt_seq': round(pcm_unexpected['avg_valence_rt_sequence'] or 0, 2),
+
+                'rating_response': rating_response,
+                'results': results,
+            }
+
+            data['users'].append(user_data)
+
+    return render(request, 'pcm_result.html', data)
+
+def rating_result_view(request):
+    users = CustomUser.objects.all().order_by('id')
+    data = {
+        'users': [],
+        'rates': [],
+    }
+    ratingresponse = (
+        RatingResponse.objects
+        .values('stimulus', 'stimulus_file')
+        .annotate(
+            avg_valence=Avg('valence'),
+            avg_valence_rt=Avg('valence_rt'),
+            avg_arousal=Avg('arousal'),
+            avg_arousal_rt=Avg('arousal_rt'),
+            n_responses=Count('id'),
+        )
+        .order_by('stimulus')
+    )
+    
+    for rate in ratingresponse:
+        
+        rate_data = {
+            'stimulus': rate['stimulus'],
+            'N': rate['n_responses'],
+            'stimulus_file': rate['stimulus_file'][17:22],
+            'valence': round(rate['avg_valence'] or 0, 2),
+            'valence_rt': round(rate['avg_valence_rt'] or 0, 2),
+            'arousal': round(rate['avg_arousal'] or 0, 2),
+            'arousal_rt': round(rate['avg_arousal_rt'] or 0, 2),
+        }
+        data['rates'].append(rate_data)
+
+    for user in users:
+        results = Result.objects.filter(user=user)
+        rating_response = RatingResponse.objects.filter(user=user)
+        
+        avg_data = rating_response.aggregate(
+            avg_valence=Avg('valence'),
+            avg_valence_rt=Avg('valence_rt'),
+            avg_arousal=Avg('arousal'),
+            avg_arousal_rt=Avg('arousal_rt'),
+            n_responses=Count('id'),
+        )
+        if rating_response :
+            user_data = {
+                'name': user.get_full_name() or user.username,
+                'email': user.email,
+                'mobile': user.username,
+                'birth_date': convert_birth_to_jalali_view(user),
+                'age': calculate_age_view(user),
+                'gender': dict(CustomUser.GENDER_CHOICES).get(user.gender, 'نامشخص'),
+                'hand': dict(CustomUser.HAND_CHOICES).get(user.hand, 'نامشخص'),
+                'disorder': user.disorder,
+                'drug': user.drug,
+                'n_responses': avg_data['n_responses'],
+                'avg_valence': round(avg_data['avg_valence'] or 0, 2),
+                'avg_valence_rt': round(avg_data['avg_valence_rt'] or 0, 2),
+                'avg_arousal': round(avg_data['avg_arousal'] or 0, 2),
+                'avg_arousal_rt': round(avg_data['avg_arousal_rt'] or 0, 2),
+                'rating_response': rating_response,
+                'results': results,
+            }
+            data['users'].append(user_data)
+
+    return render(request, 'rating_result.html', data)

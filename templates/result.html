@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>صفحه اصلی سایت</title>
+    <title>صفحه نتایج</title>
     <style>
         @font-face {
             font-family: "Vazirmatn"!important;
@@ -89,7 +89,7 @@
 
       .btn {
         background-color: white;
-        color: #000000ff;
+        color: #4a6bdf;
         padding: 12px 30px;
         border: none;
         border-radius: 50px;
@@ -189,7 +189,7 @@
         color: white;
       }
 
-    .btn {
+    .logout-btn {
         font-family: "Vazirmatn"!important;
         display: inline-block;
         font-weight: 500;
@@ -209,35 +209,19 @@
 
 
     /* استایل outline-danger */
-    .outline-danger {
-        color: #dc3545;
+    .logout-btn.outline-danger {
+        color: #dc3545;                 /* رنگ متن و border قرمز خطر */
         border-color: #dc3545;
         background-color: transparent;
     }
 
-    .outline-danger:hover {
+    .logout-btn.outline-danger:hover {
         color: #fff;                    /* متن سفید در hover */
         background-color: #dc3545;      /* پر شدن با قرمز */
+        border-color: #dc3545;
     }
 
-    .outline-danger:focus {
-        outline: none;                  /* حذف outline پیش‌فرض مرورگر */
-        box-shadow: 0 0 0 0.25rem rgba(220, 53, 69, 0.25); /* فوکوس رینگ مشابه Bootstrap */
-    }
-
-
-    .outline-secondary {
-        color: #565656ff;
-        border-color: #565656ff;
-        background-color: transparent;
-    }
-
-    .outline-secondary:hover {
-        color: #fff;                    /* متن سفید در hover */
-        background-color: #565656ff;      /* پر شدن با قرمز */
-    }
-
-    .outline-secondary:focus {
+    .logout-btn.outline-danger:focus {
         outline: none;                  /* حذف outline پیش‌فرض مرورگر */
         box-shadow: 0 0 0 0.25rem rgba(220, 53, 69, 0.25); /* فوکوس رینگ مشابه Bootstrap */
     }
@@ -262,36 +246,24 @@
   </head>
   <body>
     <!-- بخش ویژگی‌ها -->
+    {% if request.user.is_superuser %}
     <section class="features">
       <div class="container">
-        <h2>آزمون مد نظر را انتخاب نمایید !</h2>
+        <h2>نتایج</h2>
         <div class="cards">
-          <a href="/experiment/rating" class="card-btn">
+          <a href="/result/rating" class="card-btn">
             <i class="fa fa-list-ul"></i>
             <h3>آزمون رتبه بندی</h3>
-            <p>در این آزمون تعدای صدا پخش میشود و شما باید به آنها از نظر خوشایندی و شدت  هیجان نمره بدهید</p>
           </a>
-          <a href="/experiment/pcm" class="card-btn">
+          <a href="/result/pcm" class="card-btn">
             <i class="fa fa-music"></i>
             <h3>توالی‌های صوتی </h3>
-            <p>در این آزمون تعدادی توالی صوتی برای شما پخش میشود و شما به صدا ها از نظر خوشایندی نمره میدهید</p>
           </a>
         </div>
-        {% if user.is_authenticated %}
-        <div style="margin-top: 3rem; text-align: center;">
-            <form action="{% url 'logout' %}" method="post" style="display: inline;">
-                {% csrf_token %}
-                <button type="submit" class="btn outline-danger" style="width:250px;">خروج/شرکت به عنوان کاربر جدید</button><br>
-            </form>
-            {% if request.user.is_superuser %}
-              <a href="/result" class="btn outline-secondary" style="width:250px;margin-top: 1rem;">نتایج</a>
-          {% endif %}
-        </div>
-        {% endif %}
-
-        
-
-
     </section>
+    {% endif %}
+    <div style="margin-top: 3rem; text-align: center;">
+        <a href="/" class="btn outline-secondary" style="width:250px;margin-top: 1rem;">بازگشت</a>
+    </div>
   </body>
 </html>

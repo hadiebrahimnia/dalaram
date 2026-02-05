@@ -1,0 +1,292 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>آزمون توالی صوتی</title>
+  <style>
+    :root {
+      --bg:#f7f9fc;--card:#fff;--muted:#6b7280;--accent:#0ea5a4
+    }
+    html,body {
+      height:100%;margin:0;font-family:"Vazirmatn",system-ui,"Segoe UI",Roboto,"Helvetica Neue",Arial;
+      background:var(--bg);color:#111;
+    }
+    .container {
+      max-width:1400px;margin:28px auto;padding:20px;
+    }
+    .card {
+      background:var(--card);border-radius:12px;box-shadow:0 6px 20px rgba(12,20,30,0.06);padding:18px;
+    }
+    h1 {
+      margin:0 0 12px;font-size:20px;
+    }
+    input[type=search] {
+      padding:10px 12px;border-radius:8px;border:1px solid #e6e9ef;min-width:260px;
+    }
+    table {
+      width:100%;border-collapse:collapse;margin-top:12px;
+      
+
+    }
+    th,td {
+      padding:10px 12px;
+      border-bottom:1px solid #eef2f6;
+      text-align: center;
+    }
+    th {
+      background:linear-gradient(180deg,#fff,#fbfdff);
+    }
+    
+    tr:hover td {
+      background:#fbfdff;
+    }
+    .badge {
+      display:inline-block;padding:6px 8px;border-radius:999px;font-size:12px;
+    }
+    .ok {background:#ecfdf5;color:#065f46}
+    .warn {background:#fff7ed;color:#92400e}
+    .danger {background:#fff1f2;color:#831843}
+
+    #chartContainer{
+      margin: auto;
+      margin-bottom:10px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+
+    <div class="card">
+      <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;justify-content:space-between">
+        <h1>نتایج آزمون توالی صوتی</h1>
+        <input type="search" id="searchInput" placeholder="جستجو در جدول..." />
+      </div>
+      <div style="overflow:auto">
+        <table id="usersTable">
+          <thead>
+            <tr>
+              <th style="min-width: 20px;">ردیف</th>
+              <th style="min-width: 114px;">شماره موبایل</th>
+              <th style="min-width: 114px;">تاریخ تولد</th>
+              <th style="min-width: 114px;">سن</th>
+              <th style="min-width: 114px;">جنسیت</th>
+              <th style="min-width: 114px;">دست غالب</th>
+              <th style="min-width: 114px;">سابقه بیماری جسمی</th>
+              <th style="min-width: 114px;">سابقه بیماری روانی</th>
+              <th style="min-width: 114px;">تعداد پاسخ های (قابل انتظار)</th>
+              <th style="min-width: 114px;">میانگین خوشایندی محرک 1 (قابل انتظار)</th>
+              <th style="min-width: 114px;">میانگین زمان پاسخ خوشایندی محرک 1 (قابل انتظار)</th>
+              <th style="min-width: 114px;">میانگین خوشایندی محرک 2 (قابل انتظار)</th>
+              <th style="min-width: 114px;">میانگین زمان پاسخ خوشایندی محرک 2 (قابل انتظار)</th>
+              <th style="min-width: 114px;">میانگین خوشایندی محرک کل (قابل انتظار)</th>
+              <th style="min-width: 114px;">میانگین زمان پاسخ خوشایندی محرک کل (قابل انتظار)</th>
+              <th style="min-width: 114px;">تعداد پاسخ های (عدم انتظار)</th>
+              <th style="min-width: 114px;">میانگین خوشایندی محرک 1 (عدم انتظار)</th>
+              <th style="min-width: 114px;">میانگین زمان پاسخ خوشایندی محرک 1 (عدم انتظار)</th>
+              <th style="min-width: 114px;">میانگین خوشایندی محرک 2 (عدم انتظار)</th>
+              <th style="min-width: 114px;">میانگین زمان پاسخ خوشایندی محرک 2 (عدم انتظار)</th>
+              <th style="min-width: 114px;">میانگین خوشایندی محرک کل (عدم انتظار)</th>
+              <th style="min-width: 114px;">میانگین زمان پاسخ خوشایندی محرک کل (عدم انتظار)</th>
+
+
+              <th style="min-width: 114px;">تعداد پاسخ ها (رتبه بندی)</th>
+              <th style="min-width: 114px;">میانگین خوشایندی(رتبه بندی)</th>
+              <th style="min-width: 114px;">میانگین زمان واکنش خوشایندی(رتبه بندی)</th>
+              <th style="min-width: 114px;">میانگین برانگیختگی(رتبه بندی)</th>
+              <th style="min-width: 114px;">میانگین زمان واکنش برانگیختگی(رتبه بندی)</th>
+              
+
+              {% for item in users %}
+                {% for result in item.results%}
+                  <th style="min-width: 114px;">نمره خام <br>{{ result.attribute }}</th>
+                  <th style="min-width: 114px;">میانگین نمرات <br>{{ result.attribute }}</th>
+                  <th style="min-width: 114px;">جمع زمان پاسخ<br>{{ result.attribute }}</th>
+                  <th style="min-width: 114px;">میانگین زمان پاسخ<br>{{ result.attribute }}</th>
+                {% endfor %}
+              {% endfor %}
+            </tr>
+          </thead>
+          <tbody>
+
+            {% for item in users %}
+              <tr>
+                <!-- اطلاعات کاربر -->
+                <td style="background:#083d77;color:#ebebd3">{{ forloop.counter }}</td>
+                <td style="background:#083d77;color:#ebebd3"><a href="#" style="color:#ebebd3">{{ item.mobile }}</a></td>
+                <td style="background:#083d77;color:#ebebd3">{{ item.birth_date|default:"-" }}</td>
+                <td style="background:#083d77;color:#ebebd3">{{ item.age|default:"-" }}</td>
+                <td style="background:#083d77;color:#ebebd3">{{ item.gender|default:"-" }}</td>
+                <td style="background:#083d77;color:#ebebd3">{{ item.hand|default:"-" }}</td>
+                <td style="background:#083d77;color:#ebebd3">{{ item.disorder|default:"-" }}</td>
+                <td style="background:#083d77;color:#ebebd3">{{ item.drug|default:"-" }}</td>
+
+
+
+                <!-- داده‌های PCM - قابل انتظار -->
+                <td style="background:#d7f9f1;color:#2e4052">{{ item.pcm_expected_count }}</td>
+                <td style="background:#bff3e3;color:#2e4052">{{ item.pcm_expected_valence_stim1 }}</td>
+                <td style="background:#a8ecd5;color:#2e4052">{{ item.pcm_expected_valence_rt_stim1 }}</td>
+                <td style="background:#91e6c7;color:#2e4052">{{ item.pcm_expected_valence_stim2 }}</td>
+                <td style="background:#7adfb9;color:#2e4052">{{ item.pcm_expected_valence_rt_stim2 }}</td>
+                <td style="background:#63d9ab;color:#2e4052">{{ item.pcm_expected_valence_seq }}</td>
+                <td style="background:#4cd39d;color:#2e4052">{{ item.pcm_expected_valence_rt_seq }}</td>
+
+                <!-- داده‌های PCM - عدم انتظار -->
+                <td style="background:#ffe8d6;color:#2e4052">{{ item.pcm_unexpected_count }}</td>
+                <td style="background:#ffd9b8;color:#2e4052">{{ item.pcm_unexpected_valence_stim1 }}</td>
+                <td style="background:#ffca99;color:#2e4052">{{ item.pcm_unexpected_valence_rt_stim1 }}</td>
+                <td style="background:#ffbb7b;color:#2e4052">{{ item.pcm_unexpected_valence_stim2 }}</td>
+                <td style="background:#ffac5c;color:#2e4052">{{ item.pcm_unexpected_valence_rt_stim2 }}</td>
+                <td style="background:#ff9d3e;color:#2e4052">{{ item.pcm_unexpected_valence_seq }}</td>
+                <td style="background:#ff8e1f;color:#2e4052">{{ item.pcm_unexpected_valence_rt_seq }}</td>
+
+
+                <!-- داده‌های RatingMainResponse -->
+                <td style="background:#f5ecfe;color:#2e4052">{{ item.n_responses }}</td>
+                <td style="background:#ebddfe;color:#2e4052">{{ item.avg_valence }}</td>
+                <td style="background:#e0cefe;color:#2e4052">{{ item.avg_valence_rt }}</td>
+                <td style="background:#d6bffe;color:#2e4052">{{ item.avg_arousal }}</td>
+                <td style="background:#cbaffe;color:#2e4052">{{ item.avg_arousal_rt }}</td>
+
+                <!-- داده‌های نتایج (Result) -->
+                {% for result in item.results %}
+                  <td style="background:#ead7c2;color:#2e4052">{{ result.raw_score|floatformat:2 }}</td>
+                  <td style="background:#f0e2d3;color:#2e4052">{{ result.average_score|floatformat:2 }}</td>
+                  <td style="background:#f5ebe1;color:#2e4052">{{ result.sum_rt|floatformat:2 }}</td>
+                  <td style="background:#faf5f0;color:#2e4052">{{ result.average_rt|floatformat:2 }}</td>
+                {% endfor %}
+              </tr>
+              {% empty %}
+              <tr>
+                <td colspan="28" style="text-align:center;color:#666">هنوز کاربری ثبت نشده است.</td>
+              </tr>
+              {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+
+
+  <div style="background:white;padding:10px;margin:60px">
+      <div id="chartContainer" style="height: 700px; width: 70%;"></div>
+  </div>
+  <div class="container">
+    <div class="card" style="margin-bottom:10px;">
+      <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;justify-content:space-between">
+        <h1>نتایج بخش  رتبه بندی</h1>
+        <input type="search" id="searchInput" placeholder="جستجو در جدول..." />
+      </div>
+      <div style="overflow:auto">
+        <table id="usersTable">
+          <thead>
+            <tr>
+              <th>ردیف</th>
+              <th>محرک</th>
+              <th>تعداد</th>
+              <th>دسته بندی مبدا</th>
+              <th>خوشایندی</th>
+              <th>زمان واکنش خوشایندی</th>
+              <th>برانگیختگی</th>
+              <th>زمان واکنش برانگیختگی</th>
+            </tr>
+          </thead>
+          <tbody>
+
+            {% for item in rates %}
+            <tr>
+              <td>{{ forloop.counter }}</a></td>
+              <td>{{ item.stimulus }}</td>
+              <td>{{ item.N }}</td>
+              <td>{{ item.stimulus_file }}</td>
+              <td>{{ item.valence  }}</td>
+              <td>{{ item.valence_rt }}</td>
+              <td>{{ item.arousal }}</td>
+              <td>{{ item.arousal_rt }}</td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="14" style="text-align:center;color:#666">هنوز کاربری ثبت نشده است.</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    
+  </div>
+  <script src="/static/js/jquery.min.js"></script>
+  <script src="/static/js/canvasjs.js"></script>
+  <script>
+    const searchInput = document.getElementById('searchInput');
+    const table = document.getElementById('usersTable');
+    const rows = table.querySelectorAll('tbody tr');
+
+    searchInput.addEventListener('input', () => {
+      const q = searchInput.value.trim().toLowerCase();
+      rows.forEach(row => {
+        const text = row.innerText.toLowerCase();
+        row.style.display = text.includes(q) ? '' : 'none';
+      });
+    });
+  </script>
+
+  <script>
+window.onload = function () {
+
+//Better to construct options first and then pass it as a parameter
+var options = {
+	animationEnabled: true,
+	zoomEnabled: true,
+  panEnabled: true, 
+  zoomType: "xy",
+  viewport: {
+		xMin: 3,  // شروع محور X از ۳
+		xMax: 10, // پایان محور X در ۱۰
+		yMin: 0,  // شروع محور Y از ۰
+		yMax: 5   // پایان محور Y در ۵
+	},
+	colorSet: "colorSet2",
+	title: {
+		text: "Valance/Arosal"
+	},
+	axisX: {
+		title: "Valance",
+		suffix: "",
+		minimum: 0.9, // حداقل مقدار محور X
+		maximum: 9.1, // حداکثر مقدار محور X
+		interval: 1, // فاصله بین نقاط روی محور X
+		crosshair: {
+			enabled: true,
+			snapToDataPoint: true
+		}
+	},
+	axisY: {
+		title: "Arosal",
+		gridThickness: 0,
+		minimum: 0.9, // حداقل مقدار محور Y
+		maximum: 9.1, // حداکثر مقدار محور Y
+		interval: 1, // فاصله بین نقاط روی محور Y
+		crosshair: {
+			enabled: true,
+			snapToDataPoint: true
+		}
+	},
+	data: [{
+		type: "scatter",
+    toolTipContent: "<strong>{name}</strong><br/>Valance: {x}<br/>Arosal: {y}",
+		dataPoints: [
+      {% for item in rates %}
+			  { x: {{ item.valence }}, y: {{ item.arousal }} , indexLabel: "{{ item.stimulus }}", },
+			{% endfor %}
+		]
+	}]
+};
+
+$("#chartContainer").CanvasJSChart(options);
+}
+</script>
+
+</body>
+</html>
