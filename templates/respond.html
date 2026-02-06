@@ -184,113 +184,145 @@
     </form>
 
     <script>
-    const questions = {{ questions|length }};
-    let currentSlide = 0;
-    let answers = []; // همچنان آرایه، اما حالا فقط با push پر می‌شود
-    let questionStartTime = null;
+    // تنظیمات اولیه
+const totalQuestions = {{ questions|length }};
+let currentSlide = 0;
+let answers = [];
+let questionStartTime = null;
 
-    function startQuestionnaire() {
-        document.getElementById('intro').classList.add('hidden');
-        showSlide(0);
-    }
+// انتخاب عناصر یک‌بار در ابتدای لود
+const introSection = document.getElementById('intro');
+const submitForm = document.getElementById('submitForm');
+const answersDataInput = document.getElementById('answersData');
 
-    function showSlide(n) {
-        document.querySelectorAll('.question-slide').forEach(s => s.classList.add('hidden'));
-        document.getElementById(`slide-${n}`).classList.remove('hidden');
+function startQuestionnaire() {
+    introSection.classList.add('hidden');
+    showSlide(0);
+}
 
-        const progress = ((n + 1) / questions) * 100;
-        document.getElementById(`progress-${n}`).style.width = progress + '%';
+function showSlide(index) {
+    document.querySelectorAll('.question-slide').forEach(slide => {
+        slide.classList.add('hidden');
+    });
 
-        questionStartTime = Date.now();
-        currentSlide = n;
-    }
+    const currentSlideElement = document.getElementById(`slide-${index}`);
+    currentSlideElement.classList.remove('hidden');
 
-    // === چندگزینه‌ای ===
-    document.querySelectorAll('.option-btn').forEach(btn => {
-        btn.addEventListener('click', function() {
-            const questionId = this.parentElement.dataset.questionId;
-            const value = this.dataset.value;
+    const progressPercentage = ((index + 1) / totalQuestions) * 100;
+    document.getElementById(`progress-${index}`).style.width = `${progressPercentage}%`;
 
-            this.parentElement.querySelectorAll('.option-btn').forEach(b => b.classList.remove('selected'));
-            this.classList.add('selected');
+    // زمان شروع به میلی‌ثانیه
+    questionStartTime = Date.now();
+    currentSlide = index;
+}
 
-            const rt = Math.round((Date.now() - questionStartTime) / 1000);
+function getReactionTime() {
+    if (!questionStartTime) return 0;
+    // میلی‌ثانیه (بدون تقسیم بر 1000)
+    return Date.now() - questionStartTime;
+}
 
-            // به جای answers[currentSlide] = ...   →   push کنید
+function submitAnswers() {
+    answersDataInput.value = JSON.stringify(answers);
+    submitForm.submit();
+}
+
+// ────────────────────────────────────────────────
+// سوالات چندگزینه‌ای (MC)
+document.querySelectorAll('.options[data-type="MC"]').forEach(optionsContainer => {
+    const buttons = optionsContainer.querySelectorAll('.option-btn');
+
+    buttons.forEach(btn => {
+        btn.addEventListener('click', () => {
+            if (optionsContainer.querySelector('.selected')) return;
+
+            const questionId = optionsContainer.dataset.questionId;
+            const choiceId = btn.dataset.value;
+
+            buttons.forEach(b => b.classList.remove('selected'));
+            btn.classList.add('selected');
+
+            const rt = getReactionTime();
+
             answers.push({
                 question_id: questionId,
-                choice_id: value,
+                choice_id: choiceId,
                 text_answer: null,
                 scale_value: null,
-                rt: rt
+                rt: rt          // حالا عدد میلی‌ثانیه است (مثلاً ۴۲۳، ۸۷۱، ...)
             });
 
             setTimeout(() => {
-                if (currentSlide < questions - 1) {
+                if (currentSlide < totalQuestions - 1) {
                     showSlide(currentSlide + 1);
                 } else {
                     submitAnswers();
                 }
-            }, 300);
+            }, 400);
         });
     });
+});
 
-    // === متنی ===
-    function nextWithText(slideIndex, questionId) {
-        const text = document.getElementById(`text-${questionId}`).value.trim();
-        // اگر اجباری بود و خالی بود (می‌توانید * در عنوان بگذارید)
-        if (text === '') {
-            alert('لطفاً به این سوال پاسخ دهید.');
-            return;
-        }
+// ────────────────────────────────────────────────
+// سوالات متنی (TX)
+window.nextWithText = function (slideIndex, questionId) {
+    const textarea = document.getElementById(`text-${questionId}`);
+    const text = textarea.value.trim();
 
-        const rt = Math.round((Date.now() - questionStartTime) / 1000);
-
-        answers.push({
-            question_id: questionId,
-            choice_id: null,
-            text_answer: text,
-            scale_value: null,
-            rt: rt
-        });
-
-        if (slideIndex < questions - 1) {
-            showSlide(slideIndex + 1);
-        } else {
-            submitAnswers();
-        }
+    if (!text) {
+        alert('لطفاً پاسخ خود را وارد کنید.');
+        textarea.focus();
+        return;
     }
 
-    // === مقیاسی ===
-    function nextWithScale(slideIndex, questionId) {
-        const value = document.getElementById(`scale-${questionId}`).value;
-        if (value === '') {
-            alert('لطفاً یک گزینه انتخاب کنید.');
-            return;
-        }
+    const rt = getReactionTime();
 
-        const rt = Math.round((Date.now() - questionStartTime) / 1000);
+    answers.push({
+        question_id: questionId,
+        choice_id: null,
+        text_answer: text,
+        scale_value: null,
+        rt: rt
+    });
 
-        answers.push({
-            question_id: questionId,
-            choice_id: null,
-            text_answer: null,
-            scale_value: parseInt(value),
-            rt: rt
-        });
+    if (slideIndex < totalQuestions - 1) {
+        showSlide(slideIndex + 1);
+    } else {
+        submitAnswers();
+    }
+};
 
-        if (slideIndex < questions - 1) {
-            showSlide(slideIndex + 1);
-        } else {
-            submitAnswers();
-        }
+// ────────────────────────────────────────────────
+// سوالات مقیاس‌دار (SC)
+window.nextWithScale = function (slideIndex, questionId) {
+    const select = document.getElementById(`scale-${questionId}`);
+    const value = select.value;
+
+    if (!value) {
+        alert('لطفاً یک گزینه انتخاب کنید.');
+        select.focus();
+        return;
     }
 
-    function submitAnswers() {
-        // دیگر null وجود ندارد!
-        document.getElementById('answersData').value = JSON.stringify(answers);
-        document.getElementById('submitForm').submit();
+    const rt = getReactionTime();
+
+    answers.push({
+        question_id: questionId,
+        choice_id: null,
+        text_answer: null,
+        scale_value: parseInt(value, 10),
+        rt: rt
+    });
+
+    if (slideIndex < totalQuestions - 1) {
+        showSlide(slideIndex + 1);
+    } else {
+        submitAnswers();
     }
+}
+
+// اتصال دکمه شروع
+document.querySelector('.btn[onclick="startQuestionnaire()"]').addEventListener('click', startQuestionnaire);
 </script>
 </body>
 </html>
