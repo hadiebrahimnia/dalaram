@@ -570,7 +570,7 @@ def pcm_view(request):
         
 
     # --- مرحله ۲: تمرین رتبه‌بندی خوشایندی ---
-    VALENCE_PRACTICE_TRIALS = 9
+    VALENCE_PRACTICE_TRIALS = 2
     valence_practice_responses = PCMValencePracticeResponse.objects.filter(user=user)
     valence_practice_count = valence_practice_responses.count()
     RESPONSE_TIMEOUT=3000
@@ -632,9 +632,9 @@ def pcm_view(request):
         return render(request, '2_valence_practice.html', context)
 
     # --- مرحله ۳: آزمون اصلی PCM ---
-    NUM_BLOCKS = 2
-    CATCH_TRIALS_PER_BLOCK = 1
-    MAIN_TRIALS_PER_BLOCK = 2
+    NUM_BLOCKS = 3
+    CATCH_TRIALS_PER_BLOCK = 2
+    MAIN_TRIALS_PER_BLOCK = 10
 
     # محاسبه بلاک فعلی و پیشرفت کلی
     current_block = None
@@ -686,46 +686,95 @@ def pcm_view(request):
         if main_count < MAIN_TRIALS_PER_BLOCK:
             remain_main = MAIN_TRIALS_PER_BLOCK - main_count
 
-            possible_consistent = ["Neutral-Neutral", "Neutral-Negative", "Negative-Neutral"]
-            possible_inconsistent = ["Negative-Negative"]
+            # تمام توالی‌های ممکن
+            ALL_POSSIBLE_SEQUENCES = ["Neutral-Neutral", "Negative-Neutral", "Neutral-Negative"]
 
-            used_seqs = [f"{r.category_stim1}-{r.category_stim2}" for r in PCMMainResponse.objects.filter(user=user, block=block_num) if r.category_stim1 and r.category_stim2]
-            used_consistent = sum(1 for s in used_seqs if s in possible_consistent)
+            # شمارش پاسخ‌های قبلی در این بلاک
+            used_seqs = [
+                f"{r.category_stim1}-{r.category_stim2}"
+                for r in PCMMainResponse.objects.filter(user=user, block=block_num)
+                if r.category_stim1 and r.category_stim2
+            ]
+            used_consistent = sum(1 for s in used_seqs if s in ALL_POSSIBLE_SEQUENCES[:3])  # فقط ۳ تای اصلی
             used_inconsistent = len(used_seqs) - used_consistent
 
+            # هدف: 75% consistent — 25% inconsistent (می‌توانید تغییر دهید)
             target_consistent = int(MAIN_TRIALS_PER_BLOCK * 0.75)
             target_inconsistent = MAIN_TRIALS_PER_BLOCK - target_consistent
 
             remain_consistent = max(0, target_consistent - used_consistent)
             remain_inconsistent = max(0, target_inconsistent - used_inconsistent)
 
-            trial_list = (
+            # ساخت لیست نوع trialها
+            trial_types = (
                 [{'type': 'consistent'}] * remain_consistent +
                 [{'type': 'inconsistent'}] * remain_inconsistent
             )
 
-            if len(trial_list) < remain_main:
-                extra = remain_main - len(trial_list)
-                trial_list += [{'type': 'consistent' if random.random() < 0.75 else 'inconsistent'} for _ in range(extra)]
+            # اگر هنوز کم بود → تصادفی پر کنیم
+            if len(trial_types) < remain_main:
+                extra = remain_main - len(trial_types)
+                trial_types += [
+                    {'type': 'consistent' if random.random() < 0.75 else 'inconsistent'}
+                    for _ in range(extra)
+                ]
 
-            # ساخت final_trials
+            random.shuffle(trial_types)
+
+            # حالا برای هر trial نوع → cue و sequence واقعی بسازیم
             final_trials = []
-            cons_counts = Counter([s for s in used_seqs if s in possible_consistent])
+            
+            # کمک برای تعادل در consistentها
+            cons_counts = Counter([
+                f"{r.category_stim1}-{r.category_stim2}"
+                for r in PCMMainResponse.objects.filter(user=user, block=block_num)
+                if r.is_consistent
+            ])
 
-            for item in trial_list:
+            for item in trial_types:
                 if item['type'] == 'inconsistent':
-                    seq = random.choice(possible_inconsistent)
-                    cue_candidates = [c for c, exp in cues_mapping.items() if exp != seq]
-                    cue = random.choice(cue_candidates) if cue_candidates else list(cues_mapping.keys())[0]
-                    final_trials.append({'actual_seq': seq, 'cue': cue})
-                else:
-                    weights = [max(0, (remain_consistent // 3) - cons_counts.get(seq, 0)) for seq in possible_consistent]
+                    # انتخاب cue تصادفی
+                    cue = random.choice(CUE_URLS)
+                    
+                    # توالی منتظره (consistent) برای این cue
+                    expected_seq = cues_mapping[cue]
+                    
+                    # دو توالی دیگر = inconsistentهای ممکن
+                    possible_inconsistents = [s for s in ALL_POSSIBLE_SEQUENCES if s != expected_seq]
+                    
+                    # انتخاب یکی از دو inconsistent به صورت تصادفی
+                    # اگر می‌خواهید دقیق‌تر 50-50 باشد، می‌توانید از weights یا Counter استفاده کنید
+                    actual_seq = random.choice(possible_inconsistents)
+                    
+                    final_trials.append({
+                        'actual_seq': actual_seq,
+                        'cue': cue,
+                        'expected_seq': expected_seq,   # برای لاگ/دیباگ مفید است
+                    })
+
+                else:  # consistent
+                    # انتخاب توالی consistent با وزن‌دهی برای تعادل
+                    weights = [
+                        max(0, (remain_consistent // 3) - cons_counts.get(seq, 0))
+                        for seq in ALL_POSSIBLE_SEQUENCES
+                    ]
+                    
                     if sum(weights) == 0:
-                        seq = random.choice(possible_consistent)
+                        # اگر همه استفاده شده، تصادفی
+                        seq = random.choice(ALL_POSSIBLE_SEQUENCES)
                     else:
-                        seq = random.choices(possible_consistent, weights=weights)[0]
-                    cue = random.choice([c for c, exp in cues_mapping.items() if exp == seq])
-                    final_trials.append({'actual_seq': seq, 'cue': cue})
+                        seq = random.choices(ALL_POSSIBLE_SEQUENCES, weights=weights, k=1)[0]
+                    
+                    # cueهایی که این توالی را انتظار دارند
+                    cue_candidates = [c for c, exp in cues_mapping.items() if exp == seq]
+                    cue = random.choice(cue_candidates) if cue_candidates else random.choice(CUE_URLS)
+                    
+                    final_trials.append({
+                        'actual_seq': seq,
+                        'cue': cue,
+                        'expected_seq': seq,  # چون consistent است
+                    })
+                    
                     cons_counts[seq] += 1
 
             random.shuffle(final_trials)
@@ -761,7 +810,7 @@ def pcm_view(request):
     
 
     # --- مرحله 4: تمرین رتبه بندی خوشایندی و برانگیختگی---
-    RATING_PRACTICE_TRIALS = 5
+    RATING_PRACTICE_TRIALS = 2
     PRACTICE_FILES_RAW = [
         '0-practice/1.mp3',
         '0-practice/2.mp3',
@@ -793,7 +842,9 @@ def pcm_view(request):
         '5-MP-MA/102.WAV',
         '5-MP-MA/104.WAV',
         '5-MP-MA/107.WAV',
-        # '5-MP-MA/111.WAV','5-MP-MA/113.WAV','5-MP-MA/120.WAV','5-MP-MA/130.WAV','5-MP-MA/132.WAV','5-MP-MA/152.WAV','5-MP-MA/170.WAV','5-MP-MA/225.WAV','5-MP-MA/245.WAV','5-MP-MA/246.WAV','5-MP-MA/251.WAV','5-MP-MA/252.WAV','5-MP-MA/320.WAV','5-MP-MA/322.WAV','5-MP-MA/358.WAV','5-MP-MA/361.WAV','5-MP-MA/364.WAV','5-MP-MA/368.WAV','5-MP-MA/370.WAV','5-MP-MA/373.WAV','5-MP-MA/374.WAV','5-MP-MA/375.WAV','5-MP-MA/376.WAV','5-MP-MA/382.WAV','5-MP-MA/403.WAV','5-MP-MA/410.WAV','5-MP-MA/425.WAV','5-MP-MA/500.WAV','5-MP-MA/627.WAV','5-MP-MA/698.WAV','5-MP-MA/700.WAV','5-MP-MA/701.WAV','5-MP-MA/702.WAV','5-MP-MA/705.WAV','5-MP-MA/706.WAV','5-MP-MA/720.WAV','5-MP-MA/722.WAV','5-MP-MA/723.WAV','5-MP-MA/724.WAV','5-MP-MA/728.WAV','5-MP-MA/729.WAV',
+        '5-MP-MA/111.WAV',
+        '5-MP-MA/113.WAV',
+        # '5-MP-MA/120.WAV','5-MP-MA/130.WAV','5-MP-MA/132.WAV','5-MP-MA/152.WAV','5-MP-MA/170.WAV','5-MP-MA/225.WAV','5-MP-MA/245.WAV','5-MP-MA/246.WAV','5-MP-MA/251.WAV','5-MP-MA/252.WAV','5-MP-MA/320.WAV','5-MP-MA/322.WAV','5-MP-MA/358.WAV','5-MP-MA/361.WAV','5-MP-MA/364.WAV','5-MP-MA/368.WAV','5-MP-MA/370.WAV','5-MP-MA/373.WAV','5-MP-MA/374.WAV','5-MP-MA/375.WAV','5-MP-MA/376.WAV','5-MP-MA/382.WAV','5-MP-MA/403.WAV','5-MP-MA/410.WAV','5-MP-MA/425.WAV','5-MP-MA/500.WAV','5-MP-MA/627.WAV','5-MP-MA/698.WAV','5-MP-MA/700.WAV','5-MP-MA/701.WAV','5-MP-MA/702.WAV','5-MP-MA/705.WAV','5-MP-MA/706.WAV','5-MP-MA/720.WAV','5-MP-MA/722.WAV','5-MP-MA/723.WAV','5-MP-MA/724.WAV','5-MP-MA/728.WAV','5-MP-MA/729.WAV',
 
         # '6-MP-LA/171.WAV','6-MP-LA/262.WAV','6-MP-LA/377.WAV','6-MP-LA/602.WAV','6-MP-LA/708.WAV',
 
@@ -985,7 +1036,7 @@ def pcm_result_view(request):
     for rate in ratingresponse:
         
         rate_data = {
-            'stimulus': rate['stimulus'],
+            'stimulus': rate['stimulus_number'],
             'N': rate['n_responses'],
             'stimulus_file': rate['stimulus_file'][17:22],
             'valence': round(rate['avg_valence'] or 0, 2),
