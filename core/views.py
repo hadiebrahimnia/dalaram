@@ -248,21 +248,21 @@ def rating_view(request):
 
     # --- مرحله ۵: رتبه‌بندی نهایی همه صداها (لیست ثابت مشخص‌شده) ---
     MAIN_RATING_FILES_RAW = [
-        '1-HP-HA/110.WAV','1-HP-HA/200.WAV','1-HP-HA/201.WAV','1-HP-HA/202.WAV','1-HP-HA/205.WAV','1-HP-HA/215.WAV','1-HP-HA/220.WAV','1-HP-HA/311.WAV','1-HP-HA/352.WAV','1-HP-HA/353.WAV','1-HP-HA/355.WAV','1-HP-HA/360.WAV','1-HP-HA/363.WAV','1-HP-HA/365.WAV','1-HP-HA/366.WAV','1-HP-HA/367.WAV','1-HP-HA/378.WAV','1-HP-HA/415.WAV','1-HP-HA/716.WAV','1-HP-HA/717.WAV','1-HP-HA/808.WAV','1-HP-HA/815.WAV','1-HP-HA/817.WAV',
+        '1-HP-HA/110.mp3','1-HP-HA/200.mp3','1-HP-HA/201.mp3','1-HP-HA/202.mp3','1-HP-HA/205.mp3','1-HP-HA/215.mp3','1-HP-HA/220.mp3','1-HP-HA/311.mp3','1-HP-HA/352.mp3','1-HP-HA/353.mp3','1-HP-HA/355.mp3','1-HP-HA/360.mp3','1-HP-HA/363.mp3','1-HP-HA/365.mp3','1-HP-HA/366.mp3','1-HP-HA/367.mp3','1-HP-HA/378.mp3','1-HP-HA/415.mp3','1-HP-HA/716.mp3','1-HP-HA/717.mp3','1-HP-HA/808.mp3','1-HP-HA/815.mp3','1-HP-HA/817.mp3',
 
-        '2-HP-MA/109.WAV','2-HP-MA/111.WAV','2-HP-MA/112.WAV','2-HP-MA/150.WAV','2-HP-MA/151.WAV','2-HP-MA/206.WAV','2-HP-MA/221.WAV','2-HP-MA/224.WAV','2-HP-MA/226.WAV','2-HP-MA/230.WAV','2-HP-MA/254.WAV','2-HP-MA/270.WAV','2-HP-MA/351.WAV','2-HP-MA/400.WAV','2-HP-MA/601.WAV','2-HP-MA/721.WAV','2-HP-MA/725.WAV','2-HP-MA/726.WAV','2-HP-MA/802.WAV','2-HP-MA/810.WAV','2-HP-MA/811.WAV','2-HP-MA/813.WAV','2-HP-MA/816.WAV','2-HP-MA/820.WAV','2-HP-MA/826.WAV',
+        '2-HP-MA/109.mp3','2-HP-MA/111.mp3','2-HP-MA/112.mp3','2-HP-MA/150.mp3','2-HP-MA/151.mp3','2-HP-MA/206.mp3','2-HP-MA/221.mp3','2-HP-MA/224.mp3','2-HP-MA/226.mp3','2-HP-MA/230.mp3','2-HP-MA/254.mp3','2-HP-MA/270.mp3','2-HP-MA/351.mp3','2-HP-MA/400.mp3','2-HP-MA/601.mp3','2-HP-MA/721.mp3','2-HP-MA/725.mp3','2-HP-MA/726.mp3','2-HP-MA/802.mp3','2-HP-MA/810.mp3','2-HP-MA/811.mp3','2-HP-MA/813.mp3','2-HP-MA/816.mp3','2-HP-MA/820.mp3','2-HP-MA/826.mp3',
 
-        '3-HP-LA/172.WAV','3-HP-LA/809.WAV','3-HP-LA/812.WAV',
+        '3-HP-LA/172.mp3','3-HP-LA/809.mp3','3-HP-LA/812.mp3',
 
-        '4-MP-HA/114.WAV','4-MP-HA/204.WAV','4-MP-HA/210.WAV','4-MP-HA/216.WAV','4-MP-HA/610.WAV','4-MP-HA/704.WAV','4-MP-HA/710.WAV','4-MP-HA/715.WAV',
+        '4-MP-HA/114.mp3','4-MP-HA/204.mp3','4-MP-HA/210.mp3','4-MP-HA/216.mp3','4-MP-HA/610.mp3','4-MP-HA/704.mp3','4-MP-HA/710.mp3','4-MP-HA/715.mp3',
 
-        '5-MP-MA/102.WAV','5-MP-MA/104.WAV','5-MP-MA/107.WAV','5-MP-MA/111.WAV','5-MP-MA/113.WAV','5-MP-MA/120.WAV','5-MP-MA/130.WAV','5-MP-MA/132.WAV','5-MP-MA/152.WAV','5-MP-MA/170.WAV','5-MP-MA/225.WAV','5-MP-MA/245.WAV','5-MP-MA/246.WAV','5-MP-MA/251.WAV','5-MP-MA/252.WAV','5-MP-MA/320.WAV','5-MP-MA/322.WAV','5-MP-MA/358.WAV','5-MP-MA/361.WAV','5-MP-MA/364.WAV','5-MP-MA/368.WAV','5-MP-MA/370.WAV','5-MP-MA/373.WAV','5-MP-MA/374.WAV','5-MP-MA/375.WAV','5-MP-MA/376.WAV','5-MP-MA/382.WAV','5-MP-MA/403.WAV','5-MP-MA/410.WAV','5-MP-MA/425.WAV','5-MP-MA/500.WAV','5-MP-MA/627.WAV','5-MP-MA/698.WAV','5-MP-MA/700.WAV','5-MP-MA/701.WAV','5-MP-MA/702.WAV','5-MP-MA/705.WAV','5-MP-MA/706.WAV','5-MP-MA/720.WAV','5-MP-MA/722.WAV','5-MP-MA/723.WAV','5-MP-MA/724.WAV','5-MP-MA/728.WAV','5-MP-MA/729.WAV',
+        '5-MP-MA/102.mp3','5-MP-MA/104.mp3','5-MP-MA/107.mp3','5-MP-MA/111.mp3','5-MP-MA/113.mp3','5-MP-MA/120.mp3','5-MP-MA/130.mp3','5-MP-MA/132.mp3','5-MP-MA/152.mp3','5-MP-MA/170.mp3','5-MP-MA/225.mp3','5-MP-MA/245.mp3','5-MP-MA/246.mp3','5-MP-MA/251.mp3','5-MP-MA/252.mp3','5-MP-MA/320.mp3','5-MP-MA/322.mp3','5-MP-MA/358.mp3','5-MP-MA/361.mp3','5-MP-MA/364.mp3','5-MP-MA/368.mp3','5-MP-MA/370.mp3','5-MP-MA/373.mp3','5-MP-MA/374.mp3','5-MP-MA/375.mp3','5-MP-MA/376.mp3','5-MP-MA/382.mp3','5-MP-MA/403.mp3','5-MP-MA/410.mp3','5-MP-MA/425.mp3','5-MP-MA/500.mp3','5-MP-MA/627.mp3','5-MP-MA/698.mp3','5-MP-MA/700.mp3','5-MP-MA/701.mp3','5-MP-MA/702.mp3','5-MP-MA/705.mp3','5-MP-MA/706.mp3','5-MP-MA/720.mp3','5-MP-MA/722.mp3','5-MP-MA/723.mp3','5-MP-MA/724.mp3','5-MP-MA/728.mp3','5-MP-MA/729.mp3',
 
-        '6-MP-LA/171.WAV','6-MP-LA/262.WAV','6-MP-LA/377.WAV','6-MP-LA/602.WAV','6-MP-LA/708.WAV',
+        '6-MP-LA/171.mp3','6-MP-LA/262.mp3','6-MP-LA/377.mp3','6-MP-LA/602.mp3','6-MP-LA/708.mp3',
 
-        '7-LP-HA/105.WAV','7-LP-HA/106.WAV','7-LP-HA/115.WAV','7-LP-HA/116.WAV','7-LP-HA/133.WAV','7-LP-HA/134.WAV','7-LP-HA/244.WAV','7-LP-HA/255.WAV','7-LP-HA/260.WAV','7-LP-HA/261.WAV','7-LP-HA/275.WAV','7-LP-HA/276.WAV','7-LP-HA/277.WAV','7-LP-HA/278.WAV','7-LP-HA/279.WAV','7-LP-HA/281.WAV','7-LP-HA/282.WAV','7-LP-HA/283.WAV','7-LP-HA/284.WAV','7-LP-HA/285.WAV','7-LP-HA/286.WAV','7-LP-HA/288.WAV','7-LP-HA/289.WAV','7-LP-HA/290.WAV','7-LP-HA/292.WAV','7-LP-HA/296.WAV','7-LP-HA/310.WAV','7-LP-HA/312.WAV','7-LP-HA/319.WAV','7-LP-HA/380.WAV','7-LP-HA/420.WAV','7-LP-HA/422.WAV','7-LP-HA/423.WAV','7-LP-HA/424.WAV','7-LP-HA/501.WAV','7-LP-HA/502.WAV','7-LP-HA/600.WAV','7-LP-HA/624.WAV','7-LP-HA/625.WAV','7-LP-HA/626.WAV','7-LP-HA/699.WAV','7-LP-HA/709.WAV','7-LP-HA/711.WAV','7-LP-HA/712.WAV','7-LP-HA/713.WAV','7-LP-HA/714.WAV','7-LP-HA/719.WAV','7-LP-HA/730.WAV','7-LP-HA/732.WAV','7-LP-HA/910.WAV',
+        '7-LP-HA/105.mp3','7-LP-HA/106.mp3','7-LP-HA/115.mp3','7-LP-HA/116.mp3','7-LP-HA/133.mp3','7-LP-HA/134.mp3','7-LP-HA/244.mp3','7-LP-HA/255.mp3','7-LP-HA/260.mp3','7-LP-HA/261.mp3','7-LP-HA/275.mp3','7-LP-HA/276.mp3','7-LP-HA/277.mp3','7-LP-HA/278.mp3','7-LP-HA/279.mp3','7-LP-HA/281.mp3','7-LP-HA/282.mp3','7-LP-HA/283.mp3','7-LP-HA/284.mp3','7-LP-HA/285.mp3','7-LP-HA/286.mp3','7-LP-HA/288.mp3','7-LP-HA/289.mp3','7-LP-HA/290.mp3','7-LP-HA/292.mp3','7-LP-HA/296.mp3','7-LP-HA/310.mp3','7-LP-HA/312.mp3','7-LP-HA/319.mp3','7-LP-HA/380.mp3','7-LP-HA/420.mp3','7-LP-HA/422.mp3','7-LP-HA/423.mp3','7-LP-HA/424.mp3','7-LP-HA/501.mp3','7-LP-HA/502.mp3','7-LP-HA/600.mp3','7-LP-HA/624.mp3','7-LP-HA/625.mp3','7-LP-HA/626.mp3','7-LP-HA/699.mp3','7-LP-HA/709.mp3','7-LP-HA/711.mp3','7-LP-HA/712.mp3','7-LP-HA/713.mp3','7-LP-HA/714.mp3','7-LP-HA/719.mp3','7-LP-HA/730.mp3','7-LP-HA/732.mp3','7-LP-HA/910.mp3',
 
-        '8-LP-MA/241.WAV','8-LP-MA/242.WAV','8-LP-MA/243.WAV','8-LP-MA/250.WAV','8-LP-MA/280.WAV','8-LP-MA/293.WAV','8-LP-MA/295.WAV','8-LP-MA/611.WAV','8-LP-MA/703.WAV',
+        '8-LP-MA/241.mp3','8-LP-MA/242.mp3','8-LP-MA/243.mp3','8-LP-MA/250.mp3','8-LP-MA/280.mp3','8-LP-MA/293.mp3','8-LP-MA/295.mp3','8-LP-MA/611.mp3','8-LP-MA/703.mp3',
 
     ]
 
@@ -352,7 +352,7 @@ def rating_save_response(request):
 ###################################################################################################### 
 ###################################################################################################### 
 def extract_stimulus_number(url: Optional[str]) -> Optional[int]:
-    """استخراج شماره stimulus از URL فایل صوتی (مثل 102 از 102.WAV)"""
+    """استخراج شماره stimulus از URL فایل صوتی (مثل 102 از 102.mp3)"""
     if not url:
         return None
     try:
@@ -387,30 +387,30 @@ def get_cues_mapping() -> Dict[str, str]:
 def get_stimuli_lists() -> Tuple[List[str], List[str]]:
     """لیست صداهای خنثی و منفی + shuffle"""
     neutral_files = [
-        '5-MP-MA/102.WAV','5-MP-MA/104.WAV','5-MP-MA/107.WAV','5-MP-MA/111.WAV','5-MP-MA/113.WAV',
-        '5-MP-MA/120.WAV','5-MP-MA/130.WAV','5-MP-MA/132.WAV','5-MP-MA/152.WAV','5-MP-MA/170.WAV',
-        '5-MP-MA/225.WAV','5-MP-MA/245.WAV','5-MP-MA/246.WAV','5-MP-MA/251.WAV','5-MP-MA/252.WAV',
-        '5-MP-MA/320.WAV','5-MP-MA/322.WAV','5-MP-MA/358.WAV','5-MP-MA/361.WAV','5-MP-MA/364.WAV',
-        '5-MP-MA/368.WAV','5-MP-MA/370.WAV','5-MP-MA/373.WAV','5-MP-MA/374.WAV','5-MP-MA/375.WAV',
-        '5-MP-MA/376.WAV','5-MP-MA/382.WAV','5-MP-MA/403.WAV','5-MP-MA/410.WAV','5-MP-MA/425.WAV',
-        '5-MP-MA/500.WAV','5-MP-MA/627.WAV','5-MP-MA/698.WAV','5-MP-MA/700.WAV','5-MP-MA/701.WAV',
-        '5-MP-MA/702.WAV','5-MP-MA/705.WAV','5-MP-MA/706.WAV','5-MP-MA/720.WAV','5-MP-MA/722.WAV',
-        '5-MP-MA/723.WAV','5-MP-MA/724.WAV','5-MP-MA/728.WAV','5-MP-MA/729.WAV',
+        '5-MP-MA/102.mp3','5-MP-MA/104.mp3','5-MP-MA/107.mp3','5-MP-MA/111.mp3','5-MP-MA/113.mp3',
+        '5-MP-MA/120.mp3','5-MP-MA/130.mp3','5-MP-MA/132.mp3','5-MP-MA/152.mp3','5-MP-MA/170.mp3',
+        '5-MP-MA/225.mp3','5-MP-MA/245.mp3','5-MP-MA/246.mp3','5-MP-MA/251.mp3','5-MP-MA/252.mp3',
+        '5-MP-MA/320.mp3','5-MP-MA/322.mp3','5-MP-MA/358.mp3','5-MP-MA/361.mp3','5-MP-MA/364.mp3',
+        '5-MP-MA/368.mp3','5-MP-MA/370.mp3','5-MP-MA/373.mp3','5-MP-MA/374.mp3','5-MP-MA/375.mp3',
+        '5-MP-MA/376.mp3','5-MP-MA/382.mp3','5-MP-MA/403.mp3','5-MP-MA/410.mp3','5-MP-MA/425.mp3',
+        '5-MP-MA/500.mp3','5-MP-MA/627.mp3','5-MP-MA/698.mp3','5-MP-MA/700.mp3','5-MP-MA/701.mp3',
+        '5-MP-MA/702.mp3','5-MP-MA/705.mp3','5-MP-MA/706.mp3','5-MP-MA/720.mp3','5-MP-MA/722.mp3',
+        '5-MP-MA/723.mp3','5-MP-MA/724.mp3','5-MP-MA/728.mp3','5-MP-MA/729.mp3',
     ]
 
     negative_files = [
-        '7-LP-HA/105.WAV','7-LP-HA/106.WAV','7-LP-HA/115.WAV','7-LP-HA/116.WAV','7-LP-HA/133.WAV',
-        '7-LP-HA/134.WAV','7-LP-HA/244.WAV','7-LP-HA/255.WAV','7-LP-HA/260.WAV','7-LP-HA/261.WAV',
-        '7-LP-HA/275.WAV','7-LP-HA/276.WAV','7-LP-HA/277.WAV','7-LP-HA/278.WAV','7-LP-HA/279.WAV',
-        '7-LP-HA/281.WAV','7-LP-HA/282.WAV','7-LP-HA/283.WAV','7-LP-HA/284.WAV','7-LP-HA/285.WAV',
-        '7-LP-HA/286.WAV','7-LP-HA/288.WAV','7-LP-HA/289.WAV','7-LP-HA/290.WAV','7-LP-HA/292.WAV',
-        '7-LP-HA/296.WAV','7-LP-HA/310.WAV','7-LP-HA/312.WAV','7-LP-HA/319.WAV','7-LP-HA/380.WAV',
-        '7-LP-HA/420.WAV','7-LP-HA/422.WAV','7-LP-HA/423.WAV','7-LP-HA/424.WAV','7-LP-HA/501.WAV',
-        '7-LP-HA/502.WAV','7-LP-HA/600.WAV','7-LP-HA/624.WAV','7-LP-HA/625.WAV','7-LP-HA/626.WAV',
-        '7-LP-HA/699.WAV','7-LP-HA/709.WAV','7-LP-HA/711.WAV','7-LP-HA/712.WAV','7-LP-HA/713.WAV',
-        '7-LP-HA/714.WAV','7-LP-HA/719.WAV','7-LP-HA/730.WAV','7-LP-HA/732.WAV','7-LP-HA/910.WAV',
-        '8-LP-MA/241.WAV','8-LP-MA/242.WAV','8-LP-MA/243.WAV','8-LP-MA/250.WAV','8-LP-MA/280.WAV',
-        '8-LP-MA/293.WAV','8-LP-MA/295.WAV','8-LP-MA/611.WAV','8-LP-MA/703.WAV',
+        '7-LP-HA/105.mp3','7-LP-HA/106.mp3','7-LP-HA/115.mp3','7-LP-HA/116.mp3','7-LP-HA/133.mp3',
+        '7-LP-HA/134.mp3','7-LP-HA/244.mp3','7-LP-HA/255.mp3','7-LP-HA/260.mp3','7-LP-HA/261.mp3',
+        '7-LP-HA/275.mp3','7-LP-HA/276.mp3','7-LP-HA/277.mp3','7-LP-HA/278.mp3','7-LP-HA/279.mp3',
+        '7-LP-HA/281.mp3','7-LP-HA/282.mp3','7-LP-HA/283.mp3','7-LP-HA/284.mp3','7-LP-HA/285.mp3',
+        '7-LP-HA/286.mp3','7-LP-HA/288.mp3','7-LP-HA/289.mp3','7-LP-HA/290.mp3','7-LP-HA/292.mp3',
+        '7-LP-HA/296.mp3','7-LP-HA/310.mp3','7-LP-HA/312.mp3','7-LP-HA/319.mp3','7-LP-HA/380.mp3',
+        '7-LP-HA/420.mp3','7-LP-HA/422.mp3','7-LP-HA/423.mp3','7-LP-HA/424.mp3','7-LP-HA/501.mp3',
+        '7-LP-HA/502.mp3','7-LP-HA/600.mp3','7-LP-HA/624.mp3','7-LP-HA/625.mp3','7-LP-HA/626.mp3',
+        '7-LP-HA/699.mp3','7-LP-HA/709.mp3','7-LP-HA/711.mp3','7-LP-HA/712.mp3','7-LP-HA/713.mp3',
+        '7-LP-HA/714.mp3','7-LP-HA/719.mp3','7-LP-HA/730.mp3','7-LP-HA/732.mp3','7-LP-HA/910.mp3',
+        '8-LP-MA/241.mp3','8-LP-MA/242.mp3','8-LP-MA/243.mp3','8-LP-MA/250.mp3','8-LP-MA/280.mp3',
+        '8-LP-MA/293.mp3','8-LP-MA/295.mp3','8-LP-MA/611.mp3','8-LP-MA/703.mp3',
     ]
 
     neutral_files = list(set(neutral_files))
@@ -839,18 +839,18 @@ def pcm_view(request):
 
     # --- مرحله ۵: رتبه‌بندی  همه صداهای ارائه شده (خوشایندی و برانگیختگی) ---
     MAIN_RATING_FILES_RAW = [
-        '5-MP-MA/102.WAV',
-        '5-MP-MA/104.WAV',
-        '5-MP-MA/107.WAV',
-        '5-MP-MA/111.WAV',
-        '5-MP-MA/113.WAV',
-        # '5-MP-MA/120.WAV','5-MP-MA/130.WAV','5-MP-MA/132.WAV','5-MP-MA/152.WAV','5-MP-MA/170.WAV','5-MP-MA/225.WAV','5-MP-MA/245.WAV','5-MP-MA/246.WAV','5-MP-MA/251.WAV','5-MP-MA/252.WAV','5-MP-MA/320.WAV','5-MP-MA/322.WAV','5-MP-MA/358.WAV','5-MP-MA/361.WAV','5-MP-MA/364.WAV','5-MP-MA/368.WAV','5-MP-MA/370.WAV','5-MP-MA/373.WAV','5-MP-MA/374.WAV','5-MP-MA/375.WAV','5-MP-MA/376.WAV','5-MP-MA/382.WAV','5-MP-MA/403.WAV','5-MP-MA/410.WAV','5-MP-MA/425.WAV','5-MP-MA/500.WAV','5-MP-MA/627.WAV','5-MP-MA/698.WAV','5-MP-MA/700.WAV','5-MP-MA/701.WAV','5-MP-MA/702.WAV','5-MP-MA/705.WAV','5-MP-MA/706.WAV','5-MP-MA/720.WAV','5-MP-MA/722.WAV','5-MP-MA/723.WAV','5-MP-MA/724.WAV','5-MP-MA/728.WAV','5-MP-MA/729.WAV',
+        '5-MP-MA/102.mp3',
+        '5-MP-MA/104.mp3',
+        '5-MP-MA/107.mp3',
+        '5-MP-MA/111.mp3',
+        '5-MP-MA/113.mp3',
+        # '5-MP-MA/120.mp3','5-MP-MA/130.mp3','5-MP-MA/132.mp3','5-MP-MA/152.mp3','5-MP-MA/170.mp3','5-MP-MA/225.mp3','5-MP-MA/245.mp3','5-MP-MA/246.mp3','5-MP-MA/251.mp3','5-MP-MA/252.mp3','5-MP-MA/320.mp3','5-MP-MA/322.mp3','5-MP-MA/358.mp3','5-MP-MA/361.mp3','5-MP-MA/364.mp3','5-MP-MA/368.mp3','5-MP-MA/370.mp3','5-MP-MA/373.mp3','5-MP-MA/374.mp3','5-MP-MA/375.mp3','5-MP-MA/376.mp3','5-MP-MA/382.mp3','5-MP-MA/403.mp3','5-MP-MA/410.mp3','5-MP-MA/425.mp3','5-MP-MA/500.mp3','5-MP-MA/627.mp3','5-MP-MA/698.mp3','5-MP-MA/700.mp3','5-MP-MA/701.mp3','5-MP-MA/702.mp3','5-MP-MA/705.mp3','5-MP-MA/706.mp3','5-MP-MA/720.mp3','5-MP-MA/722.mp3','5-MP-MA/723.mp3','5-MP-MA/724.mp3','5-MP-MA/728.mp3','5-MP-MA/729.mp3',
 
-        # '6-MP-LA/171.WAV','6-MP-LA/262.WAV','6-MP-LA/377.WAV','6-MP-LA/602.WAV','6-MP-LA/708.WAV',
+        # '6-MP-LA/171.mp3','6-MP-LA/262.mp3','6-MP-LA/377.mp3','6-MP-LA/602.mp3','6-MP-LA/708.mp3',
 
-        # '7-LP-HA/105.WAV','7-LP-HA/106.WAV','7-LP-HA/115.WAV','7-LP-HA/116.WAV','7-LP-HA/133.WAV','7-LP-HA/134.WAV','7-LP-HA/244.WAV','7-LP-HA/255.WAV','7-LP-HA/260.WAV','7-LP-HA/261.WAV','7-LP-HA/275.WAV','7-LP-HA/276.WAV','7-LP-HA/277.WAV','7-LP-HA/278.WAV','7-LP-HA/279.WAV','7-LP-HA/281.WAV','7-LP-HA/282.WAV','7-LP-HA/283.WAV','7-LP-HA/284.WAV','7-LP-HA/285.WAV','7-LP-HA/286.WAV','7-LP-HA/288.WAV','7-LP-HA/289.WAV','7-LP-HA/290.WAV','7-LP-HA/292.WAV','7-LP-HA/296.WAV','7-LP-HA/310.WAV','7-LP-HA/312.WAV','7-LP-HA/319.WAV','7-LP-HA/380.WAV','7-LP-HA/420.WAV','7-LP-HA/422.WAV','7-LP-HA/423.WAV','7-LP-HA/424.WAV','7-LP-HA/501.WAV','7-LP-HA/502.WAV','7-LP-HA/600.WAV','7-LP-HA/624.WAV','7-LP-HA/625.WAV','7-LP-HA/626.WAV','7-LP-HA/699.WAV','7-LP-HA/709.WAV','7-LP-HA/711.WAV','7-LP-HA/712.WAV','7-LP-HA/713.WAV','7-LP-HA/714.WAV','7-LP-HA/719.WAV','7-LP-HA/730.WAV','7-LP-HA/732.WAV','7-LP-HA/910.WAV',
+        # '7-LP-HA/105.mp3','7-LP-HA/106.mp3','7-LP-HA/115.mp3','7-LP-HA/116.mp3','7-LP-HA/133.mp3','7-LP-HA/134.mp3','7-LP-HA/244.mp3','7-LP-HA/255.mp3','7-LP-HA/260.mp3','7-LP-HA/261.mp3','7-LP-HA/275.mp3','7-LP-HA/276.mp3','7-LP-HA/277.mp3','7-LP-HA/278.mp3','7-LP-HA/279.mp3','7-LP-HA/281.mp3','7-LP-HA/282.mp3','7-LP-HA/283.mp3','7-LP-HA/284.mp3','7-LP-HA/285.mp3','7-LP-HA/286.mp3','7-LP-HA/288.mp3','7-LP-HA/289.mp3','7-LP-HA/290.mp3','7-LP-HA/292.mp3','7-LP-HA/296.mp3','7-LP-HA/310.mp3','7-LP-HA/312.mp3','7-LP-HA/319.mp3','7-LP-HA/380.mp3','7-LP-HA/420.mp3','7-LP-HA/422.mp3','7-LP-HA/423.mp3','7-LP-HA/424.mp3','7-LP-HA/501.mp3','7-LP-HA/502.mp3','7-LP-HA/600.mp3','7-LP-HA/624.mp3','7-LP-HA/625.mp3','7-LP-HA/626.mp3','7-LP-HA/699.mp3','7-LP-HA/709.mp3','7-LP-HA/711.mp3','7-LP-HA/712.mp3','7-LP-HA/713.mp3','7-LP-HA/714.mp3','7-LP-HA/719.mp3','7-LP-HA/730.mp3','7-LP-HA/732.mp3','7-LP-HA/910.mp3',
 
-        # '8-LP-MA/241.WAV','8-LP-MA/242.WAV','8-LP-MA/243.WAV','8-LP-MA/250.WAV','8-LP-MA/280.WAV','8-LP-MA/293.WAV','8-LP-MA/295.WAV','8-LP-MA/611.WAV','8-LP-MA/703.WAV',
+        # '8-LP-MA/241.mp3','8-LP-MA/242.mp3','8-LP-MA/243.mp3','8-LP-MA/250.mp3','8-LP-MA/280.mp3','8-LP-MA/293.mp3','8-LP-MA/295.mp3','8-LP-MA/611.mp3','8-LP-MA/703.mp3',
     ]
 
     # حذف تکراری‌ها
