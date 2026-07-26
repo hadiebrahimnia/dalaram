@@ -6,10 +6,10 @@
     <title>صفحه اصلی سایت</title>
     <style>
       @font-face {
-          font-family: "Vazirmatn"!important;
+          font-family: "Vazirmatn";
           src: url("/static/fonts/Vazir-Medium-FD.woff") format("woff");
           font-style: normal;
-          font-display: swap; /* بهترین عملکرد: متن ابتدا با فونت سیستم نمایش داده بشه، بعد عوض بشه */
+          font-display: swap;
       }
 
       * {
@@ -19,7 +19,7 @@
       }
 
       body {
-        font-family: "Vazirmatn";
+        font-family: "Vazirmatn"!important;
         line-height: 1.7;
         color: #333;
         background-color: #f9f9f9;
@@ -264,7 +264,7 @@
     <!-- بخش ویژگی‌ها -->
     <section class="features">
       <div class="container">
-        <h2>آزمون مد نظر را انتخاب نمایید !</h2>
+        <h2 style="margin-bottom:75px">آزمون مد نظر را انتخاب نمایید !</h2>
         <div class="cards">
           <a href="/experiment/rating" class="card-btn">
             <i class="fa fa-list-ul"></i>
@@ -288,10 +288,6 @@
           {% endif %}
         </div>
         {% endif %}
-
-        
-
-
     </section>
   </body>
 </html>

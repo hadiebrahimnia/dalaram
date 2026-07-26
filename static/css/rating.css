@@ -1,5 +1,5 @@
 @font-face {
-  font-family: "Vazirmatn" !important;
+  font-family: "Vazirmatn";
   src: url("/static/fonts/Vazir-Medium-FD.woff") format("woff");
   font-style: normal;
   font-display: swap; /* بهترین عملکرد: متن ابتدا با فونت سیستم نمایش داده بشه، بعد عوض بشه */

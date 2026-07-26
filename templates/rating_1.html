@@ -23,43 +23,53 @@
 
 <div id="intro" class="card m-5">
   <div class="card-body text-center p-5">
-    <h2 class="mb-4">مرحله تمرینی</h2>
-    <p class="lead mb-4">
-        در این مرحله، یک صدا خواهید شنید و باید دو بعد زیر را رتبه‌بندی کنید:
-    </p>
 
-    <h3 class="mb-4">خوشایندی:</h3>
-    <div class="sam-buttons mt-0 mb-4">
-      {% for i in "123456789" %}
-        <button type="button" class="sam-btn" data-value="{{ forloop.counter }}">
-          <img src="{% static 'images/valence/' %}{{ forloop.counter }}.png">
-          <div class="key-hint mt-2 fw-bold">{{ forloop.counter }}</div>
-        </button>
-      {% endfor %}
+    <div style="margin-bottom:75px;">
+        <h1 class="mb-4">مرحله تمرینی</h1>
+        <p class="lead">
+            در این مرحله، توالی از صداها را خواهید شنید و باید هر صدا را از 2 جهت  نمره‌ بدهید:
+        </p>
     </div>
-    <div class="arousal-scale">
-        <span>9 = خوشایندی زیاد</span>
-        <div class="arrow-line"><span class="arrow">➤</span></div>
-        <span>1 = خوشایندی کم</span>
-    </div>
+    
+    <div style="margin-bottom:100px;">
+        <h3 class="mb-3">خوشایندی:</h3>
+        <div class="sam-buttons mb-4">
+            {% for i in "123456789" %}
+                <button type="button" class="sam-btn" data-value="{{ forloop.counter }}">
+                    <img src="{% static 'images/valence/' %}{{ forloop.counter }}.png">
+                    <div class="key-hint fw-bold">{{ forloop.counter }}</div>
+                </button>
+            {% endfor %}
+        </div>
 
-    <h3 class="mb-4 mt-5">برانگیختگی:</h3>
-    <div class="sam-buttons mt-0 mb-4">
-      {% for i in "123456789" %}
-        <button type="button" class="sam-btn" data-value="{{ forloop.counter }}">
-          <img src="{% static 'images/arousal/' %}{{ forloop.counter }}.jpg">
-          <div class="key-hint mt-2 fw-bold">{{ forloop.counter }}</div>
-        </button>
-      {% endfor %}
-    </div>
-    <div class="arousal-scale">
-        <span>9 = برانگیختگی زیاد</span>
-        <div class="arrow-line"><span class="arrow">➤</span></div>
-        <span>1 = برانگیختگی کم</span>
+        <div class="arousal-scale">
+            <span>9 = خوشایندی زیاد</span>
+            <div class="arrow-line"><span class="arrow">➤</span></div>
+            <span>1 = خوشایندی کم</span>
+        </div>
+
     </div>
 
-    <p class="text-muted mt-5">برای پاسخ می‌توانید از کلیک یا کلیدهای ۱ تا ۹ استفاده کنید.</p>
-    <p class="text-danger fw-bold">برای هر رتبه‌بندی فقط ۳ ثانیه فرصت دارید. لطفاً سریع پاسخ دهید.</p>
+    
+    <div style="margin-bottom:100px;">
+        <h3 class="mb-3">برانگیختگی:</h3>
+        <div class="sam-buttons mb-4">
+        {% for i in "123456789" %}
+            <button type="button" class="sam-btn" data-value="{{ forloop.counter }}">
+            <img src="{% static 'images/arousal/' %}{{ forloop.counter }}.jpg">
+            <div class="key-hint mt-2 fw-bold">{{ forloop.counter }}</div>
+            </button>
+        {% endfor %}
+        </div>
+        <div class="arousal-scale">
+            <span>9 = برانگیختگی زیاد</span>
+            <div class="arrow-line"><span class="arrow">➤</span></div>
+            <span>1 = برانگیختگی کم</span>
+        </div>
+    </div>
+
+    <p class="text-muted mt-5">برای پاسخ می‌توانید از کلیک روی تصاویر یا کلیدهای ۱ تا ۹ کیبورد استفاده کنید.</p>
+    <p class="text-danger fw-bold">برای هر پاسخ فقط ۳ ثانیه فرصت دارید. لطفاً سریع پاسخ دهید.</p>
 
     <div class="progress-container mb-4">
       <div class="d-flex justify-content-between mb-2">
