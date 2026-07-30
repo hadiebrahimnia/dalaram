@@ -227,22 +227,20 @@ class PCMCatchResponseInline(admin.TabularInline):
     model = PCMCatchResponse
     extra = 0
     can_delete = False
-    readonly_fields = ('trial', 'cue_short', 'stimulus1_short', 'stimulus2_short','category_stim1','category_stim2', 'user_response', 'is_correct_display', 'created_at')
+    readonly_fields = ('trial', 'cue_short', 'user_response', 'is_correct_display', 'created_at')
     fields = readonly_fields
     ordering = ('trial',)
 
     def cue_short(self, obj): return obj.cue[-30:]
-    def stimulus1_short(self, obj): return obj.stimulus1[-30:] if obj.stimulus1 else '-'
-    def stimulus2_short(self, obj): return obj.stimulus2[-30:] if obj.stimulus2 else '-'
     def is_correct_display(self, obj): return "✓" if obj.is_correct else "✗" if obj.is_correct is False else "-"
 
 
 @admin.register(PCMCatchResponse)
 class PCMCatchResponseAdmin(admin.ModelAdmin):
-    list_display = ('user_username', 'trial','block', 'cue_short','category_stim2','category_stim1', 'user_response', 'is_correct_display', 'created_at')
+    list_display = ('user_username', 'trial','block', 'cue_short','user_response', 'is_correct_display', 'created_at')
     list_filter = ('user', 'created_at')
     search_fields = ('user__username', 'cue', 'user_response')
-    readonly_fields = ('user', 'trial','block', 'cue', 'stimulus1', 'stimulus2','category_stim1','category_stim2', 'user_response', 'is_correct', 'created_at')
+    readonly_fields = ('user', 'trial','block', 'cue', 'user_response', 'is_correct', 'created_at')
     ordering = ('-created_at', 'trial')
 
     def user_username(self, obj): return obj.user.username

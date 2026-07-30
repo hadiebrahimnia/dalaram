@@ -3,6 +3,7 @@ let currentTrial = CURRENT_TRIAL_INIT;
 let currentStage = INITIAL_STAGE;
 
 let seqTrial = SEQ_TOTAL_INIT + 1;
+con
 let seqCorrect = SEQ_CORRECT_INIT;
 let valencePracticeTrial = VALENCE_PRACTICE_COMPLETED_COUNT + 1;
 let ratingPracticeTrial = RATING_PRACTICE_COMPLETED_COUNT + 1;

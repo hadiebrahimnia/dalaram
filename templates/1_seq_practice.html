@@ -21,17 +21,20 @@
 <div id="intro" class="card m-5" style="">
   <div class="card-body text-center p-5">
 
-    <h1 class="mb-5">مرحله 1 : تشخیص توالی‌های صوتی</h1>
+    {% comment %} <h1 class="mb-5">مرحله 1 : تشخیص توالی‌های صوتی</h1> {% endcomment %}
+    <h1 class="mb-5">مرحله 1</h1>
 
-    <h3 class="mb-4">در این بخش {{ total_trials }} توالی صوتی پخش خواهد شد</h3>
-    <div class="mb-5">
-      <ol class="text-start mx-auto" style="line-height: 40px; max-width: 500px">
+    
+    <div class="mb-1">
+      <h3 class="text-start text-justify mb-4 mx-auto" style="line-height: 40px; max-width: 500px">در این مرحله :</h3>
+      <ol class="text-start text-justify mx-auto" style="line-height: 40px; max-width: 500px">
         <li>ابتدا یک <strong>نشانه صوتی (شامل اعداد 1 تا 3)</strong> خواهید شنید</li>
         <li>سپس <strong>دو صدای هیجانی متوالی</strong></li>
-        <li>از ۳ گزینه ارائه شده <strong>توالی درست 2 صدا هیجانی ارائه شده  </strong> را انتخاب کنید (همانند گزینه های زیر)</li>
+        <li>از ۳ گزینه ارائه شده (همانند زیر) <strong>توالی درست 2 صدا هیجانی ارائه شده  </strong> را انتخاب کنید (یعنی باید مشخص کنید به ترتیب صدای اول و صدای دوم دارای چه هیجانی بوده است)</li>
       </ol>
     </div>
-    <h3 class="mb-4">کدام توالی شنیده شد؟</h3>
+    
+    <h6 class="text-start mb-2 mx-auto" style="line-height: 40px; max-width: 500px">کدام توالی شنیده شد؟</h6>
     <div class="sam-buttons d-flex flex-column gap-3" style="max-width: 500px; margin: auto">
         <button class="btn btn-outline-primary btn-lg sequence-btn" data-seq="Neutral-Neutral">
             خنثی → خنثی
@@ -44,7 +47,8 @@
         </button>
     </div>
 
-    <p class="text-danger mt-5">در اینجا برای پاسخ به هر سوال تنها 3 ثانیه زمان دارید ، لطفا در زمان تعیین شده پاسخ دهید</p><br>
+    <h4 class="mb-5 mt-5">تعداد کل توالی ها در این مرحله {{ total_trials }} می‌باشد</h4>
+    {% comment %} <p class="text-danger mt-5">در اینجا برای پاسخ به هر سوال تنها 3 ثانیه زمان دارید ، لطفا در زمان تعیین شده پاسخ دهید</p><br> {% endcomment %}
 
 
     <div class="progress-container mb-4">
@@ -63,7 +67,7 @@
       </div>
     </div>
 
-    <button id="start-btn" class="btn btn-success btn-lg mt-4 px-5">شروع آزمون</button>
+    <button id="start-btn" class="btn btn-success btn-lg mt-4 px-5">شروع</button>
   </div>
 </div>
 
@@ -282,9 +286,9 @@
           شما به عنوان شرکت‌کننده در این پژوهش، در یک آزمایش که شامل گوش دادن به
           توالی‌های صوتی با بار هیجانی متفاوت است شرکت می‌کنید. آزمون شامل چندین
           مرحله هست که در ابتدای هر بخش توضیحات لازم در خصوص آن بخش ارائه
-          میشود.بخش اصلی آزمون شامل ۴ بلوک آزمایشی است به همراه یک بلوک آموزشی
-          اولیه برای یادگیری توالی‌ها، و سه بلوک اصلی (هر کدام حدود ۱۵ دقیقه) که
-          در مجموع حدود ۱ ساعت طول می‌کشد.
+          میشود.بخش اصلی آزمون شامل 3 بلوک آزمایشی است به همراه یک بلوک آموزشی
+          اولیه برای یادگیری توالی‌ها، و سه بلوک اصلی (هر کدام حدود 6 دقیقه) که
+          در مجموع حدود 30 دقیقه طول می‌کشد.
         </p>
 
         <p class="text-justify">

@@ -20,16 +20,17 @@
 <!-- دستور اعمل  -->
 <div id="intro" class="card m-5" style="">
   <div class="card-body text-center p-5">
-    <h2 class="mb-4">مرحله ۲: رتبه‌بندی خوشایندی</h2>
-    <p class="lead mb-4">
-        در این مرحله، پس از شنیدن نشانه و دو صدای هیجانی، باید میزان خوشایندی را رتبه‌بندی کنید که به ترتیب شامل:
+    {% comment %} <h2 class="mb-4">مرحله ۲: رتبه‌بندی خوشایندی</h2> {% endcomment %}
+    <h2 class="mb-4">مرحله 2</h2>
+    <p class="lead text-start text-justify mb-4 mx-auto" style="line-height: 40px; max-width: 500px" >
+        در این مرحله، پس از شنیدن نشانه و دو صدای هیجانی، باید میزان خوشایندی را  که از هر صدا تجربه کردید  به ترتیب  زیر رتبه‌بندی کنید :
     </p>
     <ol class="text-start mx-auto mb-4" style="max-width: 500px;">
         <li>خوشایندی محرک اول</li>
         <li>خوشایندی محرک دوم</li>
         <li>خوشایندی کل توالی</li>
     </ol>
-    <p class="text-muted">در اینجا 9 آدمک روی صفحه نمایش داده میشود که خوشایندی صدا ها را با انتخاب آن ها مشخص میکند </p><br>
+    <p class="text-muted mt-5 mb-0">برای نمره‌دهی  9 آدمک روی صفحه نمایش داده میشود که خوشایندی صداها با انتخاب آن‌ها  مشخص می‌شود ( 1 خوشایندی خیلی کم تا 9 خوشایندی خیلی زیاد ) </p><br>
     <div class="sam-buttons mt-0 mb-4">
         {% for i in "123456789" %}
             <button type="button" class="sam-btn" data-value="{{ forloop.counter }}">
@@ -64,7 +65,7 @@
             </div>
         </div>
     </div>
-    <button id="start-btn" class="btn btn-success btn-lg mt-4 px-5">شروع آزمون</button>
+    <button id="start-btn" class="btn btn-success btn-lg mt-4 px-5">شروع</button>
   </div>
 </div>
 

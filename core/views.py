@@ -316,7 +316,6 @@ def rating_save_response(request):
     # مرحله ۱: تمرین تشخیص توالی
 
     if data.get('is_rating_practice'):
-        print("Here")
         RatingPractice.objects.create(
             user=user,
             trial=data['trial'],
@@ -497,8 +496,8 @@ def pcm_view(request):
     NEGATIVE_URLS = [build_audio_url(f) for f in negative_raw]
 
     # --- مرحله ۱: تمرین تشخیص توالی ---
-    SEQ_TRIALS = 2  # تعداد کل مرحله تمرینی
-    SEQ_THRESHOLD = 0.83  # درصد پاسخ درست برای گذر از مرحله 
+    SEQ_TRIALS = 21  # تعداد کل مرحله تمرینی
+    SEQ_THRESHOLD = 0.80  # درصد پاسخ درست برای گذر از مرحله 
     
     seq_responses = PCMSequencePracticeResponse.objects.filter(user=user)
     seq_count = seq_responses.count()  # تعداد پاسخ های ثبت شده 
@@ -570,7 +569,7 @@ def pcm_view(request):
         
 
     # --- مرحله ۲: تمرین رتبه‌بندی خوشایندی ---
-    VALENCE_PRACTICE_TRIALS = 2
+    VALENCE_PRACTICE_TRIALS = 10
     valence_practice_responses = PCMValencePracticeResponse.objects.filter(user=user)
     valence_practice_count = valence_practice_responses.count()
     RESPONSE_TIMEOUT=3000
@@ -633,8 +632,8 @@ def pcm_view(request):
 
     # --- مرحله ۳: آزمون اصلی PCM ---
     NUM_BLOCKS = 3
-    CATCH_TRIALS_PER_BLOCK = 2
-    MAIN_TRIALS_PER_BLOCK = 10
+    CATCH_TRIALS_PER_BLOCK = 6
+    MAIN_TRIALS_PER_BLOCK = 14
 
     # محاسبه بلاک فعلی و پیشرفت کلی
     current_block = None
@@ -643,11 +642,15 @@ def pcm_view(request):
 
     total_completed = 0
     total_trials_all = NUM_BLOCKS * (CATCH_TRIALS_PER_BLOCK + MAIN_TRIALS_PER_BLOCK)
+    
+    try:
+        last_response=PCMMainResponse.objects.filter(user=user).last()
+    except:
+        last_response=0
 
     for block_num in range(1, NUM_BLOCKS + 1):
         catch_count = PCMCatchResponse.objects.filter(user=user, block=block_num).count()
         main_count = PCMMainResponse.objects.filter(user=user, block=block_num).count()
-
         completed_in_block = catch_count + main_count
         total_completed += completed_in_block
 
@@ -661,31 +664,31 @@ def pcm_view(request):
             remain_catch = CATCH_TRIALS_PER_BLOCK - catch_count
             possible_sequences = ["Neutral-Neutral", "Neutral-Negative", "Negative-Neutral"]
 
-            used = [f"{r.category_stim1}-{r.category_stim2}" for r in PCMCatchResponse.objects.filter(user=user, block=block_num) if r.category_stim1 and r.category_stim2]
-            counts = Counter(used)
+            # چون category دیگر ذخیره نمی‌شود، فقط تعداد باقی‌مانده را متعادل توزیع می‌کنیم
+            target_per_seq = remain_catch // 3
+            remainder = remain_catch % 3
 
-            target_per_seq = CATCH_TRIALS_PER_BLOCK // 3
-            remainder = CATCH_TRIALS_PER_BLOCK % 3
-
-            remaining_per_seq = {}
+            catch_trials = []
             for i, seq in enumerate(possible_sequences):
-                target = target_per_seq + (1 if i < remainder else 0)
-                remaining_per_seq[seq] = max(0, target - counts.get(seq, 0))
+                count = target_per_seq + (1 if i < remainder else 0)
+                cue_candidates = [c for c, exp in cues_mapping.items() if exp == seq]
+                for _ in range(count):
+                    if cue_candidates:
+                        cue = random.choice(cue_candidates)
+                    else:
+                        cue = random.choice(CUE_URLS)
+                    catch_trials.append({
+                        'cue': cue,
+                        'expected_seq': cues_mapping.get(cue, seq),
+                    })
 
-            sequence_order = []
-            for seq, rem in remaining_per_seq.items():
-                sequence_order.extend([seq] * rem)
-
-            if len(sequence_order) != remain_catch:
-                sequence_order = possible_sequences * (remain_catch // 3) + possible_sequences[:remain_catch % 3]
-
-            random.shuffle(sequence_order)
-            all_catch_sequences[block_num] = sequence_order
+            random.shuffle(catch_trials)
+            all_catch_sequences[block_num] = catch_trials
 
         # --- ساخت توالی‌های main برای این بلاک (اگر نیاز باشد) ---
         if main_count < MAIN_TRIALS_PER_BLOCK:
             remain_main = MAIN_TRIALS_PER_BLOCK - main_count
-
+            
             # تمام توالی‌های ممکن
             ALL_POSSIBLE_SEQUENCES = ["Neutral-Neutral", "Negative-Neutral", "Neutral-Negative"]
 
@@ -802,6 +805,7 @@ def pcm_view(request):
             'negative_urls': json.dumps(NEGATIVE_URLS),
             'cues_mapping': json.dumps(cues_mapping),
 
+            'last_trial':last_response.trial,
             # مهم: تمام داده‌های همه بلاک‌ها
             'all_catch_sequences': json.dumps(all_catch_sequences),
             'all_main_trials': json.dumps(all_main_trials),
@@ -949,10 +953,6 @@ def pcm_save_response(request):
             block=data.get('block', None),
             trial=data['trial'],
             cue=extract_stimulus_number(data['cue']),
-            stimulus1=extract_stimulus_number(data.get('stimulus1')),
-            stimulus2=extract_stimulus_number(data.get('stimulus2')),
-            category_stim1=data.get('category_stim1'),
-            category_stim2=data.get('category_stim2'),
             user_response=data.get('user_response'),
             is_correct=data.get('is_correct')
         )

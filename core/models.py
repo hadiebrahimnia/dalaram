@@ -286,10 +286,6 @@ class PCMCatchResponse(models.Model):  # مرحله ۱
     )
     trial = models.PositiveIntegerField()
     cue = models.CharField(max_length=100)
-    stimulus1 = models.CharField(max_length=100, null=True, blank=True)
-    stimulus2 = models.CharField(max_length=100, null=True, blank=True)
-    category_stim1 = models.CharField(max_length=10, null=True, blank=True)
-    category_stim2 = models.CharField(max_length=10, null=True, blank=True)
     user_response = models.CharField(max_length=30, null=True, blank=True)  # توالی انتخابی
     is_correct = models.BooleanField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
