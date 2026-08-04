@@ -86,7 +86,7 @@
            برانگیختگی  :
         </h3>
         <p class="lead text-start text-justify mx-auto" style="line-height: 40px; max-width: 500px">
-            یعنی صدا تا چه حد شما را آرام کرده یا برعکس، تا چه حد هیجان‌زده، فعال و پرانرژی کرده است.
+           یعنی صدا تا چه حد در شما احساس آرامش ایجاد کرده یا برعکس، تا چه حد شما را هیجان‌زده کرده است.
         </p> 
 
         <p class="text-muted mt-2 mb-2" style=" margin: auto; line-height: 32px;">
@@ -201,13 +201,16 @@
     let currentSound = null;
     let currentPhase = null; // 'valence' یا 'arousal'
 
-    let valence = null, valenceRt = null, valenceDelay = 0;
-    let arousal = null, arousalRt = null, arousalDelay = 0;
+    let valence = null, valenceRt = null, valenceDelay = 0, valenceInputMethod = null;
+    let arousal = null, arousalRt = null, arousalDelay = 0, arousalInputMethod = null;
 
     let startTime = null;
     let timeoutId = null;
     let isModalActive = false;
     let canRespond = false;
+
+    // برای تشخیص دقیق‌تر نوع ورودی
+    let lastInputType = 'mouse';
 
     const RESPONSE_TIMEOUT = 3000;
     const FIXATION_DURATION = 1000;
@@ -246,7 +249,6 @@
         timeoutId = setTimeout(() => {
             if (!canRespond || isModalActive) return;
 
-            // افزایش شمارنده تأخیر
             if (currentPhase === 'valence') valenceDelay++;
             else if (currentPhase === 'arousal') arousalDelay++;
 
@@ -261,7 +263,6 @@
         document.body.style.overflow = '';
         isModalActive = false;
 
-        // فقط تایمر همان فاز را از نو شروع کن (صدا دوباره پخش نمی‌شود)
         if (currentPhase === 'valence' || currentPhase === 'arousal') {
             startTimer();
         }
@@ -283,10 +284,9 @@
                 valenceRating.classList.remove('fade-out');
                 valenceRating.classList.add('fade-in');
 
-                // زمان واکنش دقیقاً بعد از اتمام انیمیشن ظاهر شدن شروع شود
                 setTimeout(() => {
                     startTimer();
-                }, 350); // برابر با مدت transition در CSS
+                }, 350);
             }, 20);
         });
     }
@@ -294,7 +294,6 @@
     function showArousalRating() {
         currentPhase = 'arousal';
 
-        // اول کارت خوشایندی را محو کن
         valenceRating.classList.remove('fade-in');
         valenceRating.classList.add('fade-out');
 
@@ -302,7 +301,6 @@
             valenceRating.classList.add('hidden');
             valenceRating.classList.remove('fade-out');
 
-            // کارت برانگیختگی را نشان بده
             arousalRating.classList.remove('hidden');
             arousalRating.classList.add('fade-out');
 
@@ -311,25 +309,33 @@
                     arousalRating.classList.remove('fade-out');
                     arousalRating.classList.add('fade-in');
 
-                    // زمان واکنش دقیقاً بعد از اتمام انیمیشن ظاهر شدن شروع شود
                     setTimeout(() => {
                         startTimer();
-                    }, 350); // برابر با مدت transition در CSS
+                    }, 350);
                 }, 20);
             });
-        }, 350); // مدت محو شدن کارت قبلی
+        }, 350);
     }
 
-    
+    // تشخیص نوع ورودی با Pointer Events (بهترین روش)
+    document.addEventListener('pointerdown', (e) => {
+        if (e.pointerType === 'touch') lastInputType = 'touch';
+        else if (e.pointerType === 'mouse') lastInputType = 'mouse';
+        else if (e.pointerType === 'pen') lastInputType = 'touch';
+    }, { passive: true });
 
     // پاسخ خوشایندی
     document.querySelectorAll('#valence-rating .valence-btn').forEach(btn => {
-        
-        btn.onclick = () => {
+        btn.onclick = (e) => {
             if (currentPhase !== 'valence' || isModalActive || !canRespond) return;
 
             canRespond = false;
             clearTimeout(timeoutId);
+
+            // اگر از کیبورد آمده باشد، قبلاً ست شده؛ در غیر این صورت از lastInputType استفاده کن
+            if (!valenceInputMethod) {
+                valenceInputMethod = lastInputType;
+            }
 
             // جلوه انتخاب
             document.querySelectorAll('#valence-rating .valence-btn').forEach(b => b.classList.remove('selected'));
@@ -345,11 +351,15 @@
 
     // پاسخ برانگیختگی
     document.querySelectorAll('#arousal-rating .arousal-btn').forEach(btn => {
-        btn.onclick = () => {
+        btn.onclick = (e) => {
             if (currentPhase !== 'arousal' || isModalActive || !canRespond) return;
 
             canRespond = false;
             clearTimeout(timeoutId);
+
+            if (!arousalInputMethod) {
+                arousalInputMethod = lastInputType;
+            }
 
             // جلوه انتخاب
             document.querySelectorAll('#arousal-rating .arousal-btn').forEach(b => b.classList.remove('selected'));
@@ -373,9 +383,11 @@
                     valence: valence,
                     valence_rt: valenceRt,
                     valence_delay_number: valenceDelay,
+                    valence_input_method: valenceInputMethod,
                     arousal: arousal,
                     arousal_rt: arousalRt,
-                    arousal_delay_number: arousalDelay
+                    arousal_delay_number: arousalDelay,
+                    arousal_input_method: arousalInputMethod
                 })
             }).then(response => response.json())
               .catch(err => console.error('Save failed:', err))
@@ -400,8 +412,10 @@
         let btn = null;
         if (currentPhase === 'valence') {
             btn = document.querySelector(`#valence-rating .valence-btn[data-value="${e.key}"]`);
+            valenceInputMethod = 'keyboard';   // قبل از click ست می‌شود
         } else if (currentPhase === 'arousal') {
             btn = document.querySelector(`#arousal-rating .arousal-btn[data-value="${e.key}"]`);
+            arousalInputMethod = 'keyboard';   // اصلاح شد
         }
 
         if (btn) {
@@ -417,10 +431,11 @@
             return;
         }
 
-        // ریست کامل
         valence = arousal = null;
         valenceRt = arousalRt = null;
         valenceDelay = arousalDelay = 0;
+        valenceInputMethod = null;   // مهم: ریست شود
+        arousalInputMethod = null;   // مهم: ریست شود
         currentPhase = null;
         canRespond = false;
 

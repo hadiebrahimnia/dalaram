@@ -182,9 +182,29 @@ class RatingPractice(models.Model):
     valence = models.IntegerField(null=True, blank=True)
     valence_rt = models.PositiveIntegerField(null=True, blank=True)
     valence_delay_number = models.PositiveIntegerField(default=0, blank=True)
+    valence_input_method = models.CharField(
+        max_length=20, 
+        null=True, 
+        blank=True,
+        choices=[
+            ('keyboard', 'Keyboard'),
+            ('mouse', 'Mouse'),
+            ('touch', 'Touch'),
+        ]
+    )
     arousal = models.IntegerField(null=True, blank=True)
     arousal_rt = models.PositiveIntegerField(null=True, blank=True)
     arousal_delay_number = models.PositiveIntegerField(default=0, blank=True)
+    arousal_input_method = models.CharField(
+        max_length=20, 
+        null=True, 
+        blank=True,
+        choices=[
+            ('keyboard', 'Keyboard'),
+            ('mouse', 'Mouse'),
+            ('touch', 'Touch'),
+        ]
+    )
     created_at = models.DateTimeField(auto_now_add=True)
     is_active = models.BooleanField(default=True, verbose_name="فعال/غیرفعال")
 
@@ -217,7 +237,17 @@ class RatingResponse(models.Model):
         verbose_name="زمان پاسخ خوشایندی (میلی‌ثانیه)"
     )
     valence_delay_number = models.PositiveIntegerField(default=0, blank=True)
-    # نمره برانگیختگی (Arousal) - از 1 تا 9
+    valence_input_method = models.CharField(
+        max_length=20, 
+        null=True, 
+        blank=True,
+        choices=[
+            ('keyboard', 'Keyboard'),
+            ('mouse', 'Mouse'),
+            ('touch', 'Touch'),
+        ]
+    )
+    
     arousal = models.IntegerField(
         null=True,
         blank=True,
@@ -229,6 +259,16 @@ class RatingResponse(models.Model):
         verbose_name="زمان پاسخ برانگیختگی (میلی‌ثانیه)"
     )
     arousal_delay_number = models.PositiveIntegerField(default=0, blank=True)
+    arousal_input_method = models.CharField(
+        max_length=20, 
+        null=True, 
+        blank=True,
+        choices=[
+            ('keyboard', 'Keyboard'),
+            ('mouse', 'Mouse'),
+            ('touch', 'Touch'),
+        ]
+    )
     created_at = models.DateTimeField(
         auto_now_add=True,
         verbose_name="زمان ایجاد"
@@ -272,6 +312,16 @@ class PCMSequencePracticeResponse(models.Model):  # مرحله ۱
     user_response = models.CharField(max_length=30, null=True, blank=True)  # توالی انتخابی
     response_rt = models.PositiveIntegerField(null=True, blank=True)
     delay_number = models.PositiveIntegerField(default=0, blank=True) 
+    response_input_method = models.CharField(
+        max_length=20, 
+        null=True, 
+        blank=True,
+        choices=[
+            ('keyboard', 'Keyboard'),
+            ('mouse', 'Mouse'),
+            ('touch', 'Touch'),
+        ]
+    )
     is_correct = models.BooleanField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     is_active = models.BooleanField(default=True, verbose_name="فعال/غیرفعال")
@@ -293,12 +343,42 @@ class PCMValencePracticeResponse(models.Model):  # مرحله ۲
     valence_stim1 = models.IntegerField(null=True, blank=True)
     valence_rt_stim1 = models.PositiveIntegerField(null=True, blank=True)
     valence_delay_number_stim1 = models.PositiveIntegerField(default=0, blank=True)
+    valence_input_method_stim1 = models.CharField(
+        max_length=20, 
+        null=True, 
+        blank=True,
+        choices=[
+            ('keyboard', 'Keyboard'),
+            ('mouse', 'Mouse'),
+            ('touch', 'Touch'),
+        ]
+    )
     valence_stim2 = models.IntegerField(null=True, blank=True)
     valence_rt_stim2 = models.PositiveIntegerField(null=True, blank=True)
     valence_delay_number_stim2 = models.PositiveIntegerField(default=0, blank=True)
+    valence_input_method_stim2 = models.CharField(
+        max_length=20, 
+        null=True, 
+        blank=True,
+        choices=[
+            ('keyboard', 'Keyboard'),
+            ('mouse', 'Mouse'),
+            ('touch', 'Touch'),
+        ]
+    )
     valence_sequence = models.IntegerField(null=True, blank=True)
     valence_rt_sequence = models.PositiveIntegerField(null=True, blank=True)
     valence_delay_number_sequence = models.PositiveIntegerField(default=0, blank=True)
+    valence_input_method_sequence = models.CharField(
+        max_length=20, 
+        null=True, 
+        blank=True,
+        choices=[
+            ('keyboard', 'Keyboard'),
+            ('mouse', 'Mouse'),
+            ('touch', 'Touch'),
+        ]
+    )
     created_at = models.DateTimeField(auto_now_add=True)
     is_active = models.BooleanField(default=True, verbose_name="فعال/غیرفعال")
 
@@ -318,6 +398,16 @@ class PCMCatchResponse(models.Model):  # مرحله ۱
     user_response = models.CharField(max_length=30, null=True, blank=True)  # توالی انتخابی
     response_rt = models.PositiveIntegerField(null=True, blank=True)
     delay_number = models.PositiveIntegerField(default=0, blank=True)
+    response_input_method = models.CharField(
+        max_length=20, 
+        null=True, 
+        blank=True,
+        choices=[
+            ('keyboard', 'Keyboard'),
+            ('mouse', 'Mouse'),
+            ('touch', 'Touch'),
+        ]
+    )
     is_correct = models.BooleanField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     is_active = models.BooleanField(default=True, verbose_name="فعال/غیرفعال")
@@ -391,6 +481,16 @@ class PCMMainResponse(models.Model):
         verbose_name="زمان پاسخ خوشایندی محرک اول (میلی‌ثانیه)"
     )
     valence_delay_number_stim1 = models.PositiveIntegerField(default=0, blank=True)
+    valence_input_method_stim1 = models.CharField(
+        max_length=20, 
+        null=True, 
+        blank=True,
+        choices=[
+            ('keyboard', 'Keyboard'),
+            ('mouse', 'Mouse'),
+            ('touch', 'Touch'),
+        ]
+    )
     valence_stim2 = models.IntegerField(
         null=True,
         blank=True,
@@ -402,6 +502,16 @@ class PCMMainResponse(models.Model):
         verbose_name="زمان پاسخ خوشایندی محرک دوم (میلی‌ثانیه)"
     )
     valence_delay_number_stim2 = models.PositiveIntegerField(default=0, blank=True)
+    valence_input_method_stim2 = models.CharField(
+        max_length=20, 
+        null=True, 
+        blank=True,
+        choices=[
+            ('keyboard', 'Keyboard'),
+            ('mouse', 'Mouse'),
+            ('touch', 'Touch'),
+        ]
+    )
     valence_sequence = models.IntegerField(
         null=True,
         blank=True,
@@ -413,6 +523,16 @@ class PCMMainResponse(models.Model):
         verbose_name="زمان پاسخ خوشایندی کل توالی (میلی‌ثانیه)"
     )
     valence_delay_number_sequence = models.PositiveIntegerField(default=0, blank=True)
+    valence_input_method_sequence = models.CharField(
+        max_length=20, 
+        null=True, 
+        blank=True,
+        choices=[
+            ('keyboard', 'Keyboard'),
+            ('mouse', 'Mouse'),
+            ('touch', 'Touch'),
+        ]
+    )
     created_at = models.DateTimeField(
         auto_now_add=True,
         verbose_name="زمان ایجاد"
@@ -442,9 +562,29 @@ class RatingPracticeResponse(models.Model):  # مرحله ۴ - تمرین رتب
     valence = models.IntegerField(null=True, blank=True)
     valence_rt = models.PositiveIntegerField(null=True, blank=True)
     valence_delay_number = models.PositiveIntegerField(default=0, blank=True)
+    valence_input_method = models.CharField(
+        max_length=20, 
+        null=True, 
+        blank=True,
+        choices=[
+            ('keyboard', 'Keyboard'),
+            ('mouse', 'Mouse'),
+            ('touch', 'Touch'),
+        ]
+    )
     arousal = models.IntegerField(null=True, blank=True)
     arousal_rt = models.PositiveIntegerField(null=True, blank=True)
     arousal_delay_number = models.PositiveIntegerField(default=0, blank=True)
+    arousal_input_method = models.CharField(
+        max_length=20, 
+        null=True, 
+        blank=True,
+        choices=[
+            ('keyboard', 'Keyboard'),
+            ('mouse', 'Mouse'),
+            ('touch', 'Touch'),
+        ]
+    )
     created_at = models.DateTimeField(auto_now_add=True)
     is_active = models.BooleanField(default=True, verbose_name="فعال/غیرفعال")
 
@@ -461,9 +601,29 @@ class RatingMainResponse(models.Model):  # مرحله ۵ - رتبه‌بندی
     valence = models.IntegerField(null=True, blank=True)
     valence_rt = models.PositiveIntegerField(null=True, blank=True)
     valence_delay_number = models.PositiveIntegerField(default=0, blank=True)
+    valence_input_method = models.CharField(
+        max_length=20, 
+        null=True, 
+        blank=True,
+        choices=[
+            ('keyboard', 'Keyboard'),
+            ('mouse', 'Mouse'),
+            ('touch', 'Touch'),
+        ]
+    )
     arousal = models.IntegerField(null=True, blank=True)
     arousal_rt = models.PositiveIntegerField(null=True, blank=True)
     arousal_delay_number = models.PositiveIntegerField(default=0, blank=True)
+    arousal_input_method = models.CharField(
+        max_length=20, 
+        null=True, 
+        blank=True,
+        choices=[
+            ('keyboard', 'Keyboard'),
+            ('mouse', 'Mouse'),
+            ('touch', 'Touch'),
+        ]
+    )
     created_at = models.DateTimeField(auto_now_add=True)
     is_active = models.BooleanField(default=True, verbose_name="فعال/غیرفعال")
 

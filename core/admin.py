@@ -154,10 +154,12 @@ class RatingPracticeAdmin(admin.ModelAdmin):
         'valence',
         'valence_rt',
         'valence_delay_number',
+        'valence_input_method',
         
         'arousal',
         'arousal_rt',
         'arousal_delay_number',
+        'arousal_input_method',
 
         'complete',
         'is_active',
@@ -183,10 +185,13 @@ class RatingPracticeAdmin(admin.ModelAdmin):
         'valence',
         'valence_rt',
         'valence_delay_number',
+        'valence_input_method',
+
 
         'arousal',
         'arousal_rt',
         'arousal_delay_number',
+        'arousal_input_method',
 
         'created_at',
         'is_active'
@@ -225,10 +230,12 @@ class RatingResponseAdmin(admin.ModelAdmin):
         'valence',
         'valence_rt',
         'valence_delay_number',
+        'valence_input_method',
 
         'arousal',
         'arousal_rt',
         'arousal_delay_number',
+        'arousal_input_method',
 
         'complete',
         'is_active',
@@ -255,10 +262,12 @@ class RatingResponseAdmin(admin.ModelAdmin):
         'valence',
         'valence_rt',
         'valence_delay_number',
+        'valence_input_method',
 
         'arousal',
         'arousal_rt',
         'arousal_delay_number',
+        'arousal_input_method',
 
         'created_at',
         'is_active'
@@ -289,7 +298,7 @@ class PCMSequencePracticeResponseInline(admin.TabularInline):
     model = PCMSequencePracticeResponse
     extra = 0
     can_delete = False
-    readonly_fields = ('trial', 'cue_short', 'stimulus1_short', 'stimulus2_short','category_stim1','category_stim2', 'user_response', 'delay_number','is_correct_display', 'created_at')
+    readonly_fields = ('trial', 'cue_short', 'stimulus1_short', 'stimulus2_short','category_stim1','category_stim2', 'user_response', 'delay_number','response_input_method','is_correct_display', 'created_at')
     fields = readonly_fields
     ordering = ('trial',)
 
@@ -301,10 +310,10 @@ class PCMSequencePracticeResponseInline(admin.TabularInline):
 
 @admin.register(PCMSequencePracticeResponse)
 class PCMSequencePracticeResponseAdmin(admin.ModelAdmin):
-    list_display = ('user_username', 'trial', 'cue_short','category_stim2','category_stim1', 'user_response','response_rt' ,'delay_number','is_correct_display', 'created_at')
+    list_display = ('user_username', 'trial', 'cue_short','category_stim2','category_stim1', 'user_response','response_rt' ,'delay_number','response_input_method','is_correct_display', 'created_at')
     list_filter = ('user', 'created_at')
     search_fields = ('user__username', 'cue', 'user_response')
-    readonly_fields = ('user', 'trial', 'cue', 'stimulus1', 'stimulus2','category_stim1','category_stim2', 'user_response','response_rt','delay_number','is_correct', 'created_at','is_active')
+    readonly_fields = ('user', 'trial', 'cue', 'stimulus1', 'stimulus2','category_stim1','category_stim2', 'user_response','response_rt','delay_number','response_input_method','is_correct', 'created_at','is_active')
     ordering = ('-created_at', 'trial')
 
     def user_username(self, obj): return obj.user.username
@@ -328,14 +337,17 @@ class PCMValencePracticeResponseAdmin(admin.ModelAdmin):
         'valence_stim1',
         'valence_rt_stim1',
         'valence_delay_number_stim1',
+        'valence_input_method_stim1',
 
         'valence_stim2',
         'valence_rt_stim2',
         'valence_delay_number_stim2',
+        'valence_input_method_stim2',
 
         'valence_sequence',
         'valence_rt_sequence',
         'valence_delay_number_sequence',
+        'valence_input_method_sequence',
 
         'is_active',
         'created_at',
@@ -368,14 +380,17 @@ class PCMValencePracticeResponseAdmin(admin.ModelAdmin):
         'valence_stim1',
         'valence_rt_stim1',
         'valence_delay_number_stim1',
+        'valence_input_method_stim1',
 
         'valence_stim2',
         'valence_rt_stim2',
         'valence_delay_number_stim2',
+        'valence_input_method_stim2',
 
         'valence_sequence',
         'valence_rt_sequence',
         'valence_delay_number_sequence',
+        'valence_input_method_sequence',
 
         'created_at',
         'is_active'
@@ -406,6 +421,7 @@ class PCMCatchResponseInline(admin.TabularInline):
         'user_response',
         'response_rt',
         'delay_number',
+        'response_input_method',
         'is_correct',
         'created_at',
         'is_active',
@@ -426,6 +442,7 @@ class PCMCatchResponseAdmin(admin.ModelAdmin):
         'user_response',
         'response_rt',
         'delay_number',
+        'response_input_method',
         'is_correct',
         'is_active',
         'created_at',
@@ -453,6 +470,7 @@ class PCMCatchResponseAdmin(admin.ModelAdmin):
         'user_response',
         'response_rt',
         'delay_number',
+        'response_input_method',
         'is_correct',
         'created_at',
         'is_active'
@@ -487,14 +505,17 @@ class PCMMainResponseAdmin(admin.ModelAdmin):
         'valence_stim1',
         'valence_rt_stim1',
         'valence_delay_number_stim1',
+        'valence_input_method_stim1',
 
         'valence_stim2',
         'valence_rt_stim2',
         'valence_delay_number_stim2',
+        'valence_input_method_stim2',
 
         'valence_sequence',
         'valence_rt_sequence',
         'valence_delay_number_sequence',
+        'valence_input_method_sequence',
 
         'complete',
         'is_active',
@@ -534,14 +555,17 @@ class PCMMainResponseAdmin(admin.ModelAdmin):
         'valence_stim1',
         'valence_rt_stim1',
         'valence_delay_number_stim1',
+        'valence_input_method_stim1',
 
         'valence_stim2',
         'valence_rt_stim2',
         'valence_delay_number_stim2',
+        'valence_input_method_stim2',
 
         'valence_sequence',
         'valence_rt_sequence',
         'valence_delay_number_sequence',
+        'valence_input_method_sequence',
 
         'created_at',
         'is_active'
@@ -578,10 +602,12 @@ class RatingPracticeResponseAdmin(admin.ModelAdmin):
         'valence',
         'valence_rt',
         'valence_delay_number',
+        'valence_input_method',
 
         'arousal',
         'arousal_rt',
         'arousal_delay_number',
+        'arousal_input_method',
 
         'complete',
         'is_active',
@@ -607,10 +633,12 @@ class RatingPracticeResponseAdmin(admin.ModelAdmin):
         'valence',
         'valence_rt',
         'valence_delay_number',
+        'valence_input_method',
 
         'arousal',
         'arousal_rt',
         'arousal_delay_number',
+        'arousal_input_method',
 
         'created_at',
         'is_active'
@@ -646,10 +674,12 @@ class RatingMainResponseAdmin(admin.ModelAdmin):
         'valence',
         'valence_rt',
         'valence_delay_number',
+        'valence_input_method',
 
         'arousal',
         'arousal_rt',
         'arousal_delay_number',
+        'arousal_input_method',
 
         'complete',
         'is_active',
@@ -676,12 +706,15 @@ class RatingMainResponseAdmin(admin.ModelAdmin):
         'valence',
         'valence_rt',
         'valence_delay_number',
+        'valence_input_method',
 
         'arousal',
         'arousal_rt',
         'arousal_delay_number',
+        'arousal_input_method',
 
         'created_at',
+        'is_active',
     )
 
     ordering = (

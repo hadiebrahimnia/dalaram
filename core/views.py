@@ -348,9 +348,11 @@ def rating_save_response(request):
             valence=data.get('valence'),
             valence_rt=data.get('valence_rt'),
             valence_delay_number = data.get('valence_delay_number', 0),
+            valence_input_method = data.get('valence_input_method'),
             arousal=data.get('arousal'),
             arousal_rt=data.get('arousal_rt'),
             arousal_delay_number = data.get('arousal_delay_number', 0),
+            arousal_input_method = data.get('arousal_input_method'),
         )
 
     elif data.get('is_rerating'):
@@ -1123,12 +1125,15 @@ def pcm_save_response(request):
             valence_stim1=data.get('valence_stim1'),
             valence_rt_stim1=data.get('valence_rt_stim1') or data.get('rt_stim1'),
             valence_delay_number_stim1=data.get('valence_delay_number_stim1', 0),
+            valence_input_method_stim1=data.get('valence_input_method_stim1'),
             valence_stim2=data.get('valence_stim2'),
             valence_rt_stim2=data.get('valence_rt_stim2') or data.get('rt_stim2'),
             valence_delay_number_stim2=data.get('valence_delay_number_stim2', 0),
+            valence_input_method_stim2=data.get('valence_input_method_stim2'),
             valence_sequence=data.get('valence_sequence'),
             valence_rt_sequence=data.get('valence_rt_sequence') or data.get('rt_sequence'),
             valence_delay_number_sequence=data.get('valence_delay_number_sequence', 0),
+            valence_input_method_sequence=data.get('valence_input_method_sequence'),
         )
 
     # مرحله ۳: آزمون اصلی

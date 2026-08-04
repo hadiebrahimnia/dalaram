@@ -152,8 +152,8 @@
   </div>
 </div>
 
-  <audio id="audio-player" preload="auto"></audio>
-  <script>
+<audio id="audio-player" preload="auto"></audio>
+<script>
     // درخواست تمام‌صفحه هنگام شروع
     function requestFullscreen() {
       const elem = document.documentElement;
@@ -189,17 +189,20 @@
     let expectedSeq;
     let currentRatingStep = 0; // 0: اول، 1: دوم، 2: کل توالی
 
-    // ساختار کامل رتبه‌بندی + RT + delay برای هر مرحله جداگانه
+    // ساختار کامل رتبه‌بندی + RT + delay + input_method برای هر مرحله
     let ratings = {
-      stim1: null, rt_stim1: null, delay_stim1: 0,
-      stim2: null, rt_stim2: null, delay_stim2: 0,
-      sequence: null, rt_sequence: null, delay_sequence: 0
+      stim1: null, rt_stim1: null, delay_stim1: 0, input_method_stim1: null,
+      stim2: null, rt_stim2: null, delay_stim2: 0, input_method_stim2: null,
+      sequence: null, rt_sequence: null, delay_sequence: 0, input_method_sequence: null
     };
 
     let ratingTimeout;
     let isModalActive = false;
     let ratingStartTime = 0;
     const RESPONSE_TIMEOUT = {{ RESPONSE_TIMEOUT }}; // معمولاً 3000
+
+    // برای تشخیص دقیق موس / تاچ
+    let lastInputType = 'mouse';
 
     const questions = [
       "صدای اول ",
@@ -248,9 +251,9 @@
       // ریست کامل برای تریال جدید
       currentRatingStep = 0;
       ratings = {
-        stim1: null, rt_stim1: null, delay_stim1: 0,
-        stim2: null, rt_stim2: null, delay_stim2: 0,
-        sequence: null, rt_sequence: null, delay_sequence: 0
+        stim1: null, rt_stim1: null, delay_stim1: 0, input_method_stim1: null,
+        stim2: null, rt_stim2: null, delay_stim2: 0, input_method_stim2: null,
+        sequence: null, rt_sequence: null, delay_sequence: 0, input_method_sequence: null
       };
 
       showFixation(() => {
@@ -310,22 +313,29 @@
     }
 
     // ثبت پاسخ (هم از کلیک و هم از کیبورد)
-    function registerResponse(value) {
+    function registerResponse(value, inputMethod = null) {
       if (isModalActive) return; // وقتی مدال باز است پاسخ قبول نشود
 
       clearTimeout(ratingTimeout);
 
       const rt = Date.now() - ratingStartTime;
 
+      // تعیین روش ورودی
+      // اگر از کیبورد آمده باشد inputMethod قبلاً ست شده، در غیر این صورت از lastInputType استفاده کن
+      const method = inputMethod || lastInputType;
+
       if (currentRatingStep === 0) {
         ratings.stim1 = value;
         ratings.rt_stim1 = rt;
+        ratings.input_method_stim1 = method;
       } else if (currentRatingStep === 1) {
         ratings.stim2 = value;
         ratings.rt_stim2 = rt;
+        ratings.input_method_stim2 = method;
       } else if (currentRatingStep === 2) {
         ratings.sequence = value;
         ratings.rt_sequence = rt;
+        ratings.input_method_sequence = method;
       }
 
       document.querySelectorAll('.rating-btn').forEach(b => b.disabled = true);
@@ -341,6 +351,13 @@
       }
     }
 
+    // تشخیص نوع ورودی با Pointer Events
+    document.addEventListener('pointerdown', (e) => {
+      if (e.pointerType === 'touch') lastInputType = 'touch';
+      else if (e.pointerType === 'mouse') lastInputType = 'mouse';
+      else if (e.pointerType === 'pen') lastInputType = 'touch';
+    }, { passive: true });
+
     // کلیک روی دکمه‌های مقیاس ۱-۹
     document.querySelectorAll('.rating-btn').forEach(btn => {
       btn.addEventListener("touchstart", function () {
@@ -353,6 +370,8 @@
 
       btn.onclick = () => {
         const value = parseInt(btn.dataset.value);
+        // اگر از کیبورد آمده باشد، registerResponse قبلاً با 'keyboard' صدا زده می‌شود
+        // اینجا فقط وقتی موس/تاچ است اجرا می‌شود
         registerResponse(value);
       };
     });
@@ -376,14 +395,17 @@
           valence_stim1: ratings.stim1,
           valence_rt_stim1: ratings.rt_stim1,
           valence_delay_number_stim1: ratings.delay_stim1,
+          valence_input_method_stim1: ratings.input_method_stim1,
 
           valence_stim2: ratings.stim2,
           valence_rt_stim2: ratings.rt_stim2,
           valence_delay_number_stim2: ratings.delay_stim2,
+          valence_input_method_stim2: ratings.input_method_stim2,
 
           valence_sequence: ratings.sequence,
           valence_rt_sequence: ratings.rt_sequence,
-          valence_delay_number_sequence: ratings.delay_sequence
+          valence_delay_number_sequence: ratings.delay_sequence,
+          valence_input_method_sequence: ratings.input_method_sequence
         })
       })
       .then(res => res.json())
@@ -422,7 +444,10 @@
             btn.classList.remove('keyboard-effect');
           }, 220);
 
-          btn.click(); // از همان مسیر کلیک استفاده می‌کند
+          // مستقیماً registerResponse را با 'keyboard' صدا می‌زنیم
+          // تا از مسیر onclick (که lastInputType را استفاده می‌کند) رد نشویم
+          const value = parseInt(e.key);
+          registerResponse(value, 'keyboard');
         }
       }
     });
@@ -439,13 +464,13 @@
 
         // تایمر را از صفر شروع کن
         ratingStartTime = Date.now();
-        startRatingTimer();   // ← این باعث می‌شود اگر دوباره ۳ ثانیه پاسخ ندهد، مدال دوباره بیاید
+        startRatingTimer();
       }
 
       document.getElementById('closeModal').onclick = closeModal;
       fasterModal.querySelector('.modal-overlay').onclick = closeModal;
     });
-  </script>
+</script>
 
 
 </body>
