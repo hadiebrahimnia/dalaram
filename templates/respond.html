@@ -39,11 +39,12 @@
             color: #2c3e50;
             margin-bottom: 20px;
         }
-        .description {
+        p {
             font-size: 1.1rem;
             color: #555;
             line-height: 1.8;
             margin-bottom: 40px;
+            text-align:justify;
         }
         .btn {
             background: #27ae60;
@@ -132,7 +133,7 @@
         <!-- صفحه مقدمه -->
         <div id="intro" class="intro">
             {% if questionnaire.description %}
-                <p class="description">{{ questionnaire.description }}</p>
+                <p class="description">{{ questionnaire.description|linebreaks }}</p>
             {% else %}
                 <p class="description">این پرسشنامه برای ارزیابی ویژگی‌های شما طراحی شده است.</p>
             {% endif %}
