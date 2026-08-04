@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>مرحله ۳: آزمون اصلی PCM</title>
+  <title>مرحله 3 </title>
   {% load static %}
   <link href="{% static 'plugins/bootstrap/css/bootstrap.rtl.min.css' %}" rel="stylesheet" />
   <link href="{% static 'css/pcm.css' %}" rel="stylesheet" />
@@ -19,37 +19,94 @@
 <!-- دستورالعمل اولیه -->
 <div id="intro" class="card m-5">
   <div class="card-body text-center p-5">
-    {% comment %} <h2 class="mb-4">مرحله 3 : آزمون اصلی</h2> {% endcomment %}
-    <h1 class="mb-4">مرحله 3 </h1>
+    <div style="
+      background: linear-gradient(135deg, #3b82f6, #4f46e5);
+      color: #fff;
+      text-align: center;
+      padding: 30px;
+      border-radius: 18px;
+      max-width: 700px;
+      box-shadow: 0 10px 25px rgba(0,0,0,.15);
+      margin: auto;
+      line-height: 1.8;
+    ">
+      <div style="font-size:42px; font-weight:bold; ">
+          مرحله 3
+      </div>
+      <div style="font-size:16px;margin-top:10px;">
+          ⏱️ زمان تقریبی: 20 دقیقه
+      </div>
+    </div>
 
-    <div class="mb-5 mt-5">
-      <h3 class="text-start text-justify mb-4 mx-auto" style="line-height: 40px; max-width: 500px"> این مرحله از {{ total_blocks }} بلوک تشکیل شده است و هر بلوک شامل دو بخش است:</h3>
+    <div class="mb-1 mt-5">
+      <p class="lead text-start text-justify mb-4 mx-auto" style="line-height: 40px; max-width: 500px">
+        این مرحله شامل <strong>۲ بخش</strong> است که به صورت پشت‌سرهم و به تعداد {{ total_blocks }} بار تکرار می‌شود.
+      </p>
+
+      <h3 class="text-start text-justify mb-4 mx-auto" style="line-height: 40px; max-width: 500px">
+        بخش اول :
+      </h3>
+
       <ol class="text-start text-justify mx-auto" style="line-height: 40px; max-width: 500px">
-        <li>{{ catch_trials_per_block }} توالی برای <strong>تشخیص نوع هیجانی توالی</strong> (فقط نشانه  یعنی اعداد ارائه شده و  شما باید توالی را تعیین کنید)</li>
-        <li>{{ trials_per_block }} توالی برای <strong>رتبه‌بندی خوشایندی</strong> (صدای اول، صدای دوم، کل توالی)</li>
+        <li>
+          همانند مرحله اول، یک <strong>نشانه صوتی</strong> می‌شنوید که شامل صدای اعداد ۱ تا ۳ است.</br>
+          <strong>توجه:</strong> در این بخش فقط نشانه پخش می‌شود و هیچ صدای هیجانی پخش نمی‌گردد.
+        </li>
+        <li>
+          بر اساس نشانه‌ای که شنیدید، از بین سه گزینه‌ی زیر، <strong>توالی هیجانی</strong> مربوط به آن نشانه را که در مرحله اول یاد گرفته‌اید انتخاب کنید.
+        </li>
       </ol>
-    </div>
 
-
-  <h3 class="mt-5">تشخیص توالی:</h3>
-  <p class="text-muted mb-0 ">بلافاصله بعد از ارائه نشانه صوتی شما باید توالی را تعیین کنید</p><br>
-  <div class="sam-buttons d-flex flex-column gap-3" style="max-width: 500px; margin: auto">
-    <button class="btn btn-outline-primary btn-lg sequence-btn" data-seq="Neutral-Neutral">خنثی → خنثی</button>
-    <button class="btn btn-outline-primary btn-lg sequence-btn" data-seq="Neutral-Negative">خنثی → منفی</button>
-    <button class="btn btn-outline-primary btn-lg sequence-btn" data-seq="Negative-Neutral">منفی → خنثی</button>
-  </div>
-   
-
-    <h3 class="mt-5">رتبه‌بندی خوشایندی:</h3>
-    <p class="text-muted mb-0 ">برای نمره‌دهی  9 آدمک روی صفحه نمایش داده میشود که خوشایندی صداها با انتخاب آن‌ها  مشخص می‌شود ( 1 خوشایندی خیلی کم تا 9 خوشایندی خیلی زیاد ) </p><br>
-    <div class="sam-buttons mt-0 mb-4">
-      {% for i in "123456789" %}
-        <button type="button" class="sam-btn valence-btn" data-value="{{ forloop.counter }}">
-          <img src="{% static 'images/valence/' %}{{ forloop.counter }}.png" alt="{{ forloop.counter }}">
-          <div class="key-hint mt-2 fw-bold">{{ forloop.counter }}</div>
+      <div class="sam-buttons d-flex flex-column gap-3" style="max-width: 500px; margin: auto">
+        <button class="btn btn-outline-primary btn-lg sequence-btn" data-seq="Neutral-Neutral">
+          <span class="text-muted">خنثی</span>
+            <span class="text-dark" style="font-weight: bolder;margin: 10px;">→</span>
+          <span class="text-muted" >خنثی</span>
         </button>
-      {% endfor %}
+        <button class="btn btn-outline-primary btn-lg sequence-btn" data-seq="Negative-Neutral">
+          <span class="text-muted" >خنثی</span>
+            <span class="text-dark" style="font-weight: bolder;margin: 10px;">→</span>
+          <span class="text-danger">منفی</span>
+        </button>
+        <button class="btn btn-outline-primary btn-lg sequence-btn" data-seq="Neutral-Negative">
+          <span class="text-danger">منفی</span>
+            <span class="text-dark" style="font-weight: bolder;margin: 10px;">→</span>
+          <span class="text-muted" >خنثی</span>
+        </button>
+      </div>
+
+
+
+      <h3 class="text-start text-justify mb-4 mt-5 mx-auto" style="line-height: 40px; max-width: 500px">
+        بخش دوم :
+      </h3>
+
+      <p class="lead text-start text-justify mb-4 mx-auto" style="line-height: 40px; max-width: 500px">
+        همانند مرحله دوم، پس از شنیدن نشانه (اعداد ۱ تا ۳) و دو صدای هیجانی، باید میزان <strong>خوشایندی</strong> 
+        (میزان دلپذیر یا آزاردهنده بودن) که از هر صدا تجربه کردید را به ترتیب زیر رتبه‌بندی کنید:
+      </p>
+
+
+      <ol class="text-start mx-auto mb-4" style="max-width: 500px; line-height: 40px;">
+        <li>خوشایندی صدای اول</li>
+        <li>خوشایندی صدای دوم</li>
+        <li>خوشایندی کلی توالی (احساسی که از شنیدن هر دو صدا با هم داشتید)</li>
+      </ol>
+
+      <p class="text-muted mt-5 mb-2" style=" margin: auto; line-height: 32px;">
+      برای نمره‌دهی، ۹ آدمک روی صفحه نمایش داده می‌شود. با انتخاب یکی از آن‌ها میزان خوشایندی را مشخص کنید 
+      (نمره ۱ = خیلی ناخوشایند و آزاردهنده | نمره ۹ = خیلی خوشایند و دلپذیر).
+    </p>  
+
+    <div class="sam-buttons mt-0 mb-4 p-0" style="gap:2px!important;">
+        {% for i in "123456789" %}
+            <button type="button" class="sam-btn valence-btn" data-value="{{ forloop.counter }}" >
+                <img src="{% static 'images/valence/' %}{{ forloop.counter }}.png" alt="{{ forloop.counter }}">
+                <div class="key-hint">{{ forloop.counter }}</div>
+            </button>
+        {% endfor %}
     </div>
+
     <div class="arousal-scale">
         <span>9 = خوشایندی زیاد</span>
         <div class="arrow-line">
@@ -57,9 +114,19 @@
         </div>
         <span>1 = خوشایندی کم </span>
     </div>
+       
 
-    <p class="text-muted mt-5">در صورتی که از کامپیوتر استفاده میکنید برای پاسخ میتوانید از کلیک موس روی آدمک ها و یا از کلیدهای 1 تا 9 بالای کیبورد را استفاده نمایید</p>
-    <p class="text-danger">در اینجا برای پاسخ به هر سوال تنها 3 ثانیه زمان دارید ، لطفا در زمان تعیین شده پاسخ دهید</p><br>
+    </div>
+    
+
+    <h4 class="mb-5 mt-5 m-auto" style="max-width: 700px; line-height: 40px;">
+      در صورتی که از کامپیوتر استفاده می‌کنید، می‌توانید با کلیک روی آدمک‌ها یا فشردن کلیدهای ۱ تا ۹ بالای کیبورد پاسخ دهید.
+    </h4>
+
+    <h5 class="text-danger mt-5 m-auto" style="max-width: 700px; line-height: 40px;">
+      برای هر پاسخ  تنها ۳ ثانیه زمان دارید. لطفاً سریع و بر اساس اولین احساس خود پاسخ دهید.
+    </h5>
+
 
     <div class="progress-container mb-4">
       <div class="d-flex justify-content-between mb-2">
@@ -79,85 +146,140 @@
   </div>
 </div>
 
-
-<div id="rest-screen" class="card m-5 hidden">
-  <div class="card-body text-center p-5">
-    <h2 class="mb-4">بلوک <span id="completed-block">{{ perior_block }}</span> به پایان رسید.</h2>
-    <h2>کمی استراحت کنید</h2>
-    <p>وقتی آماده شدید، ادامه دهید.</p>
-    <button id="continue-btn" class="btn btn-primary btn-lg mt-4 px-5">ادامه آزمون</button>
+<div class="content">
+  
+  <div id="rest-screen" class="card m-5 hidden">
+    <div class="card-body text-center p-5">
+      <h1 class="mb-5" >بلوک {{ next_block }}</h2>
+      <div class="modal-icon">⚠️</div>
+      <h3 class="modal-title">کمی استراحت کنید</h3>
+      <h6 class="modal-title">هر زمان آماده بودید ادامه دهید</h6>
+      <button id="continue-btn" class="btn btn-primary btn-lg mt-4 px-5">ادامه</button>
+    </div>
   </div>
-</div>
 
-<!-- Fixation -->
-<div id="fixation" class="full-center hidden"><div class="fixation">+</div></div>
+  <!-- Fixation -->
+  <div id="fixation" class="full-center hidden"><div class="fixation">+</div></div>
 
-<!-- Catch Trial -->
-<div id="catch-trial" class="hidden">
-  <div class="card p-5" style="max-width: 700px; margin: 20px auto;">
-    <div class="card-body text-center">
-      <h3 class="mb-5">کدام توالی شنیده شد؟</h3>
+  <!-- Catch Trial -->
+  <div id="catch-trial" class="hidden">
+    <div class="card p-4">
+      <div class="card-body text-center">
+        <h3 class="mb-4">کدام توالی شنیده شد؟</h3>
+        <div class="sam-buttons d-flex flex-column gap-3" style="max-width: 500px; margin: auto">
+          <button class="btn btn-outline-primary btn-lg sequence-btn response_btn" data-seq="Neutral-Neutral">
+            <span class="text-muted">خنثی</span>
+              <span class="text-dark" style="font-weight: bolder;margin: 10px;">→</span>
+            <span class="text-muted" >خنثی</span>
+          </button>
+          <button class="btn btn-outline-primary btn-lg sequence-btn response_btn" data-seq="Negative-Neutral">
+            <span class="text-muted" >خنثی</span>
+              <span class="text-dark" style="font-weight: bolder;margin: 10px;">→</span>
+            <span class="text-danger">منفی</span>
+          </button>
+          <button class="btn btn-outline-primary btn-lg sequence-btn response_btn" data-seq="Neutral-Negative">
+            <span class="text-danger">منفی</span>
+              <span class="text-dark" style="font-weight: bolder;margin: 10px;">→</span>
+            <span class="text-muted" >خنثی</span>
+          </button>
+        </div>
+        <div id="feedback" class="mt-2 fs-2 fw-bold"></div>
+      </div>
+    </div>
+  </div>
+
+
+
+   <div id="rating-trial" class="rating hidden">
+    <div class="card p-0">
+      <div class="card-body text-center px-0">
+        <h3 id="rating-question" class="mb-5 fade-in"></h3>
+        <div class="sam-buttons mt-0 mb-4">
+            {% for i in "123456789" %}
+                <button type="button" class="sam-btn valence-btn rating-btn" data-value="{{ forloop.counter }}">
+                    <img src="{% static 'images/valence/' %}{{ forloop.counter }}.png" alt="{{ forloop.counter }}">
+                    <div class="key-hint">{{ forloop.counter }}</div>
+                </button>
+            {% endfor %}
+        </div>
+        <div id="feedback" class="mt-4 fs-3 fw-bold text-danger"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- مدال شروع Catch -->
+  <div id="catchIntroModal" class="custom-modal">
+    <div class="modal-overlay"></div>
+    <div class="modal-content">
+      <div class="modal-icon">ℹ️</div>
+      <h3 class="modal-title">تشخیص توالی — بلوک <span id="block-num">{{ current_block }}</span></h3>
+      <p class="text-start"> با دقت به نشانه گوش دهید و توالی هیجانی را مشخص کنید.</p>
+      
       <div class="sam-buttons d-flex flex-column gap-3" style="max-width: 500px; margin: auto">
-        <button class="btn btn-outline-primary btn-lg sequence-btn" data-seq="Neutral-Neutral">خنثی → خنثی</button>
-        <button class="btn btn-outline-primary btn-lg sequence-btn" data-seq="Neutral-Negative">خنثی → منفی</button>
-        <button class="btn btn-outline-primary btn-lg sequence-btn" data-seq="Negative-Neutral">منفی → خنثی</button>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- Rating Trial -->
-<div id="rating-trial" class="hidden">
-  <div class="card p-5">
-    <div class="card-body text-center">
-      <h3 id="rating-question" class="mb-5"></h3>
-      <div class="sam-buttons" style="margin: auto;">
-        {% for i in "123456789" %}
-        <button type="button" class="btn sam-btn valence-btn" data-value="{{ forloop.counter }}">
-          <img src="{% static 'images/valence/' %}{{ forloop.counter }}.png" alt="{{ forloop.counter }}" style="width: 106px;height: 136px;">
-          <div class="key-hint mt-2 fw-bold">{{ forloop.counter }}</div>
+        <button class="btn btn-outline-primary btn-lg sequence-btn response_btn" data-seq="Neutral-Neutral">
+          <span class="text-muted">خنثی</span>
+            <span class="text-dark" style="font-weight: bolder;margin: 10px;">→</span>
+          <span class="text-muted" >خنثی</span>
         </button>
-        {% endfor %}
+        <button class="btn btn-outline-primary btn-lg sequence-btn response_btn" data-seq="Negative-Neutral">
+          <span class="text-muted" >خنثی</span>
+            <span class="text-dark" style="font-weight: bolder;margin: 10px;">→</span>
+          <span class="text-danger">منفی</span>
+        </button>
+        <button class="btn btn-outline-primary btn-lg sequence-btn response_btn" data-seq="Neutral-Negative">
+          <span class="text-danger">منفی</span>
+            <span class="text-dark" style="font-weight: bolder;margin: 10px;">→</span>
+          <span class="text-muted" >خنثی</span>
+        </button>
       </div>
+
+      <p class="text-danger fw-bold mt-4">برای هر پاسخ فقط ۳ ثانیه زمان دارید!</p>
+      <button class="btn btn-primary btn-lg" id="startCatchBtn">شروع</button>
     </div>
   </div>
-</div>
 
-<!-- مدال شروع Catch -->
-<div id="catchIntroModal" class="custom-modal">
-  <div class="modal-overlay"></div>
-  <div class="modal-content">
-    <div class="modal-icon">ℹ️</div>
-    <h3 class="modal-title">تشخیص توالی — بلوک <span id="block-num">{{ current_block }}</span></h3>
-    <p>لطفاً با دقت به نشانه گوش دهید و توالی هیجانی را مشخص کنید.</p>
-    <button class="btn btn-primary btn-lg" id="startCatchBtn">شروع</button>
-  </div>
-</div>
+  <!-- مدال شروع رتبه‌بندی -->
+  <div id="ratingIntroModal" class="custom-modal">
+    <div class="modal-overlay"></div>
+    <div class="modal-content">
+      <div class="modal-icon">ℹ️</div>
+      <h3 class="modal-title">رتبه‌بندی خوشایندی — بلوک <span id="block-num-rating">{{ current_block }}</span></h3>
+      <p class="text-start">        پس از شنیدن نشانه (اعداد ۱ تا ۳) و دو صدای هیجانی، باید میزان <strong>خوشایندی</strong> (میزان دلپذیر یا آزاردهنده) که از هر صدا تجربه کردید را به ترتیب زیر رتبه‌بندی کنید:</p>
+      <ol class="text-start" >
+        <li>خوشایندی صدای اول</li>
+        <li>خوشایندی صدای دوم</li>
+        <li>خوشایندی کل توالی</li>
+      </ol>
+      <div class="sam-buttons mt-0 mb-4 p-0" style="gap:2px!important;">
+          {% for i in "123456789" %}
+              <button type="button" class="sam-btn valence-btn" data-value="{{ forloop.counter }}" >
+                  <img src="{% static 'images/valence/' %}{{ forloop.counter }}.png" alt="{{ forloop.counter }}">
+                  <div class="key-hint">{{ forloop.counter }}</div>
+              </button>
+          {% endfor %}
+      </div>
 
-<!-- مدال شروع رتبه‌بندی -->
-<div id="ratingIntroModal" class="custom-modal">
-  <div class="modal-overlay"></div>
-  <div class="modal-content">
-    <div class="modal-icon">ℹ️</div>
-    <h3 class="modal-title">رتبه‌بندی خوشایندی — بلوک <span id="block-num-rating">{{ current_block }}</span></h3>
-    <p>حالا {{ trials_per_block }} توالی را رتبه‌بندی کنید:</p>
-    <ol class="text-start mx-auto mb-3" style="max-width: 400px;">
-      <li>خوشایندی صدای اول</li>
-      <li>خوشایندی صدای دوم</li>
-      <li>خوشایندی کل توالی</li>
-    </ol>
-    <p class="text-danger fw-bold">برای هر سوال فقط ۳ ثانیه زمان دارید!</p>
-    <button class="btn btn-primary btn-lg" id="startRatingBtn">شروع</button>
+      <div class="arousal-scale">
+          <span>9 = خوشایندی زیاد</span>
+          <div class="arrow-line">
+              <span class="arrow">➤</span>
+          </div>
+          <span>1 = خوشایندی کم </span>
+      </div>
+
+      <p class="text-danger fw-bold mt-4">برای هر پاسخ فقط ۳ ثانیه زمان دارید!</p>
+      <button class="btn btn-primary btn-lg" id="startRatingBtn">شروع</button>
+    </div>
   </div>
 </div>
 
 <audio id="audio-player" preload="auto"></audio>
 
-<div id="welcomeModal" class="custom-modal">
+<div id="fasterModal" class="custom-modal">
   <div class="modal-overlay"></div>
   <div class="modal-content">
     <div class="modal-icon">⚠️</div>
-    <h3 class="modal-title"> لطفا سریعتر پاسخ دهید </h3>
+    <h3 class="modal-title">سریع‌تر پاسخ دهید</h3>
     <button class="modal-button" id="closeModal">
       ادامه
     </button>
@@ -165,6 +287,9 @@
 </div>
 
 <script>
+  let canRespond = false;
+  let isModalActive = false;
+
   // داده‌های ثابت از سرور
   const totalBlocks = {{ total_blocks }};
   const catchPerBlock = {{ catch_trials_per_block }};
@@ -175,18 +300,15 @@
   const negativeUrls = {{ negative_urls|safe }};
   const cuesMapping = {{ cues_mapping|safe }};
 
-  // تمام توالی‌های باقی‌مانده برای همه بلاک‌ها (از view ارسال شده)
-  const allCatchSequences = {{ all_catch_sequences|safe }};   // مثال: {1: ["Neutral-Neutral", ...], 2: [...]}
-  const allMainTrials = {{ all_main_trials|safe }};           // مثال: {1: [{"actual_seq": "...", "cue": "..."}, ...], 2: [...]}
+  const allCatchSequences = {{ all_catch_sequences|safe }};
+  const allMainTrials = {{ all_main_trials|safe }};
   
-
-  // بلاک فعلی (از سرور)
   let currentBlock = {{ current_block }};
   let remainingCatch = allCatchSequences[currentBlock] || [];
   let remainingTrials = allMainTrials[currentBlock] || [];
   
   let currentTrialInBlock = {{ last_trial }} + 1;
-  console.log(currentTrialInBlock)
+
   // عناصر DOM
   const audio = document.getElementById('audio-player');
   const intro = document.getElementById('intro');
@@ -198,23 +320,34 @@
 
   const catchIntroModal = document.getElementById('catchIntroModal');
   const ratingIntroModal = document.getElementById('ratingIntroModal');
+  const fasterModal = document.getElementById('fasterModal');
 
-  // متغیرهای موقت تریال
+  // متغیرهای موقت
   let currentCue, currentStim1, currentStim2, actualSeq, expectedSeq;
   let ratingStep = 0;
   let ratings = { stim1: null, stim2: null, sequence: null };
   let rts = { stim1: null, stim2: null, sequence: null };
-  let ratingStartTime, timeoutHandle;
+  let delays = { stim1: 0, stim2: 0, sequence: 0 };   // ← اضافه شد
+
+  // برای Catch
+  let catchStartTime = 0;
+  let catchDelay = 0;
+  let catchTimeoutHandle = null;
+
+  let ratingStartTime = 0;
+  let timeoutHandle = null;
 
   const ratingQuestions = [
-    "خوشایندی صدای اول چقدر بود؟",
-    "خوشایندی صدای دوم چقدر بود؟",
-    "خوشایندی کل توالی چقدر بود؟"
+    "صدای اول ",
+    "صدای دوم ",
+    "کل (دو صدا با هم) "
   ];
 
-  // توابع کمکی
+  const RESPONSE_TIMEOUT = 3000;
+
+  // ==================== توابع کمکی ====================
   function updateBlockNumbers() {
-    document.querySelectorAll('#block-num, #block-num-rating, #completed-block').forEach(el => {
+    document.querySelectorAll('#block-num, #block-num-rating').forEach(el => {
       el.textContent = currentBlock;
     });
   }
@@ -245,37 +378,83 @@
     audio.onended = () => setTimeout(next, 500);
   }
 
-  // شروع تریال catch بعدی
+  function randomChoice(arr) {
+    return arr[Math.floor(Math.random() * arr.length)];
+  }
+
+  // ==================== CATCH TRIAL ====================
   function startNextCatchTrial() {
     if (remainingCatch.length === 0) {
-      // catch این بلاک تمام شد → برو به مدال رتبه‌بندی
       ratingIntroModal.classList.add('active');
       updateBlockNumbers();
       return;
     }
 
     const trial = remainingCatch.shift();
-    // ساختار جدید از سرور: {cue: '...', expected_seq: '...'}
     currentCue = trial.cue;
     expectedSeq = trial.expected_seq;
-    // برای catch دیگر محرک صوتی پخش نمی‌شود
     currentStim1 = null;
     currentStim2 = null;
-    actualSeq = expectedSeq;  // فقط برای سازگاری با متغیرهای موجود
+    actualSeq = expectedSeq;
+    catchDelay = 0;
 
     showFixation(() => {
       play(cueUrls[currentCue] || currentCue, () => {
         catchTrial.classList.remove('hidden');
+        canRespond = true;
+        startCatchTimeout();
       });
     });
   }
 
-  // شروع تریال rating بعدی
+  function startCatchTimeout() {
+    catchStartTime = Date.now();
+    clearTimeout(catchTimeoutHandle);
+
+    catchTimeoutHandle = setTimeout(() => {
+      if (!canRespond || isModalActive) return;
+
+      catchDelay++;
+      fasterModal.classList.add('active');
+      document.body.style.overflow = 'hidden';
+      isModalActive = true;
+    }, RESPONSE_TIMEOUT);
+  }
+
+  function saveCatchResponse(userResponse) {
+    if (!canRespond || isModalActive) return;
+
+    canRespond = false;
+    clearTimeout(catchTimeoutHandle);
+
+    const rt = Date.now() - catchStartTime;
+    const isCorrect = userResponse === expectedSeq;
+
+    fetch('/pcm/save/', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCsrfToken() },
+      body: JSON.stringify({
+        is_catch: true,
+        block: currentBlock,
+        trial: catchPerBlock - remainingCatch.length,
+        cue: currentCue,
+        user_response: userResponse,
+        response_rt: rt,
+        delay_number: catchDelay,
+        is_correct: isCorrect
+      })
+    }).finally(() => {
+      catchTrial.classList.add('hidden');
+      setTimeout(startNextCatchTrial, 800);
+    });
+  }
+
+  // ==================== RATING TRIAL ====================
   function startNextRatingTrial() {
-    {% comment %} if (remainingTrials.length === 0) {
+    if (remainingTrials.length === 0) {
       finishBlock();
       return;
-    } {% endcomment %}
+    }
 
     const trial = remainingTrials.shift();
     actualSeq = trial.actual_seq;
@@ -296,6 +475,7 @@
             ratingStep = 0;
             ratings = { stim1: null, stim2: null, sequence: null };
             rts = { stim1: null, stim2: null, sequence: null };
+            delays = { stim1: 0, stim2: 0, sequence: 0 };
             showRatingQuestion();
           })
         )
@@ -304,90 +484,94 @@
   }
 
   function showRatingQuestion() {
-    questionEl.textContent = ratingQuestions[ratingStep];
     ratingTrial.classList.remove('hidden');
-    ratingStartTime = Date.now();
 
+    // محو شدن متن قبلی
+    questionEl.classList.remove('fade-in');
+    questionEl.classList.add('fade-out');
+
+    setTimeout(() => {
+      questionEl.textContent = ratingQuestions[ratingStep];
+      questionEl.classList.remove('fade-out');
+      questionEl.classList.add('fade-in');
+
+      // زمان واکنش دقیقاً از این لحظه شروع می‌شود
+      canRespond = true;
+      startRatingTimeout();
+    }, 200);
+  }
+
+  function startRatingTimeout() {
+    ratingStartTime = Date.now();
     clearTimeout(timeoutHandle);
+
     timeoutHandle = setTimeout(() => {
-      const welcomeModal = document.getElementById('welcomeModal');
-      welcomeModal.classList.add('active');
+      if (!canRespond || isModalActive) return;
+
+      // افزایش شمارنده تأخیر
+      if (ratingStep === 0) delays.stim1++;
+      else if (ratingStep === 1) delays.stim2++;
+      else delays.sequence++;
+
+      fasterModal.classList.add('active');
       document.body.style.overflow = 'hidden';
       isModalActive = true;
-    }, 3000);
+    }, RESPONSE_TIMEOUT);
   }
 
-  function randomChoice(arr) {
-    return arr[Math.floor(Math.random() * arr.length)];
-  }
-
-  // ذخیره پاسخ catch
-  function saveCatchResponse(userResponse) {
-    const isCorrect = userResponse === expectedSeq;
-
+  function saveMainResponse() {
     fetch('/pcm/save/', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCsrfToken() },
+      headers: { 
+        'Content-Type': 'application/json', 
+        'X-CSRFToken': getCsrfToken() 
+      },
       body: JSON.stringify({
-        is_catch: true,
         block: currentBlock,
-        trial: catchPerBlock - remainingCatch.length,  // شماره تریال در بلاک
+        trial: currentTrialInBlock,
         cue: currentCue,
-        user_response: userResponse,
-        is_correct: isCorrect
+        stimulus1: currentStim1,
+        stimulus2: currentStim2,
+        expected_sequence: expectedSeq,
+        is_consistent: expectedSeq === actualSeq,
+        category_stim1: actualSeq.split('-')[0],
+        category_stim2: actualSeq.split('-')[1],
+
+        valence_stim1: ratings.stim1,
+        valence_rt_stim1: rts.stim1,
+        valence_delay_number_stim1: delays.stim1,
+
+        valence_stim2: ratings.stim2,
+        valence_rt_stim2: rts.stim2,
+        valence_delay_number_stim2: delays.stim2,
+
+        valence_sequence: ratings.sequence,
+        valence_rt_sequence: rts.sequence,
+        valence_delay_number_sequence: delays.sequence
       })
-    }).finally(() => {
-      catchTrial.classList.add('hidden');
-      setTimeout(startNextCatchTrial, 800);
+    })
+    .then(response => {
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      
+      currentTrialInBlock++;
+      ratingTrial.classList.add('hidden');
+
+      const isLastTrialOfLastBlock = (remainingTrials.length === 0) && (currentBlock === totalBlocks);
+      
+      if (isLastTrialOfLastBlock) {
+        setTimeout(() => location.href = '/experiment/pcm/', 1000);
+      } else if (remainingTrials.length === 0) {
+        setTimeout(finishBlock, 800);
+      } else {
+        setTimeout(startNextRatingTrial, 800);
+      }
+    })
+    .catch(error => {
+      alert('❌ خطا در ذخیره پاسخ!\nلطفاً صفحه را رفرش کنید و دوباره تلاش کنید.');
     });
   }
 
-function saveMainResponse() {
-    fetch('/pcm/save/', {
-        method: 'POST',
-        headers: { 
-            'Content-Type': 'application/json', 
-            'X-CSRFToken': getCsrfToken() 
-        },
-        body: JSON.stringify({
-            block: currentBlock,
-            trial: currentTrialInBlock,
-            cue: currentCue,
-            stimulus1: currentStim1,
-            stimulus2: currentStim2,
-            expected_sequence: expectedSeq,
-            is_consistent: expectedSeq === actualSeq,
-            category_stim1: actualSeq.split('-')[0],
-            category_stim2: actualSeq.split('-')[1],
-            valence_stim1: ratings.stim1,
-            valence_rt_stim1: rts.stim1,
-            valence_stim2: ratings.stim2,
-            valence_rt_stim2: rts.stim2,
-            valence_sequence: ratings.sequence,
-            valence_rt_sequence: rts.sequence
-        })
-    })
-    .then(response => {
-        if (!response.ok) {
-            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-        }
-        currentTrialInBlock++;
-        ratingTrial.classList.add('hidden');
-        const isLastTrialOfLastBlock = (remainingTrials.length === 0) && (currentBlock === totalBlocks);
-        if (isLastTrialOfLastBlock) {
-            setTimeout(() => location.href = '/experiment/pcm/', 1000);
-        } else if (remainingTrials.length === 0) {
-            setTimeout(finishBlock, 800);
-        } else {
-            setTimeout(startNextRatingTrial, 800);
-        }
-    })
-    .catch(error => {
-        alert('❌ خطا در ذخیره پاسخ!\nلطفاً صفحه را رفرش کنید و دوباره تلاش کنید.');
-    });
-}
-
-  // پایان یک بلاک
+  // ==================== پایان بلاک ====================
   function finishBlock() {
     currentBlock++;
     if (currentBlock > totalBlocks) {
@@ -399,20 +583,28 @@ function saveMainResponse() {
     currentTrialInBlock = 1;
     restScreen.classList.remove('hidden');
     updateBlockNumbers();
-    
   }
 
-  // Event Listeners
+  // ==================== Event Listeners ====================
   document.getElementById('start-btn').onclick = () => {
     intro.classList.add('hidden');
+    
+    // ← این دو خط را اضافه کن
+    document.querySelector('.content').style.display = 'flex';
+    document.body.classList.add('no-scroll');
+    
     document.documentElement.requestFullscreen?.();
     updateBlockNumbers();
 
-    // تصمیم‌گیری خودکار: اگر catch باقی مانده، مدال catch؛ در غیر اینصورت rating
-    if (remainingCatch.length > 0) {
+    if (remainingCatch && remainingCatch.length > 0) {
+      // هنوز trialهای Catch باقی مانده
       catchIntroModal.classList.add('active');
-    } else {
+    } else if (remainingTrials && remainingTrials.length > 0) {
+      // Catch تمام شده و Rating باقی مانده
       ratingIntroModal.classList.add('active');
+    } else {
+      // هیچ چیزی باقی نمانده (نباید اتفاق بیفتد، اما برای اطمینان)
+      finishBlock();
     }
   };
 
@@ -423,25 +615,58 @@ function saveMainResponse() {
 
   document.getElementById('startRatingBtn').onclick = () => {
     ratingIntroModal.classList.remove('active');
-    currentTrialInBlock = 1;
+    if (remainingTrials.length === trialsPerBlock) {
+      currentTrialInBlock = 1;
+    }
     startNextRatingTrial();
   };
 
   document.getElementById('continue-btn').onclick = () => {
     restScreen.classList.add('hidden');
-    // بلاک جدید همیشه از catch شروع می‌شود
     catchIntroModal.classList.add('active');
   };
 
-  // دکمه‌های تشخیص توالی (catch)
-  document.querySelectorAll('#catch-trial .sequence-btn').forEach(btn => {
-    btn.onclick = () => saveCatchResponse(btn.dataset.seq);
+  // دکمه‌های Catch
+  document.querySelectorAll('.sequence-btn').forEach(btn => {
+      btn.addEventListener("touchstart", function () {
+          this.classList.add("touch-effect");
+      }, { passive: true });
+
+      btn.addEventListener("touchend", function () {
+          setTimeout(() => {
+              this.classList.remove("touch-effect");
+          }, 200);
+      });
+
+      btn
+      .onclick = () => saveCatchResponse(btn.dataset.seq);
   });
 
-  // دکمه‌های رتبه‌بندی valence
-  document.querySelectorAll('.valence-btn').forEach(btn => {
+  document.querySelectorAll('.sam-btn').forEach(btn => {
+    btn.addEventListener("touchstart", function () {
+        this.classList.add("touch-effect");
+    }, { passive: true });
+
+    btn.addEventListener("touchend", function () {
+        setTimeout(() => {
+            this.classList.remove("touch-effect");
+        }, 700);
+    });
+  });
+
+  // دکمه‌های Rating
+  document.querySelectorAll('#rating-trial .valence-btn').forEach(btn => {
     btn.onclick = () => {
+      if (!canRespond || isModalActive || ratingTrial.classList.contains('hidden')) return;
+
+      canRespond = false;
       clearTimeout(timeoutHandle);
+
+      // جلوه انتخاب
+      document.querySelectorAll('#rating-trial .valence-btn').forEach(b => b.classList.remove('selected'));
+      btn.classList.add('selected');
+      setTimeout(() => btn.classList.remove('selected'), 400);
+
       const value = parseInt(btn.dataset.value);
       const rt = Date.now() - ratingStartTime;
 
@@ -450,41 +675,67 @@ function saveMainResponse() {
       else { ratings.sequence = value; rts.sequence = rt; }
 
       ratingStep++;
+
       if (ratingStep < 3) {
-        setTimeout(showRatingQuestion, 600);
+        setTimeout(showRatingQuestion, 700);
       } else {
         saveMainResponse();
       }
     };
   });
 
-  // پشتیبانی از کیبورد
+  // کیبورد
   document.addEventListener('keydown', e => {
-    if (!catchTrial.classList.contains('hidden')) {
-      if (e.key === '1') document.querySelector('#catch-trial [data-seq="Neutral-Neutral"]').click();
-      if (e.key === '2') document.querySelector('#catch-trial [data-seq="Neutral-Negative"]').click();
-      if (e.key === '3') document.querySelector('#catch-trial [data-seq="Negative-Neutral"]').click();
+    // Catch
+    if (!catchTrial.classList.contains('hidden') && canRespond && !isModalActive) {
+      let targetBtn = null;
+      if (e.key === '1') targetBtn = document.querySelector('#catch-trial [data-seq="Neutral-Neutral"]');
+      if (e.key === '2') targetBtn = document.querySelector('#catch-trial [data-seq="Negative-Neutral"]');
+      if (e.key === '3') targetBtn = document.querySelector('#catch-trial [data-seq="Neutral-Negative"]');
+
+      if (targetBtn) {
+        e.preventDefault();
+        targetBtn.classList.add('keyboard-effect');
+        setTimeout(() => targetBtn.classList.remove('keyboard-effect'), 220);
+        targetBtn.click();
+      }
     }
-    if (!ratingTrial.classList.contains('hidden') && e.key >= '1' && e.key <= '9') {
-      const btn = document.querySelector(`.valence-btn[data-value="${e.key}"]`);
-      if (btn) btn.click();
+
+    // Rating
+    if (canRespond && !isModalActive && !ratingTrial.classList.contains('hidden') && e.key >= '1' && e.key <= '9') {
+      e.preventDefault();
+      const btn = document.querySelector(`#rating-trial .valence-btn[data-value="${e.key}"]`);
+      if (btn) {
+        btn.classList.add('keyboard-effect');
+        setTimeout(() => btn.classList.remove('keyboard-effect'), 220);
+        btn.click();
+      }
     }
   });
 
+  // مدیریت مدال سریع‌تر
   document.addEventListener('DOMContentLoaded', function () {
-      const welcomeModal = document.getElementById('welcomeModal');
-      const body = document.body;
+    function closeModal() {
+      fasterModal.classList.remove('active');
+      document.body.style.overflow = '';
+      isModalActive = false;
 
-      function closeModal() {
-        welcomeModal.classList.remove('active');
-        body.style.overflow = '';
-        isModalActive = false; // مدال بسته شد ⇒ اجازه شروع دوباره تایمر
+      // اگر در Catch هستیم
+      if (!catchTrial.classList.contains('hidden')) {
+        canRespond = true;
+        startCatchTimeout();
       }
+      // اگر در Rating هستیم
+      else if (!ratingTrial.classList.contains('hidden')) {
+        canRespond = true;
+        startRatingTimeout();
+      }
+    }
 
-      document.getElementById('closeModal').onclick = closeModal;
-      welcomeModal.querySelector('.modal-overlay').onclick = closeModal;
-    });
-
+    document.getElementById('closeModal').onclick = closeModal;
+    fasterModal.querySelector('.modal-overlay').onclick = closeModal;
+  });
 </script>
+
 </body>
 </html>

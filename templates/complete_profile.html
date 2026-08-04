@@ -173,12 +173,14 @@
             {% endfor %}
         {% endif %}
         <div class="mb-3">
+            <label for="mobile_number" class="text-muted mb-2">شماره موبایل :</label><br>
             <input type="text" name="mobile_number" class="form-control text-center" autocomplete="off" placeholder="{{ username }}"  required="" id="id_mobilenumber" disabled>
         </div>
         <form method="post">
             {% csrf_token %}
 
             <div class="mb-3">
+                <label for="mobile_number" class="text-muted mb-2">تاریخ تولد :</label><br>
                 {{ form.birth_date }}
                 {% if form.birth_date.errors %}
                     <small class="text-danger d-block mt-2">{{ form.birth_date.errors }}</small>
@@ -186,6 +188,7 @@
             </div>
 
             <div class="mb-3">
+                <label for="mobile_number" class="text-muted mb-2">جنسیت :</label><br>
                 {{ form.gender }}
                 {% if form.gender.errors %}
                     <small class="text-danger d-block mt-2">{{ form.gender.errors }}</small>
@@ -193,6 +196,7 @@
             </div>
 
             <div class="mb-3">
+                <label for="mobile_number" class="text-muted mb-2">دست غالب : </label><br>
                 {{ form.hand }}
                 {% if form.hand.errors %}
                     <small class="text-danger d-block mt-2">{{ form.hand.errors }}</small>
@@ -200,6 +204,7 @@
             </div>
 
             <div class="mb-4">
+                <label for="mobile_number" class="text-muted mb-2">بیماری جسمی / روانی : </label><br>
                 {{ form.disorder }}
                 {% if form.disorder.errors %}
                     <small class="text-danger d-block mt-2">{{ form.disorder.errors }}</small>
@@ -207,10 +212,12 @@
             </div>
 
             <div class="mb-4">
+                <label for="mobile_number" class="text-muted mb-2">دارو مصرفی :</label><br>
                 {{ form.drug }}
                 {% if form.drug.errors %}
                     <small class="text-danger d-block mt-2">{{ form.drug.errors }}</small>
                 {% endif %}
+                <span style="color: #737373;font-size: 12px;">در صورت مصرف دارو در 24 ساعت گذشته و یا مصرف به صورت دائمی توضیح دهید</span>
             </div>
 
             <button type="submit" class="btn btn-submit w-100">

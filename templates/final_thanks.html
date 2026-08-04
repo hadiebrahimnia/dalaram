@@ -7,17 +7,152 @@
     <link href="{% static 'plugins/bootstrap/css/bootstrap.rtl.min.css' %}" rel="stylesheet" />
     <link href="{% static 'css/pcm.css' %}" rel="stylesheet" />
     <title>پایان آزمون</title>
+    <style>
+
+      .cards {
+        display: flex;
+        justify-content: center;
+        gap: 3rem;
+        flex-wrap: wrap;
+      }
+
+      .card-btn {
+        display: block;
+        background: #f9f9f9;
+        padding: 2.5rem 2rem;
+        border-radius: 15px;
+        width: 300px;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+        transition: all 0.3s ease;
+        text-decoration: none; /* حذف خط زیر کامل */
+        color: inherit; /* رنگ متن مثل قبل بمونه */
+        text-align: center;
+      }
+
+      .card-btn:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+        background: #ffffff;
+      }
+
+      .card-btn i {
+        font-size: 3rem;
+        color: #4a6bdf;
+        margin-bottom: 1rem;
+      }
+
+      .card-btn h3 {
+        margin: 1rem 0;
+        font-size: 1.5rem;
+        color: #333;
+      }
+
+      .card-btn p {
+        color: #666;
+        font-size: 1rem;
+      }
+
+      .card-btn {
+          position: relative; /* لازم برای قرارگیری ribbon */
+          overflow: hidden;   /* تا ribbon از کارت بیرون نزند */
+        }
+
+        /* استایل کارت تکمیل‌شده */
+        .card-btn.completed {
+          background: #f0f7f0;
+          cursor: not-allowed;
+          opacity: 0.9;
+          pointer-events: none;
+        }
+
+        .card-btn.completed:hover {
+          transform: none;
+          box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+        }
+
+        /* نوار مورب */
+        .ribbon {
+          position: absolute;
+          top: 18px;
+          left: -35px;
+          width: 150px;
+          background: #2e7d32;
+          color: white;
+          text-align: center;
+          font-size: 0.9rem;
+          font-weight: 700;
+          padding: 6px 0;
+          transform: rotate(-45deg);
+          box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2);
+          z-index: 10;
+        }
+
+        .ribbon span {
+          display: block;
+        }
+  
+
+
+    </style>
   </head>
   <body>
-    <div class="content">
-      <div id="intro" class="card">
+    <div id="rotate-device">
+      <i>↻</i>
+      <h3>لطفاً گوشی را بچرخانید</h3>
+      <p>برای تجربه بهتر، صفحه را به حالت افقی ببرید</p>
+    </div>
+    <div class="row" style=" height: 100vh; ">
+      <div id="intro" class="card col-md-8 m-auto border-0" style="background:#40da2040;">
         <div class="card-body text-center p-5">
-          <!-- اینجا متن از context گرفته می‌شود -->
-          <h2 class="mb-4">{{ text }}</h2>
-          <p class="mt-4">از شرکت شما در این آزمون سپاسگزاریم.</p>
+          <h4 class="mt-2 mb-5">از شرکت شما در این آزمون سپاسگزاریم.</h4>
+          <p class="mt-5 mb-5">در صورت تمایل برای شرکت در آزمون دیگر با فاصله زمانی حداقل یک روز آن را تکمیل نمایید</p>
+          <div class="cards">
+            <!-- دکمه PCM -->
+            {% if pcm_completed %}
+              <div class="card-btn completed">
+                <div class="ribbon">
+                  <span>تکمیل شده</span>
+                </div>
+                <i class="fa fa-music"></i>
+                <h3>توالی‌های صوتی</h3>
+                <p>در این آزمون تعدادی توالی صوتی برای شما پخش میشود و شما به صدا ها از نظر خوشایندی نمره میدهید</p>
+              </div>
+            {% else %}
+              <a href="/experiment/pcm" class="card-btn">
+                <i class="fa fa-music"></i>
+                <h3>توالی‌های صوتی</h3>
+                <p>در این آزمون تعدادی توالی صوتی برای شما پخش میشود و شما به صدا ها از نظر خوشایندی نمره میدهید</p>
+              </a>
+            {% endif %}
+
+            <!-- دکمه Rating -->
+            {% if rating_completed %}
+              <div class="card-btn completed">
+                <div class="ribbon">
+                  <span>تکمیل شده</span>
+                </div>
+                <i class="fa fa-list-ul"></i>
+                <h3>آزمون رتبه بندی</h3>
+                <p>در این آزمون تعدای صدا پخش میشود و شما باید به آنها از نظر خوشایندی و شدت هیجان نمره بدهید</p>
+              </div>
+            {% else %}
+              <a href="/experiment/rating" class="card-btn">
+                <i class="fa fa-list-ul"></i>
+                <h3>آزمون رتبه بندی</h3>
+                <p>در این آزمون تعدای صدا پخش میشود و شما باید به آنها از نظر خوشایندی و شدت هیجان نمره بدهید</p>
+              </a>
+            {% endif %}
+          </div>
           <a  href="/" class="btn btn-secondary btn-lg mt-5" id="start-trial"> بازگشت</a>
         </div>
       </div>
     </div>
   </body>
+
+  <script>
+    document.querySelectorAll('.content > div:not(#rotate-device)').forEach(function(el) {
+      el.classList.add('hidden');
+    });
+  </script>
+
 </html>

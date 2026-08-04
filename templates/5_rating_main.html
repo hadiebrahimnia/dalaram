@@ -3,10 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>مرحله 5 : رتبه‌بندی</title>
+    <title>مرحله 5 پایانی</title>
     {% load static %}
     <link href="{% static 'plugins/bootstrap/css/bootstrap.rtl.min.css' %}" rel="stylesheet">
     <link href="{% static 'css/pcm.css' %}" rel="stylesheet">
+    
 </head>
 <body>
 
@@ -18,42 +19,108 @@
 
 <div id="intro" class="card m-5">
   <div class="card-body text-center p-5">
-    <h2 class="mb-4">مرحله 5 : رتبه‌بندی</h2>
-    <p class="lead mb-4">
-        در این مرحله نیز ، یک صدا خواهید شنید و باید دو بعد زیر را رتبه‌بندی کنید:
-    </p>
-    <h3 class="mb-4">خوشایندی:</h3>
-    <div class="sam-buttons mt-0 mb-4">
-      {% for i in "123456789" %}
-        <button type="button" class="sam-btn" data-value="{{ forloop.counter }}">
-          <img src="{% static 'images/valence/' %}{{ forloop.counter }}.png">
-          <div class="key-hint mt-2 fw-bold">{{ forloop.counter }}</div>
-        </button>
-      {% endfor %}
-    </div>
-    <div class="arousal-scale">
-        <span>9 = خوشایندی زیاد</span>
-        <div class="arrow-line"><span class="arrow">➤</span></div>
-        <span>1 = خوشایندی کم</span>
-    </div>
-
-    <h3 class="mb-4 mt-5">برانگیختگی:</h3>
-    <div class="sam-buttons mt-0 mb-4">
-      {% for i in "123456789" %}
-        <button type="button" class="sam-btn" data-value="{{ forloop.counter }}">
-          <img src="{% static 'images/arousal/' %}{{ forloop.counter }}.jpg">
-          <div class="key-hint mt-2 fw-bold">{{ forloop.counter }}</div>
-        </button>
-      {% endfor %}
-    </div>
-    <div class="arousal-scale">
-        <span>9 = برانگیختگی زیاد</span>
-        <div class="arrow-line"><span class="arrow">➤</span></div>
-        <span>1 = برانگیختگی کم</span>
+     <div style="
+      background: linear-gradient(135deg, #3b82f6, #4f46e5);
+      color: #fff;
+      text-align: center;
+      padding: 30px;
+      border-radius: 18px;
+      max-width: 700px;
+      box-shadow: 0 10px 25px rgba(0,0,0,.15);
+      margin: auto;
+      line-height: 1.8;
+    ">
+      <div style="font-size:42px; font-weight:bold; ">
+          مرحله 5 ( پایانی )
+      </div>
+      <div style="font-size:16px;margin-top:10px;">
+          ⏱️ زمان تقریبی: 17 دقیقه
+      </div>
     </div>
 
-    <p class="text-muted mt-5">برای پاسخ می‌توانید از کلیک یا کلیدهای ۱ تا ۹ استفاده کنید.</p>
-    <p class="text-danger fw-bold">برای هر رتبه‌بندی فقط ۳ ثانیه فرصت دارید. لطفاً سریع پاسخ دهید.</p>
+    <div class="mb-1 mt-5">
+        <p class="lead text-start text-justify mb-4 mx-auto" style="line-height: 40px; max-width: 500px">
+        در این مرحله نیز دقیقا مثل مرحله قبل <strong>یک صدای هیجانی</strong> خواهید شنید و باید میزان <strong>خوشایندی</strong> و <strong>برانگیختگی</strong> آن صدا را مشخص کنید.
+        </p>
+
+        <h3 class="text-start text-justify mb-2 mt-5 mx-auto" style="line-height: 40px; max-width: 500px">
+           خوشایندی  :
+        </h3>
+        <p class="lead text-start text-justify mx-auto" style="line-height: 40px; max-width: 500px">
+            یعنی صدا تا چه حد برایتان دلپذیر و لذت‌بخش بوده یا برعکس، تا چه حد ناخوشایند و آزاردهنده احساس شده است.
+        </p>  
+
+        <p class="text-muted mt-2 mb-2" style=" margin: auto; line-height: 32px;">
+        برای نمره‌دهی، ۹ آدمک روی صفحه نمایش داده می‌شود. با انتخاب یکی از آن‌ها میزان خوشایندی را مشخص کنید 
+        (نمره ۱ = خیلی ناخوشایند و آزاردهنده | نمره ۹ = خیلی خوشایند و دلپذیر).
+        </p>  
+
+        <div class="sam-buttons mt-0 mb-4 p-0" style="gap:2px!important;">
+            {% for i in "123456789" %}
+                <button type="button" class="sam-btn valence-btn" data-value="{{ forloop.counter }}" >
+                    <img src="{% static 'images/valence/' %}{{ forloop.counter }}.png" alt="{{ forloop.counter }}">
+                    <div class="key-hint">{{ forloop.counter }}</div>
+                </button>
+            {% endfor %}
+        </div>
+
+        <div class="arousal-scale">
+            <span>9 = خوشایندی زیاد</span>
+            <div class="arrow-line">
+                <span class="arrow">➤</span>
+            </div>
+            <span>1 = خوشایندی کم </span>
+        </div>
+
+        <p class="lead text-start text-justify mb-5 mt-4 mx-auto" style="line-height: 40px; max-width: 600px">
+            <span> به عبارت ساده‌تر:</span></br>
+            <span>خوشایندی = چقدر از شنیدن آن صدا لذت بردید یا حس خوبی داشتید؟</span></br>
+            <span>ناخوشایندی = چقدر از شنیدن آن صدا احساس بد، ناراحتی یا آزردگی کردید؟</span>
+        </p>
+
+        <h3 class="text-start text-justify mb-2 mt-5 mx-auto" style="line-height: 40px; max-width: 500px">
+           برانگیختگی  :
+        </h3>
+        <p class="lead text-start text-justify mx-auto" style="line-height: 40px; max-width: 500px">
+            یعنی صدا تا چه حد شما را آرام کرده یا برعکس، تا چه حد هیجان‌زده، فعال و پرانرژی کرده است.
+        </p> 
+
+        <p class="text-muted mt-2 mb-2" style=" margin: auto; line-height: 32px;">
+        برای نمره‌دهی، ۹ آدمک روی صفحه نمایش داده می‌شود. با انتخاب یکی از آن‌ها میزان برانگیختگی را مشخص کنید
+        (نمره ۱ = خیلی آرام&nbsp;&nbsp;|&nbsp;&nbsp;نمره ۹ = خیلی هیجان‌زده ).
+        </p>  
+        <div class="sam-buttons mt-0 mb-4">
+            {% for i in "123456789" %}
+                <button type="button" class="sam-btn arousal-btn" data-value="{{ forloop.counter }}">
+                <img src="{% static 'images/arousal/' %}{{ forloop.counter }}.png">
+                <div class="key-hint mt-2 fw-bold">{{ forloop.counter }}</div>
+                </button>
+            {% endfor %}
+            </div>
+            <div class="arousal-scale">
+            <span>۹ = برانگیختگی خیلی زیاد</span>
+            <div class="arrow-line"><span class="arrow">➤</span></div>
+            <span>۱ = برانگیختگی خیلی کم</span>
+        </div>
+        <p class="lead text-start text-justify mb-5 mt-4 mx-auto" style="line-height: 40px; max-width: 600px">
+            به عبارت ساده‌تر:<br>
+            برانگیختگی کم = احساس آرامش، آسودگی <br>
+            برانگیختگی زیاد = احساس هیجان، تحریک، انرژی بالا
+        </p>
+
+    </div>
+
+    <h4 class="mb-5 mt-5 m-auto" style="max-width: 700px; line-height: 40px;">
+      در صورتی که از کامپیوتر استفاده می‌کنید، می‌توانید با کلیک روی آدمک‌ها یا فشردن کلیدهای ۱ تا ۹ بالای کیبورد پاسخ دهید.
+    </h4>
+
+    <h4 class="mb-5 mt-5 m-auto" style="max-width: 700px; line-height: 40px;">
+      پاسخ درست یا غلط وجود ندارد. فقط احساس واقعی خودتان از شنیدن صداها را گزارش کنید.
+    </h4>
+
+    <h5 class="text-danger mt-5 m-auto" style="max-width: 700px; line-height: 40px;">
+      برای هر پاسخ تنها ۳ ثانیه زمان دارید. لطفاً سریع و بر اساس اولین احساس خود پاسخ دهید.
+    </h5>
 
     <div class="progress-container mb-4">
       <div class="d-flex justify-content-between mb-2">
@@ -69,52 +136,53 @@
   </div>
 </div>
 
-
 <!-- Fixation Cross -->
 <div id="fixation" class="full-center hidden">
     <div class="fixation">+</div>
 </div>
 
-<!-- رتبه‌بندی خوشایندی -->
-<div id="valence-rating" class="hidden">
-    <div class="card p-5">
-        <div class="card-body text-center">
-        <h3 id="rating-question" class="mb-5">خوشایندی</h3>
-        <div class="sam-buttons" style="margin: auto;">
-            {% for i in "123456789" %}
-            <button type="button" class="btn sam-btn valence-btn" data-value="{{ forloop.counter }}">
-            <img src="{% static 'images/valence/' %}{{ forloop.counter }}.png" alt="امتیاز {{ forloop.counter }}" style="width: 106px;height: 136px;">
-            <div class="key-hint mt-2 fw-bold">{{ forloop.counter }}</div>
-            </button>
-            {% endfor %}
-        </div>
+<div class="content">
+    <!-- رتبه‌بندی خوشایندی -->
+    <div id="valence-rating" class="rating hidden">
+        <div class="card p-0">
+            <div class="card-body text-center px-0">
+                <h3 class="mb-5">خوشایندی</h3>
+                <div class="sam-buttons mt-0 mb-4">
+                    {% for i in "123456789" %}
+                    <button type="button" class="sam-btn valence-btn rating-btn" data-value="{{ forloop.counter }}">
+                        <img src="{% static 'images/valence/' %}{{ forloop.counter }}.png" alt="{{ forloop.counter }}">
+                        <div class="key-hint">{{ forloop.counter }}</div>
+                    </button>
+                    {% endfor %}
+                </div>
+            </div>
         </div>
     </div>
-</div>
 
-<!-- رتبه‌بندی برانگیختگی -->
-<div id="arousal-rating" class="hidden">
-    <div class="card p-5">
-        <div class="card-body text-center">
-        <h3 id="rating-question" class="mb-5">برانگیختگی</h3>
-        <div class="sam-buttons" style="margin: auto;">
-            {% for i in "123456789" %}
-            <button type="button" class="btn sam-btn arousal-btn" data-value="{{ forloop.counter }}">
-            <img src="{% static 'images/arousal/' %}{{ forloop.counter }}.jpg" alt="امتیاز {{ forloop.counter }}" style="width: 106px;height: 136px;">
-            <div class="key-hint mt-2 fw-bold">{{ forloop.counter }}</div>
-            </button>
-            {% endfor %}
-        </div>
+    <!-- رتبه‌بندی برانگیختگی -->
+    <div id="arousal-rating" class="rating hidden">
+        <div class="card p-0">
+            <div class="card-body text-center px-0">
+                <h3 class="mb-5">برانگیختگی</h3>
+                <div class="sam-buttons mt-0 mb-4">
+                    {% for i in "123456789" %}
+                    <button type="button" class="sam-btn arousal-btn rating-btn" data-value="{{ forloop.counter }}">
+                        <img src="{% static 'images/arousal/' %}{{ forloop.counter }}.png" alt="{{ forloop.counter }}">
+                        <div class="key-hint">{{ forloop.counter }}</div>
+                    </button>
+                    {% endfor %}
+                </div>
+            </div>
         </div>
     </div>
 </div>
 
 <!-- مدال هشدار -->
-<div id="welcomeModal" class="custom-modal">
+<div id="fasterModal" class="custom-modal">
   <div class="modal-overlay"></div>
   <div class="modal-content">
     <div class="modal-icon">⚠️</div>
-    <h3 class="modal-title">لطفاً سریع‌تر پاسخ دهید</h3>
+    <h3 class="modal-title">سریع‌تر پاسخ دهید</h3>
     <button class="modal-button btn btn-warning" id="closeModal">ادامه</button>
   </div>
 </div>
@@ -128,16 +196,19 @@
     const fixation = document.getElementById('fixation');
     const valenceRating = document.getElementById('valence-rating');
     const arousalRating = document.getElementById('arousal-rating');
-    const welcomeModal = document.getElementById('welcomeModal');
+    const fasterModal = document.getElementById('fasterModal');
 
     let currentIndex = 0;
     let currentSound = null;
     let currentPhase = null; // 'valence' یا 'arousal'
-    let valence = null, valenceRt = null;
-    let arousal = null, arousalRt = null;
+
+    let valence = null, valenceRt = null, valenceDelay = 0;
+    let arousal = null, arousalRt = null, arousalDelay = 0;
+
     let startTime = null;
     let timeoutId = null;
     let isModalActive = false;
+    let canRespond = false;
 
     const RESPONSE_TIMEOUT = 3000;
     const FIXATION_DURATION = 1000;
@@ -164,66 +235,119 @@
     function playSound(url, onEnded) {
         currentSound = url;
         audio.src = url;
-        audio.play();
+        audio.play().catch(e => console.error('Audio error:', e));
         audio.onended = onEnded;
     }
 
     function startTimer() {
         clearTimeout(timeoutId);
-        timeoutId = setTimeout(showTimeoutModal, RESPONSE_TIMEOUT);
+        startTime = Date.now();
+        canRespond = true;
+
+        timeoutId = setTimeout(() => {
+            if (!canRespond || isModalActive) return;
+
+            if (currentPhase === 'valence') valenceDelay++;
+            else if (currentPhase === 'arousal') arousalDelay++;
+
+            fasterModal.classList.add('active');
+            document.body.style.overflow = 'hidden';
+            isModalActive = true;
+        }, RESPONSE_TIMEOUT);
     }
 
-    function showTimeoutModal() {
-        if (isModalActive) return;
-        welcomeModal.classList.add('active');
-        document.body.style.overflow = 'hidden';
-        isModalActive = true;
-        clearTimeout(timeoutId);
-    }
-
-    function closeModalAndRepeat() {
-        welcomeModal.classList.remove('active');
+    function closeModal() {
+        fasterModal.classList.remove('active');
         document.body.style.overflow = '';
         isModalActive = false;
-        // تکرار همان تریال از ابتدا
-        startCurrentTrial();
+
+        if (currentPhase === 'valence' || currentPhase === 'arousal') {
+            startTimer();
+        }
     }
 
-    document.getElementById('closeModal').onclick = closeModalAndRepeat;
-    welcomeModal.querySelector('.modal-overlay').onclick = closeModalAndRepeat;
+    document.getElementById('closeModal').onclick = closeModal;
+    fasterModal.querySelector('.modal-overlay').onclick = closeModal;
 
     function showValenceRating() {
         currentPhase = 'valence';
         arousalRating.classList.add('hidden');
+        arousalRating.classList.remove('fade-in', 'fade-out');
+
         valenceRating.classList.remove('hidden');
-        startTime = Date.now();
-        startTimer();
+        valenceRating.classList.add('fade-out');
+
+        requestAnimationFrame(() => {
+            setTimeout(() => {
+                valenceRating.classList.remove('fade-out');
+                valenceRating.classList.add('fade-in');
+
+                // زمان واکنش دقیقاً بعد از اتمام انیمیشن
+                setTimeout(() => {
+                    startTimer();
+                }, 350);
+            }, 20);
+        });
     }
 
     function showArousalRating() {
         currentPhase = 'arousal';
-        valenceRating.classList.add('hidden');
-        arousalRating.classList.remove('hidden');
-        startTime = Date.now();
-        startTimer();
+
+        valenceRating.classList.remove('fade-in');
+        valenceRating.classList.add('fade-out');
+
+        setTimeout(() => {
+            valenceRating.classList.add('hidden');
+            valenceRating.classList.remove('fade-out');
+
+            arousalRating.classList.remove('hidden');
+            arousalRating.classList.add('fade-out');
+
+            requestAnimationFrame(() => {
+                setTimeout(() => {
+                    arousalRating.classList.remove('fade-out');
+                    arousalRating.classList.add('fade-in');
+
+                    // زمان واکنش دقیقاً بعد از اتمام انیمیشن
+                    setTimeout(() => {
+                        startTimer();
+                    }, 350);
+                }, 20);
+            });
+        }, 350);
     }
 
     // پاسخ خوشایندی
     document.querySelectorAll('#valence-rating .valence-btn').forEach(btn => {
         btn.onclick = () => {
-            if (currentPhase !== 'valence' || isModalActive) return;
+            if (currentPhase !== 'valence' || isModalActive || !canRespond) return;
+
+            canRespond = false;
             clearTimeout(timeoutId);
+
+            document.querySelectorAll('#valence-rating .valence-btn').forEach(b => b.classList.remove('selected'));
+            btn.classList.add('selected');
+            setTimeout(() => btn.classList.remove('selected'), 350);
+
             valence = parseInt(btn.dataset.value);
             valenceRt = Date.now() - startTime;
-            showArousalRating();
+
+            setTimeout(showArousalRating, 600);
         };
     });
 
     // پاسخ برانگیختگی
     document.querySelectorAll('#arousal-rating .arousal-btn').forEach(btn => {
         btn.onclick = () => {
-            if (currentPhase !== 'arousal' || isModalActive) return;
+            if (currentPhase !== 'arousal' || isModalActive || !canRespond) return;
+
+            canRespond = false;
             clearTimeout(timeoutId);
+
+            document.querySelectorAll('#arousal-rating .arousal-btn').forEach(b => b.classList.remove('selected'));
+            btn.classList.add('selected');
+            setTimeout(() => btn.classList.remove('selected'), 350);
+
             arousal = parseInt(btn.dataset.value);
             arousalRt = Date.now() - startTime;
 
@@ -240,22 +364,54 @@
                     stimulus_number: currentSound,
                     valence: valence,
                     valence_rt: valenceRt,
+                    valence_delay_number: valenceDelay,
                     arousal: arousal,
-                    arousal_rt: arousalRt
+                    arousal_rt: arousalRt,
+                    arousal_delay_number: arousalDelay
                 })
             }).then(response => response.json())
-              .then(data => {
-              }).catch(err => {
-                  console.error('Save failed:', err);
-              }).finally(() => {
+              .catch(err => console.error('Save failed:', err))
+              .finally(() => {
                   currentIndex++;
                   if (currentIndex >= remainingFiles.length) {
                       setTimeout(() => location.href = '/experiment/pcm/', 1000);
                   } else {
-                      startCurrentTrial();
+                      setTimeout(startCurrentTrial, 800);
                   }
               });
         };
+    });
+
+    // پشتیبانی از کیبورد
+    document.addEventListener('keydown', e => {
+        if (isModalActive || !canRespond) return;
+        if (e.key < '1' || e.key > '9') return;
+
+        e.preventDefault();
+
+        let btn = null;
+        if (currentPhase === 'valence') {
+            btn = document.querySelector(`#valence-rating .valence-btn[data-value="${e.key}"]`);
+        } else if (currentPhase === 'arousal') {
+            btn = document.querySelector(`#arousal-rating .arousal-btn[data-value="${e.key}"]`);
+        }
+
+        if (btn) {
+            btn.classList.add('keyboard-effect');
+            setTimeout(() => btn.classList.remove('keyboard-effect'), 220);
+            btn.click();
+        }
+    });
+
+    // جلوه تاچ
+    document.querySelectorAll('.valence-btn, .arousal-btn').forEach(btn => {
+        btn.addEventListener('touchstart', function () {
+            clearTimeout(this.touchTimer);
+            this.classList.add('touch-effect');
+            this.touchTimer = setTimeout(() => {
+                this.classList.remove('touch-effect');
+            }, 700);
+        }, { passive: true });
     });
 
     function startCurrentTrial() {
@@ -263,8 +419,12 @@
             location.href = '/experiment/pcm/';
             return;
         }
+
         valence = arousal = null;
         valenceRt = arousalRt = null;
+        valenceDelay = arousalDelay = 0;
+        currentPhase = null;
+        canRespond = false;
 
         showFixation(() => {
             playSound(remainingFiles[currentIndex], showValenceRating);
@@ -273,6 +433,9 @@
 
     document.getElementById('start-btn').onclick = () => {
         intro.classList.add('hidden');
+        document.querySelector('.content').style.display = 'flex';
+        document.body.classList.add('no-scroll');
+        document.documentElement.requestFullscreen?.();
         startCurrentTrial();
     };
 </script>

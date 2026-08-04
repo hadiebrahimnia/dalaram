@@ -4,11 +4,21 @@
   font-style: normal;
   font-display: swap; /* بهترین عملکرد: متن ابتدا با فونت سیستم نمایش داده بشه، بعد عوض بشه */
 }
+
+.no-scroll {
+  overflow: hidden;
+}
+
 body {
   background: #f0f0f0;
   font-family: "Vazirmatn";
-  padding: 10px;
 }
+.content {
+  height: 100vh;
+  display: none; 
+  overflow: hidden;
+}
+
 .fixation {
   font-size: 120px;
   font-weight: bold;
@@ -40,7 +50,7 @@ body {
   justify-content: center;
   direction: ltr;
   flex-wrap: nowrap;
-  gap: 10px;
+  gap: 25px;
   margin-top: 30px;
 }
 .sam-btn {
@@ -56,34 +66,42 @@ body {
 }
 .sam-btn:hover {
   border-color: #007bff;
-  transform: scale(1.05);
 }
 .sam-btn.selected {
   border-color: #007bff;
   box-shadow: 0 0 15px rgba(0, 123, 255, 0.6);
-  transform: scale(1.1);
 }
+.sam-btn:active{
+  transform: scale(1.2);
+}
+
 .sam-btn img {
   width: 100%;
   height: 100px;
   object-fit: contain;
+  border-radius: 0.5rem;
 }
 .key-hint {
-  font-size: 12px;
+  font-size: 16px;
+  font-weight: bolder;
   color: #666;
   margin-top: 5px;
 }
 .card {
-  margin: 100px;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
 }
 
+.rating{
+  padding: 10px;
+  width:100%;
+}
+
 /* ----------------- بهبود نمایش دکمه‌ها در موبایل ----------------- */
-@media (max-width: 768px) {
+@media (max-width: 1000px) {
+  
   .sam-buttons {
-    flex-wrap: wrap; /* اجازه می‌ده دکمه‌ها به خط بعدی برن */
     justify-content: center;
-    gap: 15px; /* فاصله یکنواخت */
+    gap: 1px; /* فاصله یکنواخت */
     padding: 0 10px;
   }
 
@@ -159,7 +177,6 @@ body {
   }
 }
 .content {
-  display: flex;
   justify-content: center; /* وسط افقی */
   align-items: center; /* وسط عمودی */
   background-color: #f0f0f0; /* اختیاری */
@@ -336,9 +353,9 @@ CSS.custom-modal {
 .arousal-scale {
   display: flex;
   align-items: center;
-  width: 95%;
+  width: 85%;
   position: relative;
-  margin-right: 30px;
+  margin: auto;
 }
 
 .arrow-line {
@@ -361,4 +378,266 @@ CSS.custom-modal {
     margin-right: 0;
     width: 100%;
   }
+}
+
+
+/* ===== پیام دستگاه غیرمجاز ===== */
+#device-blocked {
+  position: fixed;
+  inset: 0;
+  background: #f1f5f9;
+  display: none;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  padding: 24px 16px;
+  z-index: 99999;
+  direction: rtl;
+  overflow-y: auto;
+}
+
+#device-blocked .device-blocked-icon {
+  font-size: 52px;
+  margin-bottom: 12px;
+}
+
+#device-blocked h3 {
+  color: #dc2626;
+  font-size: 1.3rem;
+  font-weight: 700;
+  margin: 0 0 24px 0;
+  line-height: 1.5;
+}
+
+#device-blocked .device-blocked-section {
+  width: 100%;
+  max-width: 420px;
+  margin-bottom: 20px;
+  text-align: right;
+}
+
+#device-blocked .device-blocked-section-title {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #334155;
+  margin-bottom: 10px;
+  text-align: center;
+}
+
+#device-blocked .device-blocked-info {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 14px 16px;
+  font-size: 0.9rem;
+  color: #475569;
+  line-height: 1.9;
+  text-align: right;
+}
+
+#device-blocked .device-blocked-allowed {
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  border-radius: 12px;
+  padding: 14px 16px;
+  color: #166534;
+  font-size: 0.9rem;
+  line-height: 1.9;
+  text-align: right;
+}
+
+#device-blocked .device-blocked-allowed ul {
+  margin: 0;
+  padding-right: 18px;
+}
+
+#device-blocked .device-blocked-footer {
+  margin-top: 10px;
+  color: #64748b;
+  font-size: 0.88rem;
+  max-width: 360px;
+}
+
+/* برای صفحه‌های خیلی کوچک */
+@media (max-width: 420px) {
+  #device-blocked {
+    padding: 16px 12px;
+  }
+  #device-blocked h3 {
+    font-size: 1.15rem;
+  }
+  #device-blocked .device-blocked-info,
+  #device-blocked .device-blocked-allowed {
+    font-size: 0.85rem;
+    padding: 12px;
+  }
+}
+
+
+
+
+@media (hover: hover) and (pointer: fine) {
+    .sequence-btn {
+      transition: all 0.2s ease;
+    }
+    .sequence-btn span {
+      transition: color 0.2s ease;
+    }
+    .sequence-btn .text-danger {
+      color: #955a5a!important;  ;
+    }
+    .sequence-btn:hover .text-muted {
+      color: #dbdbdb!important;  
+    }
+    .sequence-btn:hover .text-dark {
+      color: #ffffff!important;  ;
+    }
+    .sequence-btn:hover .text-danger {
+      color: #ffc9c9!important;  ;
+    }
+
+
+    .sam-btn {
+        transition: all .2s ease;
+    }
+    .sam-btn:active{
+      transform: scale(1.2);
+    }
+
+    .sam-btn:hover {
+        background-color: #0d6efd;
+        border-color: #0d6efd;
+    }
+
+    .sam-btn:hover img {
+        filter: brightness(0) invert(1);
+    }
+
+    .sam-btn:hover .key-hint {
+        color: #ffffff;
+    }
+}
+
+
+@media (hover: none) and (pointer: coarse) {
+    .sequence-btn,
+    .sequence-btn:hover,
+    .sequence-btn:active,
+    .sequence-btn:focus,
+    .sequence-btn:focus-visible {
+        background-color: transparent !important;
+        border-color: var(--bs-primary) !important;
+        box-shadow: none !important;
+        outline: none !important;
+    }
+
+    .sequence-btn {
+        transition: all 0.15s ease;
+    }
+
+    .sequence-btn span {
+        transition: color 0.15s ease;
+    }
+
+    .sequence-btn .text-danger {
+        color: #955a5a !important;
+    }
+
+    .sequence-btn.touch-effect {
+        background-color: #0d6efd !important;
+        border-color: #0d6efd !important;
+        transform: scale(0.98);
+        box-shadow: none !important;
+    }
+
+    .sequence-btn.touch-effect .text-muted {
+        color: #dbdbdb !important;
+    }
+
+    .sequence-btn.touch-effect .text-dark {
+        color: #ffffff !important;
+    }
+
+    .sequence-btn.touch-effect .text-danger {
+        color: #ffc9c9 !important;
+    }
+
+    /* حذف کامل افکت‌های Bootstrap */
+    .sam-btn:active,
+    .sam-btn.active,
+    .sam-btn:focus,
+    .sam-btn:focus-visible,
+    .btn:first-child:active,
+    :not(.btn-check) + .sam-btn:active {
+        border: 3px solid #ddd !important;
+        outline: none !important;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1)!important;
+        transform: scale(1) !important;
+    }
+
+    .sam-btn {
+        transition: all .15s ease;
+    }
+
+    .sam-btn img,
+    .sam-btn .key-hint {
+        transition: all .15s ease;
+    }
+    .sam-btn.touch-effect {
+        background-color: #0d6efd !important;
+        border-color: #0d6efd !important;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1)!important;
+    }
+
+    .sam-btn.touch-effect img {
+        filter: brightness(0) invert(1);
+    }
+
+    .sam-btn.touch-effect .key-hint {
+        color: #ffffff !important;
+    }
+}
+
+
+
+#rating-question {
+  transition: opacity 0.18s ease, transform 0.18s ease;
+}
+#rating-question.fade-out {
+  opacity: 0;
+  transform: translateY(-12px);
+}
+#rating-question.fade-in {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* افکت انتخاب با کیبورد (همان touch-effect) */
+.sam-btn.keyboard-effect {
+  background-color: #0d6efd !important;
+  border-color: #0d6efd !important;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15) !important;
+  transform: scale(0.97);
+}
+.sam-btn.keyboard-effect img {
+  filter: brightness(0) invert(1);
+}
+.sam-btn.keyboard-effect .key-hint {
+  color: #ffffff !important;
+}
+
+
+
+.rating {
+  transition: opacity 0.35s ease, transform 0.35s ease;
+}
+.rating.fade-out {
+  opacity: 0;
+  transform: translateY(-18px);
+  pointer-events: none;
+}
+.rating.fade-in {
+  opacity: 1;
+  transform: translateY(0);
 }

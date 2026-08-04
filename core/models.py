@@ -155,15 +155,38 @@ class Result(models.Model):
 ###################################################################################################### 
 ###################################################################################################### 
 ###################################################################################################### 
+class DeviceLog(models.Model):
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='device_logs')
+    stage = models.CharField(max_length=50, verbose_name="مرحله")
+    device_type = models.CharField(max_length=20)
+    os = models.CharField(max_length=30)
+    browser = models.CharField(max_length=30)
+    screen_width = models.PositiveIntegerField(null=True, blank=True, verbose_name="طول صفحه" )
+    screen_height = models.PositiveIntegerField( null=True, blank=True, verbose_name="ارتفاع صفحه" )
+    is_touch = models.BooleanField( default=False, verbose_name="دستگاه لمسی؟" )
+    audio_volume = models.FloatField( null=True, blank=True, verbose_name="حجم صدای تنظیم‌شده" )
+    
+    created_at = models.DateTimeField(auto_now_add=True)
+    class Meta:
+        verbose_name = "لاگ تغییر دستگاه"
+        verbose_name_plural = "لاگ‌های تغییر دستگاه"
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"{self.user.username} | {self.stage} | {self.device_type}"
+    
 class RatingPractice(models.Model):
     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
     trial = models.PositiveIntegerField()
     stimulus = models.CharField(max_length=100)
     valence = models.IntegerField(null=True, blank=True)
     valence_rt = models.PositiveIntegerField(null=True, blank=True)
+    valence_delay_number = models.PositiveIntegerField(default=0, blank=True)
     arousal = models.IntegerField(null=True, blank=True)
     arousal_rt = models.PositiveIntegerField(null=True, blank=True)
+    arousal_delay_number = models.PositiveIntegerField(default=0, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
+    is_active = models.BooleanField(default=True, verbose_name="فعال/غیرفعال")
 
     class Meta:
         unique_together = ('user', 'trial')
@@ -193,7 +216,7 @@ class RatingResponse(models.Model):
         blank=True,
         verbose_name="زمان پاسخ خوشایندی (میلی‌ثانیه)"
     )
-
+    valence_delay_number = models.PositiveIntegerField(default=0, blank=True)
     # نمره برانگیختگی (Arousal) - از 1 تا 9
     arousal = models.IntegerField(
         null=True,
@@ -205,11 +228,12 @@ class RatingResponse(models.Model):
         blank=True,
         verbose_name="زمان پاسخ برانگیختگی (میلی‌ثانیه)"
     )
-
+    arousal_delay_number = models.PositiveIntegerField(default=0, blank=True)
     created_at = models.DateTimeField(
         auto_now_add=True,
         verbose_name="زمان ایجاد"
     )
+    is_active = models.BooleanField(default=True, verbose_name="فعال/غیرفعال")
 
     class Meta:
         unique_together = ('user', 'stimulus')  # هر کاربر فقط یک بار برای هر محرک رتبه بدهد
@@ -233,8 +257,6 @@ class RatingResponse(models.Model):
         return self.has_valence() and self.has_arousal()
     
 
-
-
 ###################################################################################################### 
 ###################################################################################################### 
 ###################################################################################################### 
@@ -248,8 +270,11 @@ class PCMSequencePracticeResponse(models.Model):  # مرحله ۱
     category_stim1 = models.CharField(max_length=10, null=True, blank=True)
     category_stim2 = models.CharField(max_length=10, null=True, blank=True)
     user_response = models.CharField(max_length=30, null=True, blank=True)  # توالی انتخابی
+    response_rt = models.PositiveIntegerField(null=True, blank=True)
+    delay_number = models.PositiveIntegerField(default=0, blank=True) 
     is_correct = models.BooleanField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
+    is_active = models.BooleanField(default=True, verbose_name="فعال/غیرفعال")
 
     class Meta:
         unique_together = ('user', 'trial', 'created_at')
@@ -267,11 +292,15 @@ class PCMValencePracticeResponse(models.Model):  # مرحله ۲
     category_stim2 = models.CharField(max_length=10, null=True, blank=True)
     valence_stim1 = models.IntegerField(null=True, blank=True)
     valence_rt_stim1 = models.PositiveIntegerField(null=True, blank=True)
+    valence_delay_number_stim1 = models.PositiveIntegerField(default=0, blank=True)
     valence_stim2 = models.IntegerField(null=True, blank=True)
     valence_rt_stim2 = models.PositiveIntegerField(null=True, blank=True)
+    valence_delay_number_stim2 = models.PositiveIntegerField(default=0, blank=True)
     valence_sequence = models.IntegerField(null=True, blank=True)
     valence_rt_sequence = models.PositiveIntegerField(null=True, blank=True)
+    valence_delay_number_sequence = models.PositiveIntegerField(default=0, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
+    is_active = models.BooleanField(default=True, verbose_name="فعال/غیرفعال")
 
     class Meta:
         unique_together = ('user', 'trial')
@@ -287,8 +316,11 @@ class PCMCatchResponse(models.Model):  # مرحله ۱
     trial = models.PositiveIntegerField()
     cue = models.CharField(max_length=100)
     user_response = models.CharField(max_length=30, null=True, blank=True)  # توالی انتخابی
+    response_rt = models.PositiveIntegerField(null=True, blank=True)
+    delay_number = models.PositiveIntegerField(default=0, blank=True)
     is_correct = models.BooleanField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
+    is_active = models.BooleanField(default=True, verbose_name="فعال/غیرفعال")
 
     class Meta:
         unique_together = ('user', 'trial', 'created_at')
@@ -358,6 +390,7 @@ class PCMMainResponse(models.Model):
         blank=True,
         verbose_name="زمان پاسخ خوشایندی محرک اول (میلی‌ثانیه)"
     )
+    valence_delay_number_stim1 = models.PositiveIntegerField(default=0, blank=True)
     valence_stim2 = models.IntegerField(
         null=True,
         blank=True,
@@ -368,6 +401,7 @@ class PCMMainResponse(models.Model):
         blank=True,
         verbose_name="زمان پاسخ خوشایندی محرک دوم (میلی‌ثانیه)"
     )
+    valence_delay_number_stim2 = models.PositiveIntegerField(default=0, blank=True)
     valence_sequence = models.IntegerField(
         null=True,
         blank=True,
@@ -378,11 +412,12 @@ class PCMMainResponse(models.Model):
         blank=True,
         verbose_name="زمان پاسخ خوشایندی کل توالی (میلی‌ثانیه)"
     )
-
+    valence_delay_number_sequence = models.PositiveIntegerField(default=0, blank=True)
     created_at = models.DateTimeField(
         auto_now_add=True,
         verbose_name="زمان ایجاد"
     )
+    is_active = models.BooleanField(default=True, verbose_name="فعال/غیرفعال")
 
     class Meta:
         unique_together = ('user', 'block', 'trial')
@@ -406,9 +441,12 @@ class RatingPracticeResponse(models.Model):  # مرحله ۴ - تمرین رتب
     stimulus = models.CharField(max_length=100)
     valence = models.IntegerField(null=True, blank=True)
     valence_rt = models.PositiveIntegerField(null=True, blank=True)
+    valence_delay_number = models.PositiveIntegerField(default=0, blank=True)
     arousal = models.IntegerField(null=True, blank=True)
     arousal_rt = models.PositiveIntegerField(null=True, blank=True)
+    arousal_delay_number = models.PositiveIntegerField(default=0, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
+    is_active = models.BooleanField(default=True, verbose_name="فعال/غیرفعال")
 
     class Meta:
         unique_together = ('user', 'trial')
@@ -422,9 +460,12 @@ class RatingMainResponse(models.Model):  # مرحله ۵ - رتبه‌بندی
     stimulus_number = models.CharField(max_length=50)
     valence = models.IntegerField(null=True, blank=True)
     valence_rt = models.PositiveIntegerField(null=True, blank=True)
+    valence_delay_number = models.PositiveIntegerField(default=0, blank=True)
     arousal = models.IntegerField(null=True, blank=True)
     arousal_rt = models.PositiveIntegerField(null=True, blank=True)
+    arousal_delay_number = models.PositiveIntegerField(default=0, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
+    is_active = models.BooleanField(default=True, verbose_name="فعال/غیرفعال")
 
     class Meta:
         unique_together = ('user', 'stimulus_number')

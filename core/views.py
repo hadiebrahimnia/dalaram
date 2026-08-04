@@ -19,10 +19,35 @@ from typing import Dict, List, Tuple, Optional
 from django.views.decorators.csrf import csrf_exempt
 from collections import defaultdict, Counter
 from jdatetime import datetime as jdatetime
+from django.views.decorators.http import require_POST
 import datetime
 from django.db.models import Avg, Count
 
+import json
 
+@login_required
+@require_POST
+def save_device_log(request):
+    try:
+        data = json.loads(request.body)
+
+        DeviceLog.objects.create(
+            user=request.user,
+            stage=data.get('stage', 'unknown'),
+            device_type=data.get('device_type', 'Unknown'),
+            os=data.get('os', 'Unknown'),
+            browser=data.get('browser', 'Unknown'),
+            screen_width=data.get('screen_width'),
+            screen_height=data.get('screen_height'),
+            is_touch=data.get('is_touch', False),
+            audio_volume=data.get('audio_volume'),
+        )
+
+        return JsonResponse({'status': 'success'})
+
+    except Exception as e:
+        return JsonResponse({'status': 'error', 'message': str(e)}, status=400)
+    
 # _LATIN_TO_PERSIAN_DIGITS = str.maketrans('0123456789', '۰۱۲۳۴۵۶۷۸۹')
 
 def convert_birth_to_jalali_view(user):
@@ -300,7 +325,7 @@ def rating_view(request):
         }
         return render(request, 'rating_2.html', context)
     # --- پایان آزمون ---
-    return render(request, 'final_thanks.html')
+    return redirect('/final/')
 
 @csrf_exempt
 def rating_save_response(request):
@@ -322,8 +347,10 @@ def rating_save_response(request):
             stimulus=extract_stimulus_number(data.get('stimulus')),
             valence=data.get('valence'),
             valence_rt=data.get('valence_rt'),
+            valence_delay_number = data.get('valence_delay_number', 0),
             arousal=data.get('arousal'),
             arousal_rt=data.get('arousal_rt'),
+            arousal_delay_number = data.get('arousal_delay_number', 0),
         )
 
     elif data.get('is_rerating'):
@@ -334,8 +361,11 @@ def rating_save_response(request):
             stimulus_file=data['stimulus_file'],
             valence=data.get('valence'),
             valence_rt=data.get('valence_rt'),
+            valence_delay_number = data.get('valence_delay_number', 0),
             arousal=data.get('arousal'),
             arousal_rt=data.get('arousal_rt'),
+            arousal_delay_number = data.get('arousal_delay_number', 0),
+
         )
 
     else:
@@ -386,30 +416,120 @@ def get_cues_mapping() -> Dict[str, str]:
 def get_stimuli_lists() -> Tuple[List[str], List[str]]:
     """لیست صداهای خنثی و منفی + shuffle"""
     neutral_files = [
-        '5-MP-MA/102.mp3','5-MP-MA/104.mp3','5-MP-MA/107.mp3','5-MP-MA/111.mp3','5-MP-MA/113.mp3',
-        '5-MP-MA/120.mp3','5-MP-MA/130.mp3','5-MP-MA/132.mp3','5-MP-MA/152.mp3','5-MP-MA/170.mp3',
-        '5-MP-MA/225.mp3','5-MP-MA/245.mp3','5-MP-MA/246.mp3','5-MP-MA/251.mp3','5-MP-MA/252.mp3',
-        '5-MP-MA/320.mp3','5-MP-MA/322.mp3','5-MP-MA/358.mp3','5-MP-MA/361.mp3','5-MP-MA/364.mp3',
-        '5-MP-MA/368.mp3','5-MP-MA/370.mp3','5-MP-MA/373.mp3','5-MP-MA/374.mp3','5-MP-MA/375.mp3',
-        '5-MP-MA/376.mp3','5-MP-MA/382.mp3','5-MP-MA/403.mp3','5-MP-MA/410.mp3','5-MP-MA/425.mp3',
-        '5-MP-MA/500.mp3','5-MP-MA/627.mp3','5-MP-MA/698.mp3','5-MP-MA/700.mp3','5-MP-MA/701.mp3',
-        '5-MP-MA/702.mp3','5-MP-MA/705.mp3','5-MP-MA/706.mp3','5-MP-MA/720.mp3','5-MP-MA/722.mp3',
-        '5-MP-MA/723.mp3','5-MP-MA/724.mp3','5-MP-MA/728.mp3','5-MP-MA/729.mp3',
+        # '4-MP-HA/114.mp3',
+        # '4-MP-HA/204.mp3',
+        # '4-MP-HA/210.mp3',
+        # '4-MP-HA/216.mp3',
+        # '4-MP-HA/610.mp3',
+        # '4-MP-HA/704.mp3',
+        # '4-MP-HA/710.mp3',
+        # '4-MP-HA/715.mp3',
+        '5-MP-MA/102.mp3',
+        # '5-MP-MA/104.mp3',
+        # '5-MP-MA/107.mp3',
+        # '5-MP-MA/111.mp3',
+        # '5-MP-MA/113.mp3',
+        # '5-MP-MA/120.mp3',
+        # '5-MP-MA/130.mp3',
+        # '5-MP-MA/132.mp3',
+        '5-MP-MA/152.mp3',
+        '5-MP-MA/170.mp3',
+        # '5-MP-MA/225.mp3',
+        # '5-MP-MA/245.mp3',
+        '5-MP-MA/246.mp3',
+        # '5-MP-MA/251.mp3',
+        # '5-MP-MA/252.mp3',
+        '5-MP-MA/320.mp3',
+        '5-MP-MA/322.mp3',
+        '5-MP-MA/358.mp3',
+        '5-MP-MA/361.mp3',
+        '5-MP-MA/364.mp3',
+        '5-MP-MA/368.mp3',
+        '5-MP-MA/370.mp3',
+        '5-MP-MA/373.mp3',
+        '5-MP-MA/374.mp3',
+        '5-MP-MA/375.mp3',
+        '5-MP-MA/376.mp3',
+        '5-MP-MA/382.mp3',
+        '5-MP-MA/403.mp3',
+        '5-MP-MA/410.mp3',
+        '5-MP-MA/425.mp3',
+        # '5-MP-MA/500.mp3',
+        # '5-MP-MA/627.mp3',
+        '5-MP-MA/698.mp3',
+        # '5-MP-MA/700.mp3',
+        '5-MP-MA/701.mp3',
+        # '5-MP-MA/702.mp3',
+        '5-MP-MA/705.mp3',
+        # '5-MP-MA/706.mp3',
+        # '5-MP-MA/720.mp3',
+        '5-MP-MA/722.mp3',
+        # '5-MP-MA/723.mp3',
+        '5-MP-MA/724.mp3',
+        # '5-MP-MA/728.mp3',
+        # '5-MP-MA/729.mp3',
     ]
 
     negative_files = [
-        '7-LP-HA/105.mp3','7-LP-HA/106.mp3','7-LP-HA/115.mp3','7-LP-HA/116.mp3','7-LP-HA/133.mp3',
-        '7-LP-HA/134.mp3','7-LP-HA/244.mp3','7-LP-HA/255.mp3','7-LP-HA/260.mp3','7-LP-HA/261.mp3',
-        '7-LP-HA/275.mp3','7-LP-HA/276.mp3','7-LP-HA/277.mp3','7-LP-HA/278.mp3','7-LP-HA/279.mp3',
-        '7-LP-HA/281.mp3','7-LP-HA/282.mp3','7-LP-HA/283.mp3','7-LP-HA/284.mp3','7-LP-HA/285.mp3',
-        '7-LP-HA/286.mp3','7-LP-HA/288.mp3','7-LP-HA/289.mp3','7-LP-HA/290.mp3','7-LP-HA/292.mp3',
-        '7-LP-HA/296.mp3','7-LP-HA/310.mp3','7-LP-HA/312.mp3','7-LP-HA/319.mp3','7-LP-HA/380.mp3',
-        '7-LP-HA/420.mp3','7-LP-HA/422.mp3','7-LP-HA/423.mp3','7-LP-HA/424.mp3','7-LP-HA/501.mp3',
-        '7-LP-HA/502.mp3','7-LP-HA/600.mp3','7-LP-HA/624.mp3','7-LP-HA/625.mp3','7-LP-HA/626.mp3',
-        '7-LP-HA/699.mp3','7-LP-HA/709.mp3','7-LP-HA/711.mp3','7-LP-HA/712.mp3','7-LP-HA/713.mp3',
-        '7-LP-HA/714.mp3','7-LP-HA/719.mp3','7-LP-HA/730.mp3','7-LP-HA/732.mp3','7-LP-HA/910.mp3',
-        '8-LP-MA/241.mp3','8-LP-MA/242.mp3','8-LP-MA/243.mp3','8-LP-MA/250.mp3','8-LP-MA/280.mp3',
-        '8-LP-MA/293.mp3','8-LP-MA/295.mp3','8-LP-MA/611.mp3','8-LP-MA/703.mp3',
+        # '7-LP-HA/105.mp3',
+        '7-LP-HA/106.mp3',
+        '7-LP-HA/115.mp3',
+        '7-LP-HA/116.mp3',
+        '7-LP-HA/133.mp3',
+        # '7-LP-HA/134.mp3',
+        '7-LP-HA/244.mp3',
+        '7-LP-HA/255.mp3',
+        '7-LP-HA/260.mp3',
+        '7-LP-HA/261.mp3',
+        '7-LP-HA/275.mp3',
+        '7-LP-HA/276.mp3',
+        '7-LP-HA/277.mp3',
+        '7-LP-HA/278.mp3',
+        '7-LP-HA/279.mp3',
+        # '7-LP-HA/281.mp3',
+        '7-LP-HA/282.mp3',
+        '7-LP-HA/283.mp3',
+        '7-LP-HA/284.mp3',
+        '7-LP-HA/285.mp3',
+        '7-LP-HA/286.mp3',
+        '7-LP-HA/288.mp3',
+        '7-LP-HA/289.mp3',
+        '7-LP-HA/290.mp3',
+        '7-LP-HA/292.mp3',
+        '7-LP-HA/296.mp3',
+        '7-LP-HA/310.mp3',
+        # '7-LP-HA/312.mp3',
+        # '7-LP-HA/319.mp3',
+        '7-LP-HA/380.mp3',
+        '7-LP-HA/420.mp3',
+        '7-LP-HA/422.mp3',
+        '7-LP-HA/423.mp3',
+        '7-LP-HA/424.mp3',
+        '7-LP-HA/501.mp3',
+        '7-LP-HA/502.mp3',
+        '7-LP-HA/600.mp3',
+        '7-LP-HA/624.mp3',
+        '7-LP-HA/625.mp3',
+        '7-LP-HA/626.mp3',
+        '7-LP-HA/699.mp3',
+        # '7-LP-HA/709.mp3',
+        '7-LP-HA/711.mp3',
+        '7-LP-HA/712.mp3',
+        '7-LP-HA/713.mp3',
+        '7-LP-HA/714.mp3',
+        # '7-LP-HA/719.mp3',
+        '7-LP-HA/730.mp3',
+        '7-LP-HA/732.mp3',
+        # '7-LP-HA/910.mp3',
+        '8-LP-MA/241.mp3',
+        '8-LP-MA/242.mp3',
+        # '8-LP-MA/243.mp3',
+        # '8-LP-MA/250.mp3',
+        '8-LP-MA/280.mp3',
+        '8-LP-MA/293.mp3',
+        '8-LP-MA/295.mp3',
+        '8-LP-MA/611.mp3',
+        # '8-LP-MA/703.mp3',
     ]
 
     neutral_files = list(set(neutral_files))
@@ -552,12 +672,15 @@ def pcm_view(request):
             'neutral_urls': json.dumps(NEUTRAL_URLS),
             'negative_urls': json.dumps(NEGATIVE_URLS),
             'cues_mapping': json.dumps(cues_mapping),
-            'remaining_sequences': json.dumps(sequence_order),  # لیست باقی‌مانده متعادل و shuffle‌شده
+            'remaining_sequences': json.dumps(sequence_order),  
         }
         return render(request, '1_seq_practice.html', context)
     else:
+        
         seq_correct = seq_responses.filter(is_correct=True).count()  # محاسبه پاسخ درست 
         seq_accuracy = seq_correct / seq_count if seq_count > 0 else 0
+
+        print(seq_accuracy)
         if seq_accuracy >= SEQ_THRESHOLD:
             pass
         else:
@@ -565,7 +688,7 @@ def pcm_view(request):
             context = {
                 'text': text,
             }
-            return render(request, 'final_thanks.html', context)
+            return render(request, 'failed.html', context)
         
 
     # --- مرحله ۲: تمرین رتبه‌بندی خوشایندی ---
@@ -619,7 +742,6 @@ def pcm_view(request):
             'current_trial': valence_practice_count,  # تعداد انجام‌شده (شروع از 0)
             'total_trials': VALENCE_PRACTICE_TRIALS,
             'progress_percentage': round(progress_percentage, 1),
-
             'cue_urls': json.dumps(CUE_URLS),
             'neutral_urls': json.dumps(NEUTRAL_URLS),
             'negative_urls': json.dumps(NEGATIVE_URLS),
@@ -630,6 +752,7 @@ def pcm_view(request):
         }
         return render(request, '2_valence_practice.html', context)
 
+
     # --- مرحله ۳: آزمون اصلی PCM ---
     NUM_BLOCKS = 3
     CATCH_TRIALS_PER_BLOCK = 6
@@ -637,20 +760,49 @@ def pcm_view(request):
 
     # محاسبه بلاک فعلی و پیشرفت کلی
     current_block = None
-    all_catch_sequences = {}  # {block_num: [sequences]}
-    all_main_trials = {}      # {block_num: [trials dict]}
+    all_catch_sequences = {}  # {block_num: [ {cue, expected_seq}, ... ]}
+    all_main_trials = {}      # {block_num: [ {actual_seq, cue, expected_seq}, ... ]}
 
     total_completed = 0
     total_trials_all = NUM_BLOCKS * (CATCH_TRIALS_PER_BLOCK + MAIN_TRIALS_PER_BLOCK)
-    
-    try:
-        last_response=PCMMainResponse.objects.filter(user=user).last()
-    except:
-        last_response=0
+
+    # --- تعریف تمام mismatchهای ممکن (۶ ترکیب) برای inconsistent ---
+    ALL_MISMATCHES = [
+        {"expected_seq": "Neutral-Neutral",  "actual_seq": "Neutral-Negative"},
+        {"expected_seq": "Neutral-Neutral",  "actual_seq": "Negative-Neutral"},
+        {"expected_seq": "Neutral-Negative", "actual_seq": "Neutral-Neutral"},
+        {"expected_seq": "Neutral-Negative", "actual_seq": "Negative-Neutral"},
+        {"expected_seq": "Negative-Neutral", "actual_seq": "Neutral-Neutral"},
+        {"expected_seq": "Negative-Neutral", "actual_seq": "Neutral-Negative"},
+    ]
+
+    # جمع‌آوری mismatchهایی که قبلاً در همه بلاک‌ها استفاده شده‌اند
+    used_mismatches = set()
+    for r in PCMMainResponse.objects.filter(user=user, is_consistent=False):
+        if r.expected_sequence and r.category_stim1 and r.category_stim2:
+            actual = f"{r.category_stim1}-{r.category_stim2}"
+            used_mismatches.add((r.expected_sequence, actual))
+
+    remaining_mismatches = [
+        m for m in ALL_MISMATCHES
+        if (m["expected_seq"], m["actual_seq"]) not in used_mismatches
+    ]
+    random.shuffle(remaining_mismatches)
+    mismatch_idx = 0
+
+
+    try: 
+        last_response=PCMMainResponse.objects.filter(user=user).order_by("created_at").last() 
+        last_trial=last_response.trial 
+        last_block = last_response.block 
+    except: 
+        last_trial=0 
+        last_block=0
 
     for block_num in range(1, NUM_BLOCKS + 1):
         catch_count = PCMCatchResponse.objects.filter(user=user, block=block_num).count()
         main_count = PCMMainResponse.objects.filter(user=user, block=block_num).count()
+
         completed_in_block = catch_count + main_count
         total_completed += completed_in_block
 
@@ -659,7 +811,8 @@ def pcm_view(request):
             if current_block is None:
                 current_block = block_num
 
-        # --- ساخت توالی‌های catch برای این بلاک (اگر نیاز باشد) ---
+        # --- ساخت ترایال‌های catch برای این بلاک (اگر نیاز باشد) ---
+        # فقط نشانه (cue) ارائه می‌شود و کاربر توالی مورد انتظار را مشخص می‌کند
         if catch_count < CATCH_TRIALS_PER_BLOCK:
             remain_catch = CATCH_TRIALS_PER_BLOCK - catch_count
             possible_sequences = ["Neutral-Neutral", "Neutral-Negative", "Negative-Neutral"]
@@ -688,97 +841,66 @@ def pcm_view(request):
         # --- ساخت توالی‌های main برای این بلاک (اگر نیاز باشد) ---
         if main_count < MAIN_TRIALS_PER_BLOCK:
             remain_main = MAIN_TRIALS_PER_BLOCK - main_count
-            
-            # تمام توالی‌های ممکن
+
+            # تعداد inconsistent باقی‌مانده در این بلاک (هدف: ۲ تا در هر بلاک)
+            used_inconsistent_in_block = PCMMainResponse.objects.filter(
+                user=user, block=block_num, is_consistent=False
+            ).count()
+            remain_inconsistent = max(0, 2 - used_inconsistent_in_block)
+            remain_consistent = remain_main - remain_inconsistent
+
+            final_trials = []
+
+            # --- inconsistentها از لیست سراسری (۶ ترکیب متعادل در ۳ بلاک) ---
+            for _ in range(remain_inconsistent):
+                if mismatch_idx < len(remaining_mismatches):
+                    m = remaining_mismatches[mismatch_idx]
+                    mismatch_idx += 1
+                    expected_seq = m["expected_seq"]
+                    actual_seq = m["actual_seq"]
+                else:
+                    # fallback (نباید اتفاق بیفتد)
+                    expected_seq = random.choice(["Neutral-Neutral", "Neutral-Negative", "Negative-Neutral"])
+                    possibles = [s for s in ["Neutral-Neutral", "Neutral-Negative", "Negative-Neutral"] if s != expected_seq]
+                    actual_seq = random.choice(possibles)
+
+                cue_candidates = [c for c, exp in cues_mapping.items() if exp == expected_seq]
+                cue = random.choice(cue_candidates) if cue_candidates else random.choice(CUE_URLS)
+
+                final_trials.append({
+                    'actual_seq': actual_seq,
+                    'cue': cue,
+                    'expected_seq': expected_seq,
+                })
+
+            # --- consistentها با تعادل بین ۳ توالی ---
             ALL_POSSIBLE_SEQUENCES = ["Neutral-Neutral", "Negative-Neutral", "Neutral-Negative"]
 
-            # شمارش پاسخ‌های قبلی در این بلاک
-            used_seqs = [
-                f"{r.category_stim1}-{r.category_stim2}"
-                for r in PCMMainResponse.objects.filter(user=user, block=block_num)
-                if r.category_stim1 and r.category_stim2
-            ]
-            used_consistent = sum(1 for s in used_seqs if s in ALL_POSSIBLE_SEQUENCES[:3])  # فقط ۳ تای اصلی
-            used_inconsistent = len(used_seqs) - used_consistent
-
-            # هدف: 75% consistent — 25% inconsistent (می‌توانید تغییر دهید)
-            target_consistent = int(MAIN_TRIALS_PER_BLOCK * 0.75)
-            target_inconsistent = MAIN_TRIALS_PER_BLOCK - target_consistent
-
-            remain_consistent = max(0, target_consistent - used_consistent)
-            remain_inconsistent = max(0, target_inconsistent - used_inconsistent)
-
-            # ساخت لیست نوع trialها
-            trial_types = (
-                [{'type': 'consistent'}] * remain_consistent +
-                [{'type': 'inconsistent'}] * remain_inconsistent
-            )
-
-            # اگر هنوز کم بود → تصادفی پر کنیم
-            if len(trial_types) < remain_main:
-                extra = remain_main - len(trial_types)
-                trial_types += [
-                    {'type': 'consistent' if random.random() < 0.75 else 'inconsistent'}
-                    for _ in range(extra)
-                ]
-
-            random.shuffle(trial_types)
-
-            # حالا برای هر trial نوع → cue و sequence واقعی بسازیم
-            final_trials = []
-            
-            # کمک برای تعادل در consistentها
             cons_counts = Counter([
                 f"{r.category_stim1}-{r.category_stim2}"
-                for r in PCMMainResponse.objects.filter(user=user, block=block_num)
-                if r.is_consistent
+                for r in PCMMainResponse.objects.filter(user=user, block=block_num, is_consistent=True)
+                if r.category_stim1 and r.category_stim2
             ])
 
-            for item in trial_types:
-                if item['type'] == 'inconsistent':
-                    # انتخاب cue تصادفی
-                    cue = random.choice(CUE_URLS)
-                    
-                    # توالی منتظره (consistent) برای این cue
-                    expected_seq = cues_mapping[cue]
-                    
-                    # دو توالی دیگر = inconsistentهای ممکن
-                    possible_inconsistents = [s for s in ALL_POSSIBLE_SEQUENCES if s != expected_seq]
-                    
-                    # انتخاب یکی از دو inconsistent به صورت تصادفی
-                    # اگر می‌خواهید دقیق‌تر 50-50 باشد، می‌توانید از weights یا Counter استفاده کنید
-                    actual_seq = random.choice(possible_inconsistents)
-                    
-                    final_trials.append({
-                        'actual_seq': actual_seq,
-                        'cue': cue,
-                        'expected_seq': expected_seq,   # برای لاگ/دیباگ مفید است
-                    })
+            for _ in range(remain_consistent):
+                weights = [
+                    max(0, (remain_consistent // 3) - cons_counts.get(seq, 0))
+                    for seq in ALL_POSSIBLE_SEQUENCES
+                ]
+                if sum(weights) == 0:
+                    seq = random.choice(ALL_POSSIBLE_SEQUENCES)
+                else:
+                    seq = random.choices(ALL_POSSIBLE_SEQUENCES, weights=weights, k=1)[0]
 
-                else:  # consistent
-                    # انتخاب توالی consistent با وزن‌دهی برای تعادل
-                    weights = [
-                        max(0, (remain_consistent // 3) - cons_counts.get(seq, 0))
-                        for seq in ALL_POSSIBLE_SEQUENCES
-                    ]
-                    
-                    if sum(weights) == 0:
-                        # اگر همه استفاده شده، تصادفی
-                        seq = random.choice(ALL_POSSIBLE_SEQUENCES)
-                    else:
-                        seq = random.choices(ALL_POSSIBLE_SEQUENCES, weights=weights, k=1)[0]
-                    
-                    # cueهایی که این توالی را انتظار دارند
-                    cue_candidates = [c for c, exp in cues_mapping.items() if exp == seq]
-                    cue = random.choice(cue_candidates) if cue_candidates else random.choice(CUE_URLS)
-                    
-                    final_trials.append({
-                        'actual_seq': seq,
-                        'cue': cue,
-                        'expected_seq': seq,  # چون consistent است
-                    })
-                    
-                    cons_counts[seq] += 1
+                cue_candidates = [c for c, exp in cues_mapping.items() if exp == seq]
+                cue = random.choice(cue_candidates) if cue_candidates else random.choice(CUE_URLS)
+
+                final_trials.append({
+                    'actual_seq': seq,
+                    'cue': cue,
+                    'expected_seq': seq,
+                })
+                cons_counts[seq] += 1
 
             random.shuffle(final_trials)
             all_main_trials[block_num] = final_trials
@@ -790,8 +912,8 @@ def pcm_view(request):
         # ادامه کد مراحل بعدی (rating practice و ...)
         pass
     else:
+        
         context = {
-            'perior_block': current_block-1,
             'current_block': current_block,
             'total_blocks': NUM_BLOCKS,
             'catch_trials_per_block': CATCH_TRIALS_PER_BLOCK,
@@ -805,7 +927,9 @@ def pcm_view(request):
             'negative_urls': json.dumps(NEGATIVE_URLS),
             'cues_mapping': json.dumps(cues_mapping),
 
-            'last_trial':last_response.trial,
+            'last_trial':last_trial,
+            'last_block':last_block,
+            'next_block':last_block + 1,
             # مهم: تمام داده‌های همه بلاک‌ها
             'all_catch_sequences': json.dumps(all_catch_sequences),
             'all_main_trials': json.dumps(all_main_trials),
@@ -814,7 +938,7 @@ def pcm_view(request):
     
 
     # --- مرحله 4: تمرین رتبه بندی خوشایندی و برانگیختگی---
-    RATING_PRACTICE_TRIALS = 2
+    RATING_PRACTICE_TRIALS = 10
     PRACTICE_FILES_RAW = [
         '0-practice/1.mp3',
         '0-practice/2.mp3',
@@ -844,28 +968,85 @@ def pcm_view(request):
     # --- مرحله ۵: رتبه‌بندی  همه صداهای ارائه شده (خوشایندی و برانگیختگی) ---
     MAIN_RATING_FILES_RAW = [
         '5-MP-MA/102.mp3',
-        '5-MP-MA/104.mp3',
-        '5-MP-MA/107.mp3',
-        '5-MP-MA/111.mp3',
-        '5-MP-MA/113.mp3',
-        # '5-MP-MA/120.mp3','5-MP-MA/130.mp3','5-MP-MA/132.mp3','5-MP-MA/152.mp3','5-MP-MA/170.mp3','5-MP-MA/225.mp3','5-MP-MA/245.mp3','5-MP-MA/246.mp3','5-MP-MA/251.mp3','5-MP-MA/252.mp3','5-MP-MA/320.mp3','5-MP-MA/322.mp3','5-MP-MA/358.mp3','5-MP-MA/361.mp3','5-MP-MA/364.mp3','5-MP-MA/368.mp3','5-MP-MA/370.mp3','5-MP-MA/373.mp3','5-MP-MA/374.mp3','5-MP-MA/375.mp3','5-MP-MA/376.mp3','5-MP-MA/382.mp3','5-MP-MA/403.mp3','5-MP-MA/410.mp3','5-MP-MA/425.mp3','5-MP-MA/500.mp3','5-MP-MA/627.mp3','5-MP-MA/698.mp3','5-MP-MA/700.mp3','5-MP-MA/701.mp3','5-MP-MA/702.mp3','5-MP-MA/705.mp3','5-MP-MA/706.mp3','5-MP-MA/720.mp3','5-MP-MA/722.mp3','5-MP-MA/723.mp3','5-MP-MA/724.mp3','5-MP-MA/728.mp3','5-MP-MA/729.mp3',
-
-        # '6-MP-LA/171.mp3','6-MP-LA/262.mp3','6-MP-LA/377.mp3','6-MP-LA/602.mp3','6-MP-LA/708.mp3',
-
-        # '7-LP-HA/105.mp3','7-LP-HA/106.mp3','7-LP-HA/115.mp3','7-LP-HA/116.mp3','7-LP-HA/133.mp3','7-LP-HA/134.mp3','7-LP-HA/244.mp3','7-LP-HA/255.mp3','7-LP-HA/260.mp3','7-LP-HA/261.mp3','7-LP-HA/275.mp3','7-LP-HA/276.mp3','7-LP-HA/277.mp3','7-LP-HA/278.mp3','7-LP-HA/279.mp3','7-LP-HA/281.mp3','7-LP-HA/282.mp3','7-LP-HA/283.mp3','7-LP-HA/284.mp3','7-LP-HA/285.mp3','7-LP-HA/286.mp3','7-LP-HA/288.mp3','7-LP-HA/289.mp3','7-LP-HA/290.mp3','7-LP-HA/292.mp3','7-LP-HA/296.mp3','7-LP-HA/310.mp3','7-LP-HA/312.mp3','7-LP-HA/319.mp3','7-LP-HA/380.mp3','7-LP-HA/420.mp3','7-LP-HA/422.mp3','7-LP-HA/423.mp3','7-LP-HA/424.mp3','7-LP-HA/501.mp3','7-LP-HA/502.mp3','7-LP-HA/600.mp3','7-LP-HA/624.mp3','7-LP-HA/625.mp3','7-LP-HA/626.mp3','7-LP-HA/699.mp3','7-LP-HA/709.mp3','7-LP-HA/711.mp3','7-LP-HA/712.mp3','7-LP-HA/713.mp3','7-LP-HA/714.mp3','7-LP-HA/719.mp3','7-LP-HA/730.mp3','7-LP-HA/732.mp3','7-LP-HA/910.mp3',
-
-        # '8-LP-MA/241.mp3','8-LP-MA/242.mp3','8-LP-MA/243.mp3','8-LP-MA/250.mp3','8-LP-MA/280.mp3','8-LP-MA/293.mp3','8-LP-MA/295.mp3','8-LP-MA/611.mp3','8-LP-MA/703.mp3',
+        '5-MP-MA/152.mp3',
+        '5-MP-MA/170.mp3',
+        '5-MP-MA/246.mp3',
+        '5-MP-MA/320.mp3',
+        '5-MP-MA/322.mp3',
+        '5-MP-MA/358.mp3',
+        '5-MP-MA/361.mp3',
+        '5-MP-MA/364.mp3',
+        '5-MP-MA/368.mp3',
+        '5-MP-MA/370.mp3',
+        '5-MP-MA/373.mp3',
+        '5-MP-MA/374.mp3',
+        '5-MP-MA/375.mp3',
+        '5-MP-MA/376.mp3',
+        '5-MP-MA/382.mp3',
+        '5-MP-MA/403.mp3',
+        '5-MP-MA/410.mp3',
+        '5-MP-MA/425.mp3',
+        '5-MP-MA/698.mp3',
+        '5-MP-MA/701.mp3',
+        '5-MP-MA/705.mp3',
+        '5-MP-MA/722.mp3',
+        '5-MP-MA/724.mp3',
+        '7-LP-HA/106.mp3',
+        '7-LP-HA/115.mp3',
+        '7-LP-HA/116.mp3',
+        '7-LP-HA/133.mp3',
+        '7-LP-HA/244.mp3',
+        '7-LP-HA/255.mp3',
+        '7-LP-HA/260.mp3',
+        '7-LP-HA/261.mp3',
+        '7-LP-HA/275.mp3',
+        '7-LP-HA/276.mp3',
+        '7-LP-HA/277.mp3',
+        '7-LP-HA/278.mp3',
+        '7-LP-HA/279.mp3',
+        '7-LP-HA/282.mp3',
+        '7-LP-HA/283.mp3',
+        '7-LP-HA/284.mp3',
+        '7-LP-HA/285.mp3',
+        '7-LP-HA/286.mp3',
+        '7-LP-HA/288.mp3',
+        '7-LP-HA/289.mp3',
+        '7-LP-HA/290.mp3',
+        '7-LP-HA/292.mp3',
+        '7-LP-HA/296.mp3',
+        '7-LP-HA/310.mp3',
+        '7-LP-HA/380.mp3',
+        '7-LP-HA/420.mp3',
+        '7-LP-HA/422.mp3',
+        '7-LP-HA/423.mp3',
+        '7-LP-HA/424.mp3',
+        '7-LP-HA/501.mp3',
+        '7-LP-HA/502.mp3',
+        '7-LP-HA/600.mp3',
+        '7-LP-HA/624.mp3',
+        '7-LP-HA/625.mp3',
+        '7-LP-HA/626.mp3',
+        '7-LP-HA/699.mp3',
+        '7-LP-HA/711.mp3',
+        '7-LP-HA/712.mp3',
+        '7-LP-HA/713.mp3',
+        '7-LP-HA/714.mp3',
+        '7-LP-HA/730.mp3',
+        '7-LP-HA/732.mp3',
+        '8-LP-MA/241.mp3',
+        '8-LP-MA/242.mp3',
+        '8-LP-MA/280.mp3',
+        '8-LP-MA/293.mp3',
+        '8-LP-MA/295.mp3',
+        '8-LP-MA/611.mp3',
     ]
 
     # حذف تکراری‌ها
     MAIN_RATING_FILES_RAW = list(set(MAIN_RATING_FILES_RAW))
-
     # تبدیل به URL کامل
     main_rating_files = [build_audio_url(f) for f in MAIN_RATING_FILES_RAW]
-
     # تعداد کل محرک‌ها
     TOTAL_MAIN_RATING_TRIALS = len(main_rating_files)
-
     # تعداد رتبه‌بندی‌های تکمیل‌شده (هر دو valence و arousal پر باشند)
     rating_main_done = RatingMainResponse.objects.filter(
         user=user
@@ -876,7 +1057,6 @@ def pcm_view(request):
     ).count()
 
     progress_percentage = (rating_main_done / TOTAL_MAIN_RATING_TRIALS) * 100 if TOTAL_MAIN_RATING_TRIALS > 0 else 100
-
     if rating_main_done < TOTAL_MAIN_RATING_TRIALS:
         completed_stimuli_urls = set(
             RatingMainResponse.objects.filter(
@@ -899,7 +1079,7 @@ def pcm_view(request):
         return render(request, '5_rating_main.html', context)
 
     # --- پایان آزمون ---
-    return render(request, 'final_thanks.html')
+    return redirect('/final/')
 
 
 @csrf_exempt
@@ -925,6 +1105,8 @@ def pcm_save_response(request):
             category_stim1=data.get('category_stim1'),
             category_stim2=data.get('category_stim2'),
             user_response=data['user_response'],
+            response_rt=data['response_rt'],
+            delay_number=data['delay_number'],
             is_correct=data['is_correct'],
         )
 
@@ -939,11 +1121,14 @@ def pcm_save_response(request):
             category_stim1=data.get('category_stim1'),
             category_stim2=data.get('category_stim2'),
             valence_stim1=data.get('valence_stim1'),
-            valence_rt_stim1=data.get('rt_stim1'),
+            valence_rt_stim1=data.get('valence_rt_stim1') or data.get('rt_stim1'),
+            valence_delay_number_stim1=data.get('valence_delay_number_stim1', 0),
             valence_stim2=data.get('valence_stim2'),
-            valence_rt_stim2=data.get('rt_stim2'),
+            valence_rt_stim2=data.get('valence_rt_stim2') or data.get('rt_stim2'),
+            valence_delay_number_stim2=data.get('valence_delay_number_stim2', 0),
             valence_sequence=data.get('valence_sequence'),
-            valence_rt_sequence=data.get('rt_sequence'),
+            valence_rt_sequence=data.get('valence_rt_sequence') or data.get('rt_sequence'),
+            valence_delay_number_sequence=data.get('valence_delay_number_sequence', 0),
         )
 
     # مرحله ۳: آزمون اصلی
@@ -954,6 +1139,8 @@ def pcm_save_response(request):
             trial=data['trial'],
             cue=extract_stimulus_number(data['cue']),
             user_response=data.get('user_response'),
+            response_rt=data['response_rt'],
+            delay_number=data.get('delay_number', 0),
             is_correct=data.get('is_correct')
         )
 
@@ -972,10 +1159,13 @@ def pcm_save_response(request):
             category_stim2=data.get('category_stim2'),
             valence_stim1=data.get('valence_stim1'),
             valence_rt_stim1=data.get('valence_rt_stim1'),
+            valence_delay_number_stim1=data.get('valence_delay_number_stim1', 0),
             valence_stim2=data.get('valence_stim2'),
             valence_rt_stim2=data.get('valence_rt_stim2'),
+            valence_delay_number_stim2=data.get('valence_delay_number_stim2', 0),
             valence_sequence=data.get('valence_sequence'),
             valence_rt_sequence=data.get('valence_rt_sequence'),
+            valence_delay_number_sequence=data.get('valence_delay_number_sequence', 0),
         )
 
     # مرحله ۴: تمرین رتبه‌بندی کامل
@@ -986,8 +1176,10 @@ def pcm_save_response(request):
             stimulus=extract_stimulus_number(data.get('stimulus')),
             valence=data.get('valence'),
             valence_rt=data.get('valence_rt'),
+            valence_delay_number = data.get('valence_delay_number', 0),
             arousal=data.get('arousal'),
             arousal_rt=data.get('arousal_rt'),
+            arousal_delay_number = data.get('arousal_delay_number', 0),
         )
 
     # مرحله ۵: رتبه‌بندی نهایی
@@ -999,14 +1191,146 @@ def pcm_save_response(request):
             stimulus_file=data['stimulus_file'],
             valence=data.get('valence'),
             valence_rt=data.get('valence_rt'),
+            valence_delay_number = data.get('valence_delay_number', 0),
             arousal=data.get('arousal'),
             arousal_rt=data.get('arousal_rt'),
+            arousal_delay_number = data.get('arousal_delay_number', 0),
         )
 
     else:
         return JsonResponse({'status': 'error', 'message': 'نوع داده نامعتبر'}, status=400)
 
     return JsonResponse({'status': 'success'})
+
+
+def final_view(request):
+    user = request.user
+    PCM_FILES_RAW = [
+        '5-MP-MA/102.mp3',
+        # '5-MP-MA/152.mp3',
+        # '5-MP-MA/170.mp3',
+        # '5-MP-MA/246.mp3',
+        # '5-MP-MA/320.mp3',
+        # '5-MP-MA/322.mp3',
+        # '5-MP-MA/358.mp3',
+        # '5-MP-MA/361.mp3',
+        # '5-MP-MA/364.mp3',
+        # '5-MP-MA/368.mp3',
+        # '5-MP-MA/370.mp3',
+        # '5-MP-MA/373.mp3',
+        # '5-MP-MA/374.mp3',
+        # '5-MP-MA/375.mp3',
+        # '5-MP-MA/376.mp3',
+        # '5-MP-MA/382.mp3',
+        # '5-MP-MA/403.mp3',
+        # '5-MP-MA/410.mp3',
+        # '5-MP-MA/425.mp3',
+        # '5-MP-MA/698.mp3',
+        # '5-MP-MA/701.mp3',
+        # '5-MP-MA/705.mp3',
+        # '5-MP-MA/722.mp3',
+        # '5-MP-MA/724.mp3',
+        # '7-LP-HA/106.mp3',
+        # '7-LP-HA/115.mp3',
+        # '7-LP-HA/116.mp3',
+        # '7-LP-HA/133.mp3',
+        # '7-LP-HA/244.mp3',
+        # '7-LP-HA/255.mp3',
+        # '7-LP-HA/260.mp3',
+        # '7-LP-HA/261.mp3',
+        # '7-LP-HA/275.mp3',
+        # '7-LP-HA/276.mp3',
+        # '7-LP-HA/277.mp3',
+        # '7-LP-HA/278.mp3',
+        # '7-LP-HA/279.mp3',
+        # '7-LP-HA/282.mp3',
+        # '7-LP-HA/283.mp3',
+        # '7-LP-HA/284.mp3',
+        # '7-LP-HA/285.mp3',
+        # '7-LP-HA/286.mp3',
+        # '7-LP-HA/288.mp3',
+        # '7-LP-HA/289.mp3',
+        # '7-LP-HA/290.mp3',
+        # '7-LP-HA/292.mp3',
+        # '7-LP-HA/296.mp3',
+        # '7-LP-HA/310.mp3',
+        # '7-LP-HA/380.mp3',
+        # '7-LP-HA/420.mp3',
+        # '7-LP-HA/422.mp3',
+        # '7-LP-HA/423.mp3',
+        # '7-LP-HA/424.mp3',
+        # '7-LP-HA/501.mp3',
+        # '7-LP-HA/502.mp3',
+        # '7-LP-HA/600.mp3',
+        # '7-LP-HA/624.mp3',
+        # '7-LP-HA/625.mp3',
+        # '7-LP-HA/626.mp3',
+        # '7-LP-HA/699.mp3',
+        # '7-LP-HA/711.mp3',
+        # '7-LP-HA/712.mp3',
+        # '7-LP-HA/713.mp3',
+        # '7-LP-HA/714.mp3',
+        # '7-LP-HA/730.mp3',
+        # '7-LP-HA/732.mp3',
+        # '8-LP-MA/241.mp3',
+        # '8-LP-MA/242.mp3',
+        # '8-LP-MA/280.mp3',
+        # '8-LP-MA/293.mp3',
+        # '8-LP-MA/295.mp3',
+        # '8-LP-MA/611.mp3',
+    ]
+
+    # حذف تکراری‌ها
+    PCM_FILES_RAW = list(set(PCM_FILES_RAW))
+    main_pcm_files = [build_audio_url(f) for f in PCM_FILES_RAW]
+    TOTAL_MAIN_PCM_TRIALS = len(main_pcm_files)
+    rating_pcm_done = RatingMainResponse.objects.filter(
+        user=user
+    ).exclude(
+        valence__isnull=True
+    ).exclude(
+        arousal__isnull=True
+    ).count()
+    PCM_percentage = (rating_pcm_done / TOTAL_MAIN_PCM_TRIALS) * 100 if TOTAL_MAIN_PCM_TRIALS > 0 else 100
+    if PCM_percentage == 100 :
+        pcm_completed = True
+    else:
+        pcm_completed = False
+
+    RATING_FILES_RAW = [
+        '1-HP-HA/110.mp3','1-HP-HA/200.mp3','1-HP-HA/201.mp3','1-HP-HA/202.mp3','1-HP-HA/205.mp3','1-HP-HA/215.mp3','1-HP-HA/220.mp3','1-HP-HA/311.mp3','1-HP-HA/352.mp3','1-HP-HA/353.mp3','1-HP-HA/355.mp3','1-HP-HA/360.mp3','1-HP-HA/363.mp3','1-HP-HA/365.mp3','1-HP-HA/366.mp3','1-HP-HA/367.mp3','1-HP-HA/378.mp3','1-HP-HA/415.mp3','1-HP-HA/716.mp3','1-HP-HA/717.mp3','1-HP-HA/808.mp3','1-HP-HA/815.mp3','1-HP-HA/817.mp3',
+        '2-HP-MA/109.mp3','2-HP-MA/111.mp3','2-HP-MA/112.mp3','2-HP-MA/150.mp3','2-HP-MA/151.mp3','2-HP-MA/206.mp3','2-HP-MA/221.mp3','2-HP-MA/224.mp3','2-HP-MA/226.mp3','2-HP-MA/230.mp3','2-HP-MA/254.mp3','2-HP-MA/270.mp3','2-HP-MA/351.mp3','2-HP-MA/400.mp3','2-HP-MA/601.mp3','2-HP-MA/721.mp3','2-HP-MA/725.mp3','2-HP-MA/726.mp3','2-HP-MA/802.mp3','2-HP-MA/810.mp3','2-HP-MA/811.mp3','2-HP-MA/813.mp3','2-HP-MA/816.mp3','2-HP-MA/820.mp3','2-HP-MA/826.mp3',
+        '3-HP-LA/172.mp3','3-HP-LA/809.mp3','3-HP-LA/812.mp3',
+        '4-MP-HA/114.mp3','4-MP-HA/204.mp3','4-MP-HA/210.mp3','4-MP-HA/216.mp3','4-MP-HA/610.mp3','4-MP-HA/704.mp3','4-MP-HA/710.mp3','4-MP-HA/715.mp3',
+        '5-MP-MA/102.mp3','5-MP-MA/104.mp3','5-MP-MA/107.mp3','5-MP-MA/111.mp3','5-MP-MA/113.mp3','5-MP-MA/120.mp3','5-MP-MA/130.mp3','5-MP-MA/132.mp3','5-MP-MA/152.mp3','5-MP-MA/170.mp3','5-MP-MA/225.mp3','5-MP-MA/245.mp3','5-MP-MA/246.mp3','5-MP-MA/251.mp3','5-MP-MA/252.mp3','5-MP-MA/320.mp3','5-MP-MA/322.mp3','5-MP-MA/358.mp3','5-MP-MA/361.mp3','5-MP-MA/364.mp3','5-MP-MA/368.mp3','5-MP-MA/370.mp3','5-MP-MA/373.mp3','5-MP-MA/374.mp3','5-MP-MA/375.mp3','5-MP-MA/376.mp3','5-MP-MA/382.mp3','5-MP-MA/403.mp3','5-MP-MA/410.mp3','5-MP-MA/425.mp3','5-MP-MA/500.mp3','5-MP-MA/627.mp3','5-MP-MA/698.mp3','5-MP-MA/700.mp3','5-MP-MA/701.mp3','5-MP-MA/702.mp3','5-MP-MA/705.mp3','5-MP-MA/706.mp3','5-MP-MA/720.mp3','5-MP-MA/722.mp3','5-MP-MA/723.mp3','5-MP-MA/724.mp3','5-MP-MA/728.mp3','5-MP-MA/729.mp3',
+        '6-MP-LA/171.mp3','6-MP-LA/262.mp3','6-MP-LA/377.mp3','6-MP-LA/602.mp3','6-MP-LA/708.mp3',
+        '7-LP-HA/105.mp3','7-LP-HA/106.mp3','7-LP-HA/115.mp3','7-LP-HA/116.mp3','7-LP-HA/133.mp3','7-LP-HA/134.mp3','7-LP-HA/244.mp3','7-LP-HA/255.mp3','7-LP-HA/260.mp3','7-LP-HA/261.mp3','7-LP-HA/275.mp3','7-LP-HA/276.mp3','7-LP-HA/277.mp3','7-LP-HA/278.mp3','7-LP-HA/279.mp3','7-LP-HA/281.mp3','7-LP-HA/282.mp3','7-LP-HA/283.mp3','7-LP-HA/284.mp3','7-LP-HA/285.mp3','7-LP-HA/286.mp3','7-LP-HA/288.mp3','7-LP-HA/289.mp3','7-LP-HA/290.mp3','7-LP-HA/292.mp3','7-LP-HA/296.mp3','7-LP-HA/310.mp3','7-LP-HA/312.mp3','7-LP-HA/319.mp3','7-LP-HA/380.mp3','7-LP-HA/420.mp3','7-LP-HA/422.mp3','7-LP-HA/423.mp3','7-LP-HA/424.mp3','7-LP-HA/501.mp3','7-LP-HA/502.mp3','7-LP-HA/600.mp3','7-LP-HA/624.mp3','7-LP-HA/625.mp3','7-LP-HA/626.mp3','7-LP-HA/699.mp3','7-LP-HA/709.mp3','7-LP-HA/711.mp3','7-LP-HA/712.mp3','7-LP-HA/713.mp3','7-LP-HA/714.mp3','7-LP-HA/719.mp3','7-LP-HA/730.mp3','7-LP-HA/732.mp3','7-LP-HA/910.mp3',
+        '8-LP-MA/241.mp3','8-LP-MA/242.mp3','8-LP-MA/243.mp3','8-LP-MA/250.mp3','8-LP-MA/280.mp3','8-LP-MA/293.mp3','8-LP-MA/295.mp3','8-LP-MA/611.mp3','8-LP-MA/703.mp3',
+    ]
+
+    # حذف تکراری‌ها
+    RATING_FILES_RAW = list(set(RATING_FILES_RAW))
+    # تبدیل به URL کامل
+    main_rating_files = [build_audio_url(f) for f in RATING_FILES_RAW]
+    # تعداد کل محرک‌ها
+    TOTAL_MAIN_RATING_TRIALS = len(main_rating_files)
+    # تعداد رتبه‌بندی‌های تکمیل‌شده (هر دو valence و arousal پر باشند)
+    rating_main_done = RatingResponse.objects.filter(
+        user=user
+    ).exclude(
+        valence__isnull=True
+    ).exclude(
+        arousal__isnull=True
+    ).count()
+    rating_percentage = (rating_main_done / TOTAL_MAIN_RATING_TRIALS) * 100 if TOTAL_MAIN_RATING_TRIALS > 0 else 100
+    if rating_percentage == 100 :
+        rating_completed = True
+    else:
+        rating_completed = False
+    return render(request, 'final_thanks.html',{
+        'pcm_completed':pcm_completed,
+        'rating_completed':rating_completed,
+    })
 
 
 def result_view(request):

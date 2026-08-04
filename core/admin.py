@@ -145,31 +145,142 @@ class ResponseAdmin(admin.ModelAdmin):
 # ------------------- مرحله ۰: Rating اصلی (Valence + Arousal) -------------------
 @admin.register(RatingPractice)
 class RatingPracticeAdmin(admin.ModelAdmin):
-    list_display = ('user_username', 'trial', 'stimulus_short', 'valence', 'arousal', 'v_rt', 'a_rt', 'complete', 'created_at')
-    list_filter = ('trial', 'created_at')
-    search_fields = ('user__username', 'stimulus')
-    readonly_fields = ('user', 'trial', 'stimulus', 'valence', 'arousal', 'created_at')
-    ordering = ('-created_at', 'trial')
+    list_display = (
+        'user_username',
+        'trial',
+        'stimulus_short',
+        'stimulus',
 
-    def user_username(self, obj): return obj.user.username
-    def stimulus_short(self, obj): return obj.stimulus[-40:] if obj.stimulus else '-'
-    def v_rt(self, obj): return f"{obj.valence_rt} ms" if obj.valence_rt else '-'
-    def a_rt(self, obj): return f"{obj.arousal_rt} ms" if obj.arousal_rt else '-'
-    def complete(self, obj): return "✓" if (obj.valence and obj.arousal) else "◐"
+        'valence',
+        'valence_rt',
+        'valence_delay_number',
+        
+        'arousal',
+        'arousal_rt',
+        'arousal_delay_number',
+
+        'complete',
+        'is_active',
+        'created_at',
+    )
+
+    list_filter = (
+        'trial',
+        'is_active',
+        'created_at',
+    )
+
+    search_fields = (
+        'user__username',
+        'stimulus',
+    )
+
+    readonly_fields = (
+        'user',
+        'trial',
+        'stimulus',
+
+        'valence',
+        'valence_rt',
+        'valence_delay_number',
+
+        'arousal',
+        'arousal_rt',
+        'arousal_delay_number',
+
+        'created_at',
+        'is_active'
+    )
+
+    ordering = (
+        'user',
+        'trial',
+    )
+
+    @admin.display(description='کاربر')
+    def user_username(self, obj):
+        return obj.user.username
+
+    @admin.display(description='محرک')
+    def stimulus_short(self, obj):
+        return obj.stimulus[-40:] if obj.stimulus else "-"
+
+    @admin.display(description='کامل')
+    def complete(self, obj):
+        return (
+            "✓"
+            if obj.valence is not None and obj.arousal is not None
+            else "◐"
+        )
 
 
 @admin.register(RatingResponse)
 class RatingResponseAdmin(admin.ModelAdmin):
-    list_display = ('user_username', 'stimulus', 'stimulus_file_short', 'valence', 'arousal', 'v_rt', 'a_rt', 'created_at')
-    list_filter = ('valence', 'arousal', 'created_at')
-    search_fields = ('user__username', 'stimulus_', 'stimulus_file')
-    readonly_fields = ('user', 'stimulus_file', 'stimulus', 'valence', 'arousal', 'created_at')
-    ordering = ('-created_at',)
+    list_display = (
+        'user_username',
+        'trial',
+        'stimulus',
+        'stimulus_short',
 
-    def user_username(self, obj): return obj.user.username
-    def stimulus_file_short(self, obj): return obj.stimulus_file[-60:] + '...' if len(obj.stimulus_file) > 60 else obj.stimulus_file
-    def v_rt(self, obj): return f"{obj.valence_rt} ms" if obj.valence_rt else '-'
-    def a_rt(self, obj): return f"{obj.arousal_rt} ms" if obj.arousal_rt else '-'
+        'valence',
+        'valence_rt',
+        'valence_delay_number',
+
+        'arousal',
+        'arousal_rt',
+        'arousal_delay_number',
+
+        'complete',
+        'is_active',
+        'created_at',
+    )
+
+    list_filter = (
+        'is_active',
+        'created_at',
+    )
+
+    search_fields = (
+        'user__username',
+        'stimulus',
+        'stimulus_file',
+    )
+
+    readonly_fields = (
+        'user',
+        'trial',
+        'stimulus',
+        'stimulus_file',
+
+        'valence',
+        'valence_rt',
+        'valence_delay_number',
+
+        'arousal',
+        'arousal_rt',
+        'arousal_delay_number',
+
+        'created_at',
+        'is_active'
+    )
+
+    ordering = (
+        'user',
+        'trial',
+        'stimulus',
+    )
+
+    @admin.display(description='کاربر')
+    def user_username(self, obj):
+        return obj.user.username
+
+    @admin.display(description='فایل محرک')
+    def stimulus_short(self, obj):
+        return obj.stimulus_file[-40:] if obj.stimulus_file else "-"
+
+    @admin.display(description='کامل')
+    def complete(self, obj):
+        return "✓" if obj.is_complete() else "◐"
     
 
 
@@ -178,7 +289,7 @@ class PCMSequencePracticeResponseInline(admin.TabularInline):
     model = PCMSequencePracticeResponse
     extra = 0
     can_delete = False
-    readonly_fields = ('trial', 'cue_short', 'stimulus1_short', 'stimulus2_short','category_stim1','category_stim2', 'user_response', 'is_correct_display', 'created_at')
+    readonly_fields = ('trial', 'cue_short', 'stimulus1_short', 'stimulus2_short','category_stim1','category_stim2', 'user_response', 'delay_number','is_correct_display', 'created_at')
     fields = readonly_fields
     ordering = ('trial',)
 
@@ -190,10 +301,10 @@ class PCMSequencePracticeResponseInline(admin.TabularInline):
 
 @admin.register(PCMSequencePracticeResponse)
 class PCMSequencePracticeResponseAdmin(admin.ModelAdmin):
-    list_display = ('user_username', 'trial', 'cue_short','category_stim2','category_stim1', 'user_response', 'is_correct_display', 'created_at')
+    list_display = ('user_username', 'trial', 'cue_short','category_stim2','category_stim1', 'user_response','response_rt' ,'delay_number','is_correct_display', 'created_at')
     list_filter = ('user', 'created_at')
     search_fields = ('user__username', 'cue', 'user_response')
-    readonly_fields = ('user', 'trial', 'cue', 'stimulus1', 'stimulus2','category_stim1','category_stim2', 'user_response', 'is_correct', 'created_at')
+    readonly_fields = ('user', 'trial', 'cue', 'stimulus1', 'stimulus2','category_stim1','category_stim2', 'user_response','response_rt','delay_number','is_correct', 'created_at','is_active')
     ordering = ('-created_at', 'trial')
 
     def user_username(self, obj): return obj.user.username
@@ -204,21 +315,81 @@ class PCMSequencePracticeResponseAdmin(admin.ModelAdmin):
 # ------------------- مرحله ۲: تمرین رتبه‌بندی خوشایندی -------------------
 @admin.register(PCMValencePracticeResponse)
 class PCMValencePracticeResponseAdmin(admin.ModelAdmin):
-    list_display = ('user_username', 'trial', 'cue_short','stimulus1','stimulus2','category_stim1','category_stim2', 'v1', 'v2', 'v_seq', 'rt1', 'rt2', 'rt_seq', 'created_at')
-    list_filter = ('trial', 'created_at')
-    search_fields = ('user__username', 'cue')
-    readonly_fields = ('user', 'trial', 'cue', 'stimulus1', 'stimulus2', 'valence_stim1', 'valence_stim2', 'valence_sequence', 'created_at')
+    list_display = (
+        'user_username',
+        'trial',
+        'cue_short',
+        'cue',
+        'stimulus1',
+        'stimulus2',
+        'category_stim1',
+        'category_stim2',
+
+        'valence_stim1',
+        'valence_rt_stim1',
+        'valence_delay_number_stim1',
+
+        'valence_stim2',
+        'valence_rt_stim2',
+        'valence_delay_number_stim2',
+
+        'valence_sequence',
+        'valence_rt_sequence',
+        'valence_delay_number_sequence',
+
+        'is_active',
+        'created_at',
+    )
+
+    list_filter = (
+        'trial',
+        'category_stim1',
+        'category_stim2',
+        'is_active',
+        'created_at',
+    )
+
+    search_fields = (
+        'user__username',
+        'cue',
+        'stimulus1',
+        'stimulus2',
+    )
+
+    readonly_fields = (
+        'user',
+        'trial',
+        'cue',
+        'stimulus1',
+        'stimulus2',
+        'category_stim1',
+        'category_stim2',
+
+        'valence_stim1',
+        'valence_rt_stim1',
+        'valence_delay_number_stim1',
+
+        'valence_stim2',
+        'valence_rt_stim2',
+        'valence_delay_number_stim2',
+
+        'valence_sequence',
+        'valence_rt_sequence',
+        'valence_delay_number_sequence',
+
+        'created_at',
+        'is_active'
+    )
+
     ordering = ('-created_at', 'trial')
 
-    def user_username(self, obj): return obj.user.username
-    def cue_short(self, obj): return obj.cue[-30:]
-    def v1(self, obj): return obj.valence_stim1 or '-'
-    def v2(self, obj): return obj.valence_stim2 or '-'
-    def v_seq(self, obj): return obj.valence_sequence or '-'
-    def rt1(self, obj): return f"{obj.valence_rt_stim1} ms" if obj.valence_rt_stim1 else '-'
-    def rt2(self, obj): return f"{obj.valence_rt_stim2} ms" if obj.valence_rt_stim2 else '-'
-    def rt_seq(self, obj): return f"{obj.valence_rt_sequence} ms" if obj.valence_rt_sequence else '-'
-    # def complete(self, obj): return "✓" if obj.is_complete() else "◐" id.complete.short_description = 'کامل'
+    @admin.display(description='کاربر')
+    def user_username(self, obj):
+        return obj.user.username
+
+    @admin.display(description='سرنخ (کوتاه)')
+    def cue_short(self, obj):
+        return obj.cue[-30:] if obj.cue else "-"
 
 
 # ------------------- مرحله ۳: آزمون اصلی PCM -------------------
@@ -227,72 +398,369 @@ class PCMCatchResponseInline(admin.TabularInline):
     model = PCMCatchResponse
     extra = 0
     can_delete = False
-    readonly_fields = ('trial', 'cue_short', 'user_response', 'is_correct_display', 'created_at')
+
+    readonly_fields = (
+        'trial',
+        'block',
+        'cue',
+        'user_response',
+        'response_rt',
+        'delay_number',
+        'is_correct',
+        'created_at',
+        'is_active',
+    )
+
     fields = readonly_fields
     ordering = ('trial',)
-
-    def cue_short(self, obj): return obj.cue[-30:]
-    def is_correct_display(self, obj): return "✓" if obj.is_correct else "✗" if obj.is_correct is False else "-"
 
 
 @admin.register(PCMCatchResponse)
 class PCMCatchResponseAdmin(admin.ModelAdmin):
-    list_display = ('user_username', 'trial','block', 'cue_short','user_response', 'is_correct_display', 'created_at')
-    list_filter = ('user', 'created_at')
-    search_fields = ('user__username', 'cue', 'user_response')
-    readonly_fields = ('user', 'trial','block', 'cue', 'user_response', 'is_correct', 'created_at')
+    list_display = (
+        'user_username',
+        'trial',
+        'block',
+        'cue_short',
+        'cue',
+        'user_response',
+        'response_rt',
+        'delay_number',
+        'is_correct',
+        'is_active',
+        'created_at',
+    )
+
+    list_filter = (
+        'user',
+        'block',
+        'is_correct',
+        'is_active',
+        'created_at',
+    )
+
+    search_fields = (
+        'user__username',
+        'cue',
+        'user_response',
+    )
+
+    readonly_fields = (
+        'user',
+        'trial',
+        'block',
+        'cue',
+        'user_response',
+        'response_rt',
+        'delay_number',
+        'is_correct',
+        'created_at',
+        'is_active'
+    )
+
     ordering = ('-created_at', 'trial')
 
-    def user_username(self, obj): return obj.user.username
-    def cue_short(self, obj): return obj.cue[-40:]
-    def is_correct_display(self, obj): return "✓ درست" if obj.is_correct else "✗ غلط" if obj.is_correct is False else "—"
+    @admin.display(description='کاربر')
+    def user_username(self, obj):
+        return obj.user.username
 
+    @admin.display(description='سرنخ (کوتاه)')
+    def cue_short(self, obj):
+        return obj.cue[-40:] if obj.cue else "-"
 
 
 @admin.register(PCMMainResponse)
 class PCMMainResponseAdmin(admin.ModelAdmin):
-    list_display = ('user_username', 'block', 'trial', 'cue_short', 'v1', 'v2', 'v_seq', 'consistent', 'complete', 'created_at')
-    list_filter = ('block', 'is_consistent', 'created_at')
-    search_fields = ('user__username', 'cue')
-    readonly_fields = ('user', 'block', 'trial', 'cue', 'stimulus1', 'stimulus2', 'expected_sequence', 'is_consistent', 'created_at')
-    ordering = ('user', 'block', 'trial')
+    list_display = (
+        'user_username',
+        'block',
+        'trial',
+        'cue_short',
+        'cue',
+        'stimulus1',
+        'stimulus2',
+        'expected_sequence',
+        'consistent',
+        'category_stim1',
+        'category_stim2',
 
-    def user_username(self, obj): return obj.user.username
-    def cue_short(self, obj): return obj.cue[-30:]
-    def v1(self, obj): return obj.valence_stim1 or '-'
-    def v2(self, obj): return obj.valence_stim2 or '-'
-    def v_seq(self, obj): return obj.valence_sequence or '-'
-    def consistent(self, obj): return "✓" if obj.is_consistent else "✗"
-    def complete(self, obj): return "✓" if obj.is_complete() else "◐"
+        'valence_stim1',
+        'valence_rt_stim1',
+        'valence_delay_number_stim1',
+
+        'valence_stim2',
+        'valence_rt_stim2',
+        'valence_delay_number_stim2',
+
+        'valence_sequence',
+        'valence_rt_sequence',
+        'valence_delay_number_sequence',
+
+        'complete',
+        'is_active',
+        'created_at',
+    )
+
+    list_filter = (
+        'block',
+        'is_consistent',
+        'is_active',
+        'category_stim1',
+        'category_stim2',
+        'created_at',
+    )
+
+    search_fields = (
+        'user__username',
+        'cue',
+        'stimulus1',
+        'stimulus2',
+        'expected_sequence',
+    )
+
+    readonly_fields = (
+        'user',
+        'block',
+        'trial',
+        'cue',
+        'stimulus1',
+        'stimulus2',
+        'expected_sequence',
+        'is_consistent',
+
+        'category_stim1',
+        'category_stim2',
+
+        'valence_stim1',
+        'valence_rt_stim1',
+        'valence_delay_number_stim1',
+
+        'valence_stim2',
+        'valence_rt_stim2',
+        'valence_delay_number_stim2',
+
+        'valence_sequence',
+        'valence_rt_sequence',
+        'valence_delay_number_sequence',
+
+        'created_at',
+        'is_active'
+    )
+
+    ordering = ('-created_at', 'user',)
+
+    @admin.display(description='کاربر')
+    def user_username(self, obj):
+        return obj.user.username
+
+    @admin.display(description='کیو')
+    def cue_short(self, obj):
+        return obj.cue[-30:] if obj.cue else "-"
+
+    @admin.display(description='سازگار')
+    def consistent(self, obj):
+        return "✓" if obj.is_consistent else "✗"
+
+    @admin.display(description='کامل')
+    def complete(self, obj):
+        return "✓" if obj.is_complete() else "◐"
 
 
 # ------------------- مرحله ۴: تمرین رتبه‌بندی Valence + Arousal -------------------
 @admin.register(RatingPracticeResponse)
 class RatingPracticeResponseAdmin(admin.ModelAdmin):
-    list_display = ('user_username', 'trial', 'stimulus_short', 'valence', 'arousal', 'v_rt', 'a_rt', 'complete', 'created_at')
-    list_filter = ('trial', 'created_at')
-    search_fields = ('user__username', 'stimulus')
-    readonly_fields = ('user', 'trial', 'stimulus', 'valence', 'arousal', 'created_at')
+    list_display = (
+        'user_username',
+        'trial',
+        'stimulus_short',
+        'stimulus',
+
+        'valence',
+        'valence_rt',
+        'valence_delay_number',
+
+        'arousal',
+        'arousal_rt',
+        'arousal_delay_number',
+
+        'complete',
+        'is_active',
+        'created_at',
+    )
+
+    list_filter = (
+        'trial',
+        'is_active',
+        'created_at',
+    )
+
+    search_fields = (
+        'user__username',
+        'stimulus',
+    )
+
+    readonly_fields = (
+        'user',
+        'trial',
+        'stimulus',
+
+        'valence',
+        'valence_rt',
+        'valence_delay_number',
+
+        'arousal',
+        'arousal_rt',
+        'arousal_delay_number',
+
+        'created_at',
+        'is_active'
+    )
+
     ordering = ('-created_at', 'trial')
 
-    def user_username(self, obj): return obj.user.username
-    def stimulus_short(self, obj): return obj.stimulus[-40:] if obj.stimulus else '-'
-    def v_rt(self, obj): return f"{obj.valence_rt} ms" if obj.valence_rt else '-'
-    def a_rt(self, obj): return f"{obj.arousal_rt} ms" if obj.arousal_rt else '-'
-    def complete(self, obj): return "✓" if (obj.valence and obj.arousal) else "◐"
+    @admin.display(description='کاربر')
+    def user_username(self, obj):
+        return obj.user.username
+
+    @admin.display(description='محرک')
+    def stimulus_short(self, obj):
+        return obj.stimulus[-40:] if obj.stimulus else "-"
+
+    @admin.display(description='کامل')
+    def complete(self, obj):
+        return (
+            "✓"
+            if obj.valence is not None and obj.arousal is not None
+            else "◐"
+        )
 
 
-# ------------------- مرحله ۵: رتبه‌بندی نهایی صداها -------------------
 @admin.register(RatingMainResponse)
 class RatingMainResponseAdmin(admin.ModelAdmin):
-    list_display = ('user_username', 'stimulus_number', 'stimulus_file_short', 'valence', 'arousal', 'v_rt', 'a_rt', 'created_at')
-    list_filter = ('valence', 'arousal', 'created_at')
-    search_fields = ('user__username', 'stimulus_number', 'stimulus_file')
-    readonly_fields = ('user', 'stimulus_file', 'stimulus_number', 'valence', 'arousal', 'created_at')
-    ordering = ('-created_at',)
+    list_display = (
+        'user_username',
+        'trial',
+        'stimulus_number',
+        'stimulus_short',
 
-    def user_username(self, obj): return obj.user.username
-    def stimulus_file_short(self, obj): return obj.stimulus_file[-60:] + '...' if len(obj.stimulus_file) > 60 else obj.stimulus_file
-    def v_rt(self, obj): return f"{obj.valence_rt} ms" if obj.valence_rt else '-'
-    def a_rt(self, obj): return f"{obj.arousal_rt} ms" if obj.arousal_rt else '-'
+        'valence',
+        'valence_rt',
+        'valence_delay_number',
+
+        'arousal',
+        'arousal_rt',
+        'arousal_delay_number',
+
+        'complete',
+        'is_active',
+        'created_at',
+    )
+
+    list_filter = (
+        'is_active',
+        'created_at',
+    )
+
+    search_fields = (
+        'user__username',
+        'stimulus_number',
+        'stimulus_file',
+    )
+
+    readonly_fields = (
+        'user',
+        'trial',
+        'stimulus_file',
+        'stimulus_number',
+
+        'valence',
+        'valence_rt',
+        'valence_delay_number',
+
+        'arousal',
+        'arousal_rt',
+        'arousal_delay_number',
+
+        'created_at',
+    )
+
+    ordering = (
+        'user',
+        'trial',
+        'stimulus_number',
+    )
+
+    @admin.display(description='کاربر')
+    def user_username(self, obj):
+        return obj.user.username
+
+    @admin.display(description='محرک')
+    def stimulus_short(self, obj):
+        return obj.stimulus_file[-40:] if obj.stimulus_file else "-"
+
+    @admin.display(description='کامل')
+    def complete(self, obj):
+        return (
+            "✓"
+            if obj.valence is not None and obj.arousal is not None
+            else "◐"
+        )
+
+# -------------------  دستگاه شرکت کننده-------------------
+@admin.register(DeviceLog)
+class DeviceLogAdmin(admin.ModelAdmin):
+    list_display = (
+        'user',
+        'stage',
+        'device_type',
+        'os',
+        'browser',
+        'screen_width',
+        'screen_height',
+        'is_touch',
+        'audio_volume',
+        'created_at',
+    )
+    
+    list_filter = (
+        'device_type',
+        'os',
+        'browser',
+        'is_touch',
+        'stage',
+        'created_at',
+    )
+    
+    search_fields = (
+        'user__username',
+        'user__email',
+        'stage',
+        'device_type',
+        'os',
+        'browser',
+    )
+    
+    readonly_fields = (
+        'user',
+        'stage',
+        'device_type',
+        'os',
+        'browser',
+        'screen_width',
+        'screen_height',
+        'is_touch',
+        'audio_volume',
+        'created_at',
+    )
+    
+    ordering = ('-created_at',)
+    
+    list_per_page = 50
+
+    # برای اینکه کسی نتواند دستی رکورد جدید بسازد یا ویرایش کند
+    def has_add_permission(self, request):
+        return False
+
+    def has_change_permission(self, request, obj=None):
+        return False
     

@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>مرحله ۱: تشخیص توالی</title>
+  <title>مرحله 1</title>
   {% load static %}
   <link href="{% static 'plugins/bootstrap/css/bootstrap.rtl.min.css' %}" rel="stylesheet" />
   <link href="{% static 'css/pcm.css' %}" rel="stylesheet" />
@@ -17,39 +17,84 @@
   <p>برای تجربه بهتر، صفحه را به حالت افقی ببرید</p>
 </div>
 
+<!-- پیام دستگاه غیرمجاز -->
+<div id="device-blocked" style="display: none;">
+  <div class="device-blocked-icon">🚫</div>
+  <h3>امکان شرکت در آزمون وجود ندارد</h3>
+  
+  <div class="device-blocked-section">
+    <div class="device-blocked-section-title">شما هم‌اکنون با این مشخصات وارد شده‌اید</div>
+    <div id="device-blocked-info" class="device-blocked-info"></div>
+  </div>
+
+  <div class="device-blocked-section">
+    <div class="device-blocked-section-title">شرایط مجاز برای شرکت</div>
+    <div id="device-blocked-allowed" class="device-blocked-allowed"></div>
+  </div>
+
+  <p class="device-blocked-footer">لطفاً با یکی از شرایط بالا وارد آزمون شوید.</p>
+</div>
+
 <!-- دستور اعمل  -->
-<div id="intro" class="card m-5" style="">
-  <div class="card-body text-center p-5">
-
-    {% comment %} <h1 class="mb-5">مرحله 1 : تشخیص توالی‌های صوتی</h1> {% endcomment %}
-    <h1 class="mb-5">مرحله 1</h1>
-
+  <div id="intro" class="card m-5" style="">
+    <div class="card-body text-center p-5">
+    <div style="
+      background: linear-gradient(135deg, #3b82f6, #4f46e5);
+      color: #fff;
+      text-align: center;
+      padding: 30px;
+      border-radius: 18px;
+      max-width: 700px;
+      box-shadow: 0 10px 25px rgba(0,0,0,.15);
+      margin: auto;
+      line-height: 1.8;
+    ">
+      <div style="font-size:42px; font-weight:bold; ">
+          مرحله ۱
+      </div>
+      <div style="font-size:16px;margin-top:10px;">
+          ⏱️ زمان تقریبی: ۶ دقیقه
+      </div>
+    </div>
     
-    <div class="mb-1">
-      <h3 class="text-start text-justify mb-4 mx-auto" style="line-height: 40px; max-width: 500px">در این مرحله :</h3>
+    <div class="mb-1 mt-5">
+      <h3 class="text-start text-justify mb-4 mx-auto" style="line-height: 40px; max-width: 500px">
+        در این مرحله:
+      </h3>
       <ol class="text-start text-justify mx-auto" style="line-height: 40px; max-width: 500px">
-        <li>ابتدا یک <strong>نشانه صوتی (شامل اعداد 1 تا 3)</strong> خواهید شنید</li>
-        <li>سپس <strong>دو صدای هیجانی متوالی</strong></li>
-        <li>از ۳ گزینه ارائه شده (همانند زیر) <strong>توالی درست 2 صدا هیجانی ارائه شده  </strong> را انتخاب کنید (یعنی باید مشخص کنید به ترتیب صدای اول و صدای دوم دارای چه هیجانی بوده است)</li>
+        <li>ابتدا یک <strong>نشانه صوتی</strong> می‌شنوید که شامل صدای اعداد ۱ تا ۳ است (که نشان دهنده توالی صوتی بعد از آن است).</li>
+        <li>سپس بلافاصله <strong>دو صدای هیجانی کوتاه</strong> پشت‌سرهم پخش می‌شود (هر صدا یا خنثی است یا منفی).</li>
+        <li>از بین سه گزینه‌ی زیر، <strong>توالی درست هیجان‌های دو صدا</strong> را انتخاب کنید. یعنی مشخص کنید صدای اول و صدای دوم به ترتیب چه هیجانی داشته‌اند (مثلاً خنثی سپس منفی، یا منفی سپس خنثی و ... ).</li>
       </ol>
     </div>
-    
-    <h6 class="text-start mb-2 mx-auto" style="line-height: 40px; max-width: 500px">کدام توالی شنیده شد؟</h6>
+
+    <h6 class="text-start mb-2 mx-auto" style="line-height: 40px; max-width: 500px">
+      کدام توالی شنیده شد؟
+    </h6>
     <div class="sam-buttons d-flex flex-column gap-3" style="max-width: 500px; margin: auto">
-        <button class="btn btn-outline-primary btn-lg sequence-btn" data-seq="Neutral-Neutral">
-            خنثی → خنثی
-        </button>
-        <button class="btn btn-outline-primary btn-lg sequence-btn" data-seq="Negative-Neutral">
-            خنثی → منفی
-        </button>
-        <button class="btn btn-outline-primary btn-lg sequence-btn" data-seq="Neutral-Negative">
-            منفی → خنثی
-        </button>
+      <button class="btn btn-outline-primary btn-lg sequence-btn" data-seq="Neutral-Neutral">
+        <span class="text-muted">خنثی</span>
+          <span class="text-dark" style="font-weight: bolder;margin: 10px;">→</span>
+        <span class="text-muted" >خنثی</span>
+      </button>
+      <button class="btn btn-outline-primary btn-lg sequence-btn" data-seq="Negative-Neutral">
+        <span class="text-muted" >خنثی</span>
+          <span class="text-dark" style="font-weight: bolder;margin: 10px;">→</span>
+        <span class="text-danger">منفی</span>
+      </button>
+      <button class="btn btn-outline-primary btn-lg sequence-btn" data-seq="Neutral-Negative">
+        <span class="text-danger">منفی</span>
+          <span class="text-dark" style="font-weight: bolder;margin: 10px;">→</span>
+        <span class="text-muted" >خنثی</span>
+      </button>
     </div>
 
-    <h4 class="mb-5 mt-5">تعداد کل توالی ها در این مرحله {{ total_trials }} می‌باشد</h4>
-    {% comment %} <p class="text-danger mt-5">در اینجا برای پاسخ به هر سوال تنها 3 ثانیه زمان دارید ، لطفا در زمان تعیین شده پاسخ دهید</p><br> {% endcomment %}
-
+    <h4 class="text-start text-justify mb-5 mt-5 mx-auto" style="line-height: 40px; max-width: 500px">
+      لطفاً با تمرکز کامل گوش دهید و بدون وقفه، بدون تغییر حجم صدا و بدون حواس‌پرتی به سوالات پاسخ دهید.
+    </h4>
+    <h5 class="text-danger mb-5 mt-5">
+      برای پاسخ به هر سوال تنها ۳ ثانیه زمان دارید. لطفاً سریع و دقیق پاسخ دهید.
+    </h5>
 
     <div class="progress-container mb-4">
       <div class="d-flex justify-content-between mb-2">
@@ -80,21 +125,27 @@
     </div>
     <!-- صفحه انتخاب توالی -->
     <div id="choice" class="hidden">
-      <div class="card p-5">
+      <div class="card p-4">
         <div class="card-body text-center">
           <h3 class="mb-4">کدام توالی شنیده شد؟</h3>
           <div class="sam-buttons d-flex flex-column gap-3" style="max-width: 500px; margin: auto">
-            <button class="btn btn-outline-primary btn-lg sequence-btn" data-seq="Neutral-Neutral">
-              خنثی → خنثی
+            <button class="btn btn-outline-primary btn-lg sequence-btn response_btn" data-seq="Neutral-Neutral">
+              <span class="text-muted">خنثی</span>
+                <span class="text-dark" style="font-weight: bolder;margin: 10px;">→</span>
+              <span class="text-muted" >خنثی</span>
             </button>
-            <button class="btn btn-outline-primary btn-lg sequence-btn" data-seq="Negative-Neutral">
-              خنثی → منفی
+            <button class="btn btn-outline-primary btn-lg sequence-btn response_btn" data-seq="Negative-Neutral">
+              <span class="text-muted" >خنثی</span>
+                <span class="text-dark" style="font-weight: bolder;margin: 10px;">→</span>
+              <span class="text-danger">منفی</span>
             </button>
-            <button class="btn btn-outline-primary btn-lg sequence-btn" data-seq="Neutral-Negative">
-              منفی → خنثی
+            <button class="btn btn-outline-primary btn-lg sequence-btn response_btn" data-seq="Neutral-Negative">
+              <span class="text-danger">منفی</span>
+                <span class="text-dark" style="font-weight: bolder;margin: 10px;">→</span>
+              <span class="text-muted" >خنثی</span>
             </button>
           </div>
-          <div id="feedback" class="mt-5 fs-2 fw-bold"></div>
+          <div id="feedback" class="mt-2 fs-2 fw-bold"></div>
         </div>
       </div>
     </div>
@@ -102,7 +153,184 @@
 
   <audio id="audio-player" preload="auto"></audio>
 
+  <div id="fasterModal" class="custom-modal">
+    <div class="modal-overlay"></div>
+    <div class="modal-content">
+      <div class="modal-icon">⚠️</div>
+      <h3 class="modal-title">سریع‌تر پاسخ دهید</h3>
+      <button class="modal-button" id="closeModal">
+        ادامه
+      </button>
+    </div>
+  </div>
 
+
+  <div id="welcomeModal" class="custom-modal">
+    <div class="modal-overlay"></div>
+    <div class="modal-content">
+      <div class="modal-icon">⚠️</div>
+      <h3 class="modal-title">توجه مهم قبل از شروع</h3>
+      <p class="text-justify">
+        در این فرم، اطلاعاتی در مورد این پژوهش در اختیار شما قرار گرفته است.
+        لطفا آن را مطالعه نموده  و در صورتی که ابهامی وجود دارد، قبل از تکمیل
+        آن مطرح نمایید. مشارکت شما در این پژوهش، ما را در پیشرفت تحقیقات علمی
+        یاری خواهد داد.
+      </p>
+      <p class="text-justify">
+        عنوان پژوهش:<strong> کدگذاری پیش‌بینانه هیجان در پردازش توالی‌های صوتی توسط
+        مغز</strong>
+      </p>
+
+      <p class="text-justify">
+        شما به عنوان شرکت‌کننده در این پژوهش، در یک آزمایش که شامل گوش دادن به
+        توالی‌های صوتی با بار هیجانی متفاوت است شرکت می‌کنید. آزمون شامل چندین
+        مرحله هست که در ابتدای هر بخش توضیحات لازم در خصوص آن بخش ارائه
+        می‌شود. بخش اصلی آزمون شامل 3 بلوک آزمایشی است به همراه یک بلوک آموزشی
+        اولیه که
+        در مجموع حدود 30 دقیقه طول می‌کشد.
+      </p>
+
+      <p class="text-justify">
+        این آزمون هیچ‌گونه اثر گذاری منفی بر روی شما و عملکرد شما نخواهد داشت اما به دلیل ارائه صداهایی با بار هیجانی ممکن است که به صورت لحظه ای تغییر احساساتی  را تجربه کنید که دائمی نبود و سریع از بین می‌رود اما در هر شکل اگر درباره این موضوع نیازمند مشاوره و یا کسب اطلاعات بیشتری بودید میتوانید به پژوهشگر اطلاع دهید
+      </p>
+
+     
+
+      <p class="text-justify">
+        اطلاعات شما تنها به صورت جمعی در قالب کار پژوهشی بدون ذکر نام یا اطلاعاتی از شما ارائه  میگردد
+      </p>
+
+      <p class="text-justify">
+        همکاری شما داوطلبانه است و هر زمان که خواستید می‌توانید از آزمون خارج شوید.
+      </p>
+
+      <p class="text-justify">
+       در صورتی که علاقه‌مند به دریافت نتایج کسب شده به همراه تفسیر درباره آزمون بودید با شماره تماس (09128396510) در ارتباط باشید
+      </p>
+
+      <p class="text-justify ltr" style=" margin-left: 25px;">
+      با تشکر
+      </p>
+
+      <p class="text-justify ltr ">
+      هادی ابراهیم نیا
+      </p>
+
+      <div class="modal-message mt-5">
+        <p class="text-justify text-danger">
+           لطفاً قبل از آغاز آزمون موارد زیر را رعایت کنید:<br />
+        </p>
+        <p class="text-justify">
+         توصیه می‌شود این آزمون در کامپیوتر یا لپ تاپ تکمیل شود ( تنها در صورتی که به این وسایل دسترسی نداشتید از موبایل به عنوان جایگزین استفاده نمایید ) 
+        </p>
+        <p class="text-justify">
+           • این آزمون در حدود 30 دقیقه زمان می‌برد و باید در یک مرحله بدون وقفه اجرا شود <br />
+        </p>
+        <p class="text-justify">
+           • برای تمرکز بیشتر و شنیدن دقیق فایل‌های صوتی، حتماً از <strong>هدفون یا هندزفری</strong> استفاده کنید.<br />
+        </p>
+        <p class="text-justify">
+          این آزمون را در <strong>محیطی آرام، ساکت و بدون عوامل مزاحم</strong> انجام دهید. اطمینان حاصل کنید که نور محیط کافی باشد، در وضعیت نشستن مناسبی قرار داشته باشید و تا پایان آزمون از قطع شدن تمرکز، استفاده از تلفن همراه یا هرگونه وقفه خودداری کنید.
+        </p>
+        <p class="text-justify">
+        • در صورت قطع شدن اینترنت، نگران نباشید؛ با <strong>رفرش (Reload) صفحه</strong> می‌توانید آزمون را از همان مرحله‌ای که متوقف شده است ادامه دهید.<br />
+        </p>
+      </div>
+
+      <button class="modal-button" id="closeWelcomeModal">
+        قبول دارم و ادامه می‌دهم
+      </button>
+    </div>
+  </div>
+
+
+  <div id="volumeCalibrationModal" class="custom-modal" style="display: none;">
+    <audio id="test-audio" preload="auto" loop><source src="/static/sounds/0-practice/test.mp3" type="audio/mp3"></audio>
+    <div class="modal-overlay"></div>
+    <div class="modal-content" style="max-width: 520px;">
+      <div class="modal-icon">🔊</div>
+      <h3 class="modal-title">تنظیم حجم صدا</h3>
+
+
+      <p class="text-justify">
+        لطفاً ابتدا حجم صدای سیستم ( کامپیوتر / مک ) که در پایین سمت راست صفحه نمایشگر قرار دارد را روی سطح 50 درصد تنظیم کنید.
+        (در صورتی که از گوشی استفاده میکنید صدا را میانه قرار دهید)
+      </p>
+
+      <p class="text-justify">
+        سپس با اسلایدر زیر حجم صدا را طوری تنظیم کنید که صدای تست
+        <strong>واضح و راحت</strong> باشد (نه خیلی بلند و نه خیلی کم).
+      </p>
+
+      <p class="text-justify" style="color: #d97706; font-weight: 600;">
+        ⚠️ حتماً از هدفون یا هندزفری استفاده کنید.
+      </p>
+
+      <!-- کنترل حجم -->
+      <div class="volume-control-box">
+        <div class="volume-label">
+          <span>زیاد</span>
+          <span id="volumePercent">50%</span>
+          <span>کم</span>
+        </div>
+
+        <input 
+          type="range" 
+          id="volumeSlider" 
+          min="0" 
+          max="100" 
+          value="50" 
+          class="volume-slider ltr"
+        >
+
+        <div class="volume-buttons">
+          <button type="button" id="volUp" class="vol-btn" style="background:darkseagreen;padding: 6px;">+</button>
+          <button type="button" id="playTestTone" class="play-tone-btn">▶ پخش صدای تست</button>
+          <button type="button" id="volDown" class="vol-btn" style="background:darksalmon;padding: 6px;">−</button>
+        </div>
+      </div>
+
+      <p class="text-justify">
+          بعد از تنظیم حجم مناسب صدا دکمه توقف را فشار دهید
+      </p>
+
+      <p class="text-justify">
+         حالا عددی که در قسمت بالا برای حجم صدا مشاهده می‌کنید را به عنوان حجم صدای سیستم خود که در پایین سمت راست صفحه نمایشگر قرار دارد تنظیم کنید
+         (اگر از گوشی استفاده میکنید صدا را متناسب با درصد بالا تنظیم کنید)
+      </p>
+
+      <p class="text-justify" style="color: #d97706; font-weight: 600;">
+        ⚠️ در طول آزمون حجم صدا را تغییر ندهید
+
+      </p>
+      <button class="modal-button" id="confirmVolumeBtn" disabled>
+        حجم مناسب است — ادامه
+      </button>
+    </div>
+  </div>
+  <script>
+      document.addEventListener('DOMContentLoaded', function () {
+        const fasterModal = document.getElementById('fasterModal');
+        const body = document.body;
+
+        function closeModal() {
+          fasterModal.classList.remove('active');
+          body.style.overflow = '';
+          isModalActive = false; // مدال بسته شد ⇒ اجازه شروع دوباره تایمر
+
+          // ریست تایمر (از صفر شروع می‌شه)
+          if (responseTimeout) {
+            clearTimeout(responseTimeout);
+            responseTimeout = null;
+          }
+          // دوباره تایمر رو از صفر شروع کن (چون هنوز صفحه انتخاب بازه)
+          startResponseTimer();
+        }
+
+        document.getElementById('closeModal').onclick = closeModal;
+        fasterModal.querySelector('.modal-overlay').onclick = closeModal;
+      });
+</script>
   <script>
     // درخواست تمام‌صفحه هنگام شروع
     function requestFullscreen() {
@@ -112,12 +340,12 @@
       else if (elem.webkitRequestFullscreen) elem.webkitRequestFullscreen();
       else if (elem.msRequestFullscreen) elem.msRequestFullscreen();
     }
-
     document.getElementById('start-btn').addEventListener('click', () => {
+      document.querySelector('.content').style.display = 'flex';
+      document.body.classList.add('no-scroll');
       requestFullscreen();
       setTimeout(startTrial, 300);
     });
-
     // داده‌های ارسالی از ویو
     let trialIndex = {{ current_trial }} + 1;
     const totalTrials = {{ total_trials }};
@@ -132,6 +360,14 @@
     const fixation = document.getElementById('fixation');
     const choice = document.getElementById('choice');
     const feedback = document.getElementById('feedback');
+    
+
+    let responseStartTime = null;
+    let responseTimeout = null;
+    let isModalActive = false;
+    let delay_number = 0;
+
+    const RESPONSE_TIME_LIMIT = 3000; // ۳
 
     let expectedSeq, currentCue, currentStim1, currentStim2;
 
@@ -160,6 +396,7 @@
     }
 
     function startTrial() {
+      delay_number = 0;
       intro.classList.add('hidden');
 
       // گرفتن توالی بعدی از لیست باقی‌مانده (که در ویو متعادل شده)
@@ -182,21 +419,36 @@
           play(currentStim1, () => {
             play(currentStim2, () => {
               choice.classList.remove('hidden');
+              responseStartTime = Date.now();
+              startResponseTimer();
             });
           });
         });
       });
     }
-
     // کلیک روی دکمه‌های انتخاب توالی
-    document.querySelectorAll('.sequence-btn').forEach(btn => {
+    document.querySelectorAll('.response_btn').forEach(btn => {
+      btn.addEventListener("touchstart", function () {
+        clearTimeout(this.touchTimer);
+        this.classList.add("touch-effect");
+        this.touchTimer = setTimeout(() => {
+            this.classList.remove("touch-effect");
+        }, 200);
+      }, { passive: true });
       btn.onclick = () => {
+        
+        const response_rt = Date.now() - responseStartTime;
+        if (responseTimeout) {
+          clearTimeout(responseTimeout);
+          responseTimeout = null;
+        }
+        if (responseTimeout) {
+          clearTimeout(responseTimeout);
+          responseTimeout = null;
+        }
         const correct = btn.dataset.seq === expectedSeq;
         feedback.textContent = correct ? '✅ درست!' : '❌ غلط!';
         feedback.style.color = correct ? '#28a745' : '#dc3545';
-
-        document.querySelectorAll('.sequence-btn').forEach(b => b.disabled = true);
-
         fetch('/pcm/save/', {
           method: 'POST',
           headers: {
@@ -212,29 +464,52 @@
             category_stim1: expectedSeq.split('-')[0],
             category_stim2: expectedSeq.split('-')[1],
             user_response: btn.dataset.seq,
+            response_rt: response_rt,
+            delay_number:delay_number,
             is_correct: correct
           })
         })
         .then(res => res.json())
         .then(data => {
           if (data.status === 'success') {
-            trialIndex++
+            trialIndex++;
             setTimeout(() => {
               choice.classList.add('hidden');
               feedback.textContent = '';
-              document.querySelectorAll('.sequence-btn').forEach(b => b.disabled = false);
-
               if (trialIndex > totalTrials) {
                 setTimeout(() => location.href = '/experiment/pcm/', 1000);
               } else {
                 showFixation(startTrial);
               }
-            }, 1800);
+            }, 1500);
           }
         })
+        
         .catch(err => console.error('خطا در ارسال:', err));
+        
       };
     });
+
+    function startResponseTimer() {
+      responseStartTime = Date.now();
+      // پاک کردن تایمر قبلی اگر وجود داشته باشه
+      if (responseTimeout) {
+        clearTimeout(responseTimeout);
+        responseTimeout = null;
+      }
+
+      if (isModalActive) return; // اگر مدال بازه، تایمر شروع نشه
+
+      responseTimeout = setTimeout(() => {
+        delay_number++;
+        // فقط اگر هنوز صفحه انتخاب بازه و مدال فعال نیست
+        if (!choice.classList.contains('hidden') && !isModalActive) {
+          isModalActive = true;
+          fasterModal.classList.add('active');
+          document.body.style.overflow = 'hidden';
+        }
+      }, RESPONSE_TIME_LIMIT);
+    }
 
     // پشتیبانی از کلیدهای کیبورد ۱، ۲، ۳
     document.addEventListener('keydown', e => {
@@ -243,77 +518,248 @@
       if (e.key === '2') document.querySelector('[data-seq="Neutral-Negative"]').click();
       if (e.key === '3') document.querySelector('[data-seq="Negative-Neutral"]').click();
     });
+
   </script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+
+      // ==================== عناصر ====================
+      const welcomeModal      = document.getElementById('welcomeModal');
+      const volumeModal       = document.getElementById('volumeCalibrationModal');
+      const body              = document.body;
+
+      const testAudio         = document.getElementById('test-audio');
+      const volumeSlider      = document.getElementById('volumeSlider');
+      const volumePercent     = document.getElementById('volumePercent');
+      const playTestToneBtn   = document.getElementById('playTestTone');
+      const confirmVolumeBtn  = document.getElementById('confirmVolumeBtn');
+      const volUpBtn          = document.getElementById('volUp');
+      const volDownBtn        = document.getElementById('volDown');
+
+      // ==================== توابع باز و بسته کردن مدال ====================
+      function openModal(modal) {
+        modal.style.display = 'flex';
+        modal.classList.add('active');
+        body.style.overflow = 'hidden';
+      }
+
+      function closeModal(modal) {
+        modal.classList.remove('active');
+        modal.style.display = 'none';
+        body.style.overflow = '';
+      }
+      // ==================== ۱. باز شدن خودکار مدال خوش‌آمدگویی ====================
+      {% if progress_percentage == 0 %}
+        openModal(welcomeModal);
+
+        document.getElementById('closeWelcomeModal').addEventListener('click', function () {
+            closeModal(welcomeModal);
+
+            setTimeout(function () {
+                openModal(volumeModal);
+            }, 200);
+        });
+      {% endif %}
+
+
+      // ==================== ۳. کنترل‌های حجم صدا ====================
+      let isPlaying = false;
+      let currentVolume = 0.5;
+      testAudio.volume = currentVolume;
+
+      function playTestSound() {
+        if (isPlaying) {
+          stopTestSound();
+          return;
+        }
+
+        testAudio.currentTime = 0;
+        testAudio.play().catch(function (err) {
+          console.error('خطا در پخش صدای تست:', err);
+        });
+
+        isPlaying = true;
+        playTestToneBtn.textContent = '⏹ توقف';
+        playTestToneBtn.classList.add('playing');
+        confirmVolumeBtn.disabled = false;
+      }
+
+      function stopTestSound() {
+        testAudio.pause();
+        testAudio.currentTime = 0;
+        isPlaying = false;
+        playTestToneBtn.textContent = '▶ پخش صدای تست';
+        playTestToneBtn.classList.remove('playing');
+      }
+
+      function updateVolume(value) {
+        currentVolume = value / 100;
+        testAudio.volume = currentVolume;
+        volumePercent.textContent = value + '%';
+      }
+
+      volumeSlider.addEventListener('input', function (e) {
+        updateVolume(parseInt(e.target.value));
+      });
+
+      volUpBtn.addEventListener('click', function () {
+        let val = Math.min(100, parseInt(volumeSlider.value) + 1);
+        volumeSlider.value = val;
+        updateVolume(val);
+      });
+
+      volDownBtn.addEventListener('click', function () {
+        let val = Math.max(0, parseInt(volumeSlider.value) - 1);
+        volumeSlider.value = val;
+        updateVolume(val);
+      });
+
+      playTestToneBtn.addEventListener('click', playTestSound);
+
+      // ==================== ۴. تأیید حجم و بستن مدال ====================
+      confirmVolumeBtn.addEventListener('click', function () {
+        stopTestSound();
+        closeModal(volumeModal);
+
+        // ذخیره حجم برای استفاده در بقیه آزمایش
+        window.audioVolume = currentVolume;
+        console.log('حجم نهایی تنظیم شد:', currentVolume);
+      });
+
+    });
+  </script>
+  
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      // اول دستگاه را بررسی کن
+      const canContinue = initDeviceCheck(
+        (typeof INITIAL_STAGE !== 'undefined' ? INITIAL_STAGE : 'sequence_practice')
+      );
+
+      // اگر دستگاه غیرمجاز بود، بقیه کد اجرا نشود
+      if (!canContinue) return;
+
+      // مخفی کردن همه بخش‌ها به جز rotate-device
+      document.querySelectorAll('.content > div:not(#rotate-device)').forEach(function(el) {
+        el.classList.add('hidden');
+      });
+
+      if (typeof IS_AT_BLOCK_BREAK !== 'undefined' && IS_AT_BLOCK_BREAK) {
+        const blockBreak = document.getElementById('block-break');
+        if (blockBreak) {
+          blockBreak.classList.remove('hidden');
+          const msg = document.getElementById('block-break-message');
+          if (msg) msg.innerHTML = BLOCK_BREAK_MESSAGE;
+        }
+      } else if (typeof SHOW_RESUME_SCREEN !== 'undefined' && SHOW_RESUME_SCREEN) {
+        const stageId = (typeof INITIAL_STAGE !== 'undefined' ? INITIAL_STAGE : 'sequence_practice').replace(/_/g, '-');
+        const stageEl = document.getElementById(stageId);
+        if (stageEl) stageEl.classList.remove('hidden');
+        
+        const msgEl = document.getElementById(stageId + '-message');
+        if (msgEl && typeof RESUME_MESSAGE !== 'undefined') {
+          msgEl.textContent = RESUME_MESSAGE;
+        }
+      } else {
+        const stageId = (typeof INITIAL_STAGE !== 'undefined' ? INITIAL_STAGE : 'sequence_practice').replace(/_/g, '-');
+        const stageEl = document.getElementById(stageId);
+        if (stageEl) stageEl.classList.remove('hidden');
+      }
+    });
+  </script>
+  
+  <script src="/static/js/CheckDevice.js"></script>
+  <style>
+    .volume-control-box {
+      background: #f8fafc;
+      border-radius: 12px;
+      padding: 20px;
+      margin: 20px 0;
+      border: 1px solid #e2e8f0;
+    }
+
+    .volume-label {
+      display: flex;
+      justify-content: space-between;
+      font-size: 14px;
+      color: #64748b;
+      margin-bottom: 8px;
+    }
+
+    .volume-slider {
+      width: 100%;
+      height: 8px;
+      -webkit-appearance: none;
+      appearance: none;
+      background: #e2e8f0;
+      border-radius: 4px;
+      outline: none;
+      margin-bottom: 16px;
+    }
+
+    .volume-slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 22px;
+      height: 22px;
+      background: #3b82f6;
+      border-radius: 50%;
+      cursor: pointer;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+    }
+
+    .volume-buttons {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .vol-btn {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      border: 2px solid #cbd5e1;
+      background: white;
+      font-size: 22px;
+      font-weight: bold;
+      cursor: pointer;
+      color: #334155;
+      transition: all 0.15s;
+    }
+
+    .vol-btn:hover {
+      background: #f1f5f9;
+      border-color: #94a3b8;
+    }
+
+    .play-tone-btn {
+      flex: 1;
+      padding: 12px 16px;
+      background: #3b82f6;
+      color: white;
+      border: none;
+      border-radius: 10px;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+
+    .play-tone-btn:hover {
+      background: #2563eb;
+    }
+
+    .play-tone-btn.playing {
+      background: #ef4444;
+    }
+
+    #confirmVolumeBtn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+  </style>
 
 </body>
 
-
-<script>
-      document.addEventListener('DOMContentLoaded', function () {
-          const welcomeModal = document.getElementById('welcomeModal');
-          const body = document.body;
-          function openModal() {
-              welcomeModal.classList.add('active');
-              body.style.overflow = 'hidden';  // قفل کامل اسکرول صفحه اصلی
-          }
-          function closeModal() {
-              welcomeModal.classList.remove('active');
-              body.style.overflow = '';  // بازگرداندن اسکرول
-          }
-          openModal();  // نمایش خودکار
-          document.getElementById('closeWelcomeModal').onclick = closeModal;
-          welcomeModal.querySelector('.modal-overlay').onclick = closeModal;
-      });
-    </script>
-
-    <div id="welcomeModal" class="custom-modal">
-      <div class="modal-overlay"></div>
-      <div class="modal-content">
-        <div class="modal-icon">⚠️</div>
-        <h3 class="modal-title">توجه مهم قبل از شروع</h3>
-        <p class="text-justify">
-          در این فرم، اطلاعاتی در مورد این پژوهش در اختیار شما قرار گرفته است.
-          لطفا آن را مطالعه نموده  و در صورتی که ابهامی وجود دارد، قبل از تکمیل
-          آن مطرح نمایید. مشارکت شما در این پژوهش، ما را در پیشرفت تحقیقات علمی
-          یاری خواهد داد.
-        </p>
-        <p class="text-justify">
-          عنوان پژوهش: کدگذاری پیش‌بینانه هیجان در پردازش توالی‌های صوتی توسط
-          مغز
-        </p>
-
-        <p class="text-justify">
-          شما به عنوان شرکت‌کننده در این پژوهش، در یک آزمایش که شامل گوش دادن به
-          توالی‌های صوتی با بار هیجانی متفاوت است شرکت می‌کنید. آزمون شامل چندین
-          مرحله هست که در ابتدای هر بخش توضیحات لازم در خصوص آن بخش ارائه
-          میشود.بخش اصلی آزمون شامل 3 بلوک آزمایشی است به همراه یک بلوک آموزشی
-          اولیه برای یادگیری توالی‌ها، و سه بلوک اصلی (هر کدام حدود 6 دقیقه) که
-          در مجموع حدود 30 دقیقه طول می‌کشد.
-        </p>
-
-        <p class="text-justify">
-         همکاری شما داوطلبانه است و هر زمان که خواستید از آزمون خارج شوید.
-        </p>
-
-        <p class="text-justify ltr" style=" margin-left: 25px;">
-        با تشکر
-        </p>
-
-        <p class="text-justify ltr ">
-        هادی ابراهیم نیا
-        </p>
-
-        <p class="modal-message mt-5">
-          لطفاً قبل از آغاز آزمون موارد زیر را رعایت کنید:<br /><br />
-          • حتماً از <strong>هدفون یا هندزفیری</strong> استفاده کنید.<br />
-          • در محیطی <strong>آرام و بدون مزاحمت</strong> باشید.<br />
-          • حجم صدای دستگاه را <strong>مناسب</strong> تنظیم کنید.<br />
-          • با قطع اینترنت، در هر مرحله ای ،با رفرش صفحه ادامه آزمون ارائه خواهد
-          شد
-        </p>
-        <button class="modal-button" id="closeWelcomeModal">
-          قبول دارم و ادامه می‌دهم
-        </button>
-      </div>
-    </div>
 </html>
