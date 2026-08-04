@@ -174,6 +174,46 @@ class DeviceLog(models.Model):
 
     def __str__(self):
         return f"{self.user.username} | {self.stage} | {self.device_type}"
+
+
+class FeedbackSettings(models.Model):
+    # ... فیلدهای دیگر تنظیمات ...
+    FEEDBACK_MODE_CHOICES = [
+        ('always', 'همیشه نمایش داده شود'),
+        ('never', 'هرگز نمایش داده نشود'),
+        ('first_n', 'فقط در N محرک اول'),
+        ('until_n_correct', 'تا رسیدن به N پاسخ درست متوالی یا کلی'),
+        ('first_n_or_until_correct', 'N محرک اول یا تا رسیدن به M پاسخ درست (هرکدام زودتر)'),
+    ]
+
+    feedback_mode = models.CharField(
+        max_length=30,
+        choices=FEEDBACK_MODE_CHOICES,
+        default='always',
+        verbose_name="حالت نمایش فیدبک"
+    )
+
+    feedback_first_n = models.PositiveIntegerField(
+        default=5,
+        verbose_name="تعداد محرک اول برای نمایش فیدبک (در حالت first_n)"
+    )
+
+    feedback_until_correct = models.PositiveIntegerField(
+        default=5,
+        verbose_name="تعداد پاسخ درست مورد نیاز برای قطع فیدبک (در حالت until_n_correct)"
+    )
+
+    # اگر بخوای متوالی باشه یا تجمعی:
+    feedback_correct_consecutive = models.BooleanField(
+        default=False,
+        verbose_name="پاسخ‌های درست باید متوالی باشند؟"
+    )
+
+    class Meta:
+        verbose_name = "تنظیمات PCM"
+        verbose_name_plural = "تنظیمات PCM"
+
+    
     
 class RatingPractice(models.Model):
     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)

@@ -289,26 +289,23 @@
 <script>
   let canRespond = false;
   let isModalActive = false;
-
   // داده‌های ثابت از سرور
   const totalBlocks = {{ total_blocks }};
   const catchPerBlock = {{ catch_trials_per_block }};
   const trialsPerBlock = {{ trials_per_block }};
-  
+
   const cueUrls = {{ cue_urls|safe }};
   const neutralUrls = {{ neutral_urls|safe }};
   const negativeUrls = {{ negative_urls|safe }};
   const cuesMapping = {{ cues_mapping|safe }};
-
   const allCatchSequences = {{ all_catch_sequences|safe }};
   const allMainTrials = {{ all_main_trials|safe }};
-  
+
   let currentBlock = {{ current_block }};
   let remainingCatch = allCatchSequences[currentBlock] || [];
   let remainingTrials = allMainTrials[currentBlock] || [];
-  
-  let currentTrialInBlock = {{ last_trial }} + 1;
 
+  let currentTrialInBlock = {{ last_trial }} + 1;
   // عناصر DOM
   const audio = document.getElementById('audio-player');
   const intro = document.getElementById('intro');
@@ -317,41 +314,39 @@
   const catchTrial = document.getElementById('catch-trial');
   const ratingTrial = document.getElementById('rating-trial');
   const questionEl = document.getElementById('rating-question');
-
   const catchIntroModal = document.getElementById('catchIntroModal');
   const ratingIntroModal = document.getElementById('ratingIntroModal');
   const fasterModal = document.getElementById('fasterModal');
-
   // متغیرهای موقت
   let currentCue, currentStim1, currentStim2, actualSeq, expectedSeq;
   let ratingStep = 0;
   let ratings = { stim1: null, stim2: null, sequence: null };
   let rts = { stim1: null, stim2: null, sequence: null };
   let delays = { stim1: 0, stim2: 0, sequence: 0 };   // ← اضافه شد
-
+  let inputMethods = { stim1: null, stim2: null, sequence: null };
   // برای Catch
   let catchStartTime = 0;
   let catchDelay = 0;
+  let catchInputMethod = null;
   let catchTimeoutHandle = null;
-
   let ratingStartTime = 0;
   let timeoutHandle = null;
+
+  // برای تشخیص دقیق‌تر نوع ورودی (موس / تاچ)
+  let lastInputType = 'mouse';
 
   const ratingQuestions = [
     "صدای اول ",
     "صدای دوم ",
     "کل (دو صدا با هم) "
   ];
-
   const RESPONSE_TIMEOUT = 3000;
-
   // ==================== توابع کمکی ====================
   function updateBlockNumbers() {
     document.querySelectorAll('#block-num, #block-num-rating').forEach(el => {
       el.textContent = currentBlock;
     });
   }
-
   function getCsrfToken() {
     const name = 'csrftoken';
     let cookieValue = '';
@@ -363,7 +358,6 @@
     }
     return cookieValue;
   }
-
   function showFixation(cb) {
     fixation.classList.remove('hidden');
     setTimeout(() => {
@@ -371,17 +365,14 @@
       cb();
     }, 1000);
   }
-
   function play(url, next) {
     audio.src = url;
     audio.play().catch(e => console.error('Audio play error:', e));
     audio.onended = () => setTimeout(next, 500);
   }
-
   function randomChoice(arr) {
     return arr[Math.floor(Math.random() * arr.length)];
   }
-
   // ==================== CATCH TRIAL ====================
   function startNextCatchTrial() {
     if (remainingCatch.length === 0) {
@@ -389,7 +380,6 @@
       updateBlockNumbers();
       return;
     }
-
     const trial = remainingCatch.shift();
     currentCue = trial.cue;
     expectedSeq = trial.expected_seq;
@@ -397,7 +387,7 @@
     currentStim2 = null;
     actualSeq = expectedSeq;
     catchDelay = 0;
-
+    catchInputMethod = null;   // مهم
     showFixation(() => {
       play(cueUrls[currentCue] || currentCue, () => {
         catchTrial.classList.remove('hidden');
@@ -406,30 +396,29 @@
       });
     });
   }
-
   function startCatchTimeout() {
     catchStartTime = Date.now();
     clearTimeout(catchTimeoutHandle);
-
     catchTimeoutHandle = setTimeout(() => {
       if (!canRespond || isModalActive) return;
-
       catchDelay++;
       fasterModal.classList.add('active');
       document.body.style.overflow = 'hidden';
       isModalActive = true;
     }, RESPONSE_TIMEOUT);
   }
-
   function saveCatchResponse(userResponse) {
     if (!canRespond || isModalActive) return;
-
     canRespond = false;
     clearTimeout(catchTimeoutHandle);
 
+    // اگر از کیبورد آمده باشد قبلاً ست شده، در غیر این صورت از lastInputType استفاده کن
+    if (!catchInputMethod) {
+      catchInputMethod = lastInputType;
+    }
+
     const rt = Date.now() - catchStartTime;
     const isCorrect = userResponse === expectedSeq;
-
     fetch('/pcm/save/', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCsrfToken() },
@@ -441,6 +430,7 @@
         user_response: userResponse,
         response_rt: rt,
         delay_number: catchDelay,
+        response_input_method: catchInputMethod,
         is_correct: isCorrect
       })
     }).finally(() => {
@@ -448,83 +438,70 @@
       setTimeout(startNextCatchTrial, 800);
     });
   }
-
   // ==================== RATING TRIAL ====================
   function startNextRatingTrial() {
     if (remainingTrials.length === 0) {
       finishBlock();
       return;
     }
-
     const trial = remainingTrials.shift();
     actualSeq = trial.actual_seq;
     currentCue = trial.cue;
     expectedSeq = cuesMapping[currentCue];
-
     const [cat1, cat2] = actualSeq.split('-');
     const pool1 = cat1 === 'Neutral' ? neutralUrls : negativeUrls;
     const pool2 = cat2 === 'Neutral' ? neutralUrls : negativeUrls;
-
     currentStim1 = randomChoice(pool1);
     currentStim2 = randomChoice(pool2);
-
     showFixation(() => {
-      play(cueUrls[currentCue] || currentCue, () => 
-        play(currentStim1, () => 
+      play(cueUrls[currentCue] || currentCue, () =>
+        play(currentStim1, () =>
           play(currentStim2, () => {
             ratingStep = 0;
             ratings = { stim1: null, stim2: null, sequence: null };
             rts = { stim1: null, stim2: null, sequence: null };
             delays = { stim1: 0, stim2: 0, sequence: 0 };
+            inputMethods = { stim1: null, stim2: null, sequence: null };
             showRatingQuestion();
           })
         )
       );
     });
   }
-
   function showRatingQuestion() {
     ratingTrial.classList.remove('hidden');
-
     // محو شدن متن قبلی
     questionEl.classList.remove('fade-in');
     questionEl.classList.add('fade-out');
-
     setTimeout(() => {
       questionEl.textContent = ratingQuestions[ratingStep];
       questionEl.classList.remove('fade-out');
       questionEl.classList.add('fade-in');
-
       // زمان واکنش دقیقاً از این لحظه شروع می‌شود
       canRespond = true;
       startRatingTimeout();
     }, 200);
   }
-
   function startRatingTimeout() {
     ratingStartTime = Date.now();
     clearTimeout(timeoutHandle);
-
     timeoutHandle = setTimeout(() => {
       if (!canRespond || isModalActive) return;
-
       // افزایش شمارنده تأخیر
       if (ratingStep === 0) delays.stim1++;
       else if (ratingStep === 1) delays.stim2++;
       else delays.sequence++;
-
       fasterModal.classList.add('active');
       document.body.style.overflow = 'hidden';
       isModalActive = true;
     }, RESPONSE_TIMEOUT);
   }
-
   function saveMainResponse() {
     fetch('/pcm/save/', {
       method: 'POST',
-      headers: { 
-        'Content-Type': 'application/json', 
-        'X-CSRFToken': getCsrfToken() 
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRFToken': getCsrfToken()
       },
       body: JSON.stringify({
         block: currentBlock,
@@ -536,28 +513,27 @@
         is_consistent: expectedSeq === actualSeq,
         category_stim1: actualSeq.split('-')[0],
         category_stim2: actualSeq.split('-')[1],
-
         valence_stim1: ratings.stim1,
         valence_rt_stim1: rts.stim1,
         valence_delay_number_stim1: delays.stim1,
-
+        valence_input_method_stim1: inputMethods.stim1,
         valence_stim2: ratings.stim2,
         valence_rt_stim2: rts.stim2,
         valence_delay_number_stim2: delays.stim2,
-
+        valence_input_method_stim2: inputMethods.stim2,
         valence_sequence: ratings.sequence,
         valence_rt_sequence: rts.sequence,
-        valence_delay_number_sequence: delays.sequence
+        valence_delay_number_sequence: delays.sequence,
+        valence_input_method_sequence: inputMethods.sequence
       })
     })
     .then(response => {
       if (!response.ok) throw new Error(`HTTP ${response.status}`);
-      
+     
       currentTrialInBlock++;
       ratingTrial.classList.add('hidden');
-
       const isLastTrialOfLastBlock = (remainingTrials.length === 0) && (currentBlock === totalBlocks);
-      
+     
       if (isLastTrialOfLastBlock) {
         setTimeout(() => location.href = '/experiment/pcm/', 1000);
       } else if (remainingTrials.length === 0) {
@@ -570,7 +546,6 @@
       alert('❌ خطا در ذخیره پاسخ!\nلطفاً صفحه را رفرش کنید و دوباره تلاش کنید.');
     });
   }
-
   // ==================== پایان بلاک ====================
   function finishBlock() {
     currentBlock++;
@@ -584,18 +559,16 @@
     restScreen.classList.remove('hidden');
     updateBlockNumbers();
   }
-
   // ==================== Event Listeners ====================
   document.getElementById('start-btn').onclick = () => {
     intro.classList.add('hidden');
-    
+   
     // ← این دو خط را اضافه کن
     document.querySelector('.content').style.display = 'flex';
     document.body.classList.add('no-scroll');
-    
+   
     document.documentElement.requestFullscreen?.();
     updateBlockNumbers();
-
     if (remainingCatch && remainingCatch.length > 0) {
       // هنوز trialهای Catch باقی مانده
       catchIntroModal.classList.add('active');
@@ -607,12 +580,10 @@
       finishBlock();
     }
   };
-
   document.getElementById('startCatchBtn').onclick = () => {
     catchIntroModal.classList.remove('active');
     startNextCatchTrial();
   };
-
   document.getElementById('startRatingBtn').onclick = () => {
     ratingIntroModal.classList.remove('active');
     if (remainingTrials.length === trialsPerBlock) {
@@ -620,62 +591,66 @@
     }
     startNextRatingTrial();
   };
-
   document.getElementById('continue-btn').onclick = () => {
     restScreen.classList.add('hidden');
     catchIntroModal.classList.add('active');
   };
+
+  // تشخیص نوع ورودی با Pointer Events (بهترین روش)
+  document.addEventListener('pointerdown', (e) => {
+      if (e.pointerType === 'touch') lastInputType = 'touch';
+      else if (e.pointerType === 'mouse') lastInputType = 'mouse';
+      else if (e.pointerType === 'pen') lastInputType = 'touch';
+  }, { passive: true });
 
   // دکمه‌های Catch
   document.querySelectorAll('.sequence-btn').forEach(btn => {
       btn.addEventListener("touchstart", function () {
           this.classList.add("touch-effect");
       }, { passive: true });
-
       btn.addEventListener("touchend", function () {
           setTimeout(() => {
               this.classList.remove("touch-effect");
           }, 200);
       });
-
-      btn
-      .onclick = () => saveCatchResponse(btn.dataset.seq);
+      btn.onclick = () => saveCatchResponse(btn.dataset.seq);
   });
-
   document.querySelectorAll('.sam-btn').forEach(btn => {
     btn.addEventListener("touchstart", function () {
         this.classList.add("touch-effect");
     }, { passive: true });
-
     btn.addEventListener("touchend", function () {
         setTimeout(() => {
             this.classList.remove("touch-effect");
         }, 700);
     });
   });
-
   // دکمه‌های Rating
   document.querySelectorAll('#rating-trial .valence-btn').forEach(btn => {
     btn.onclick = () => {
       if (!canRespond || isModalActive || ratingTrial.classList.contains('hidden')) return;
-
       canRespond = false;
       clearTimeout(timeoutHandle);
+
+      // اگر از کیبورد آمده باشد قبلاً ست شده، در غیر این صورت از lastInputType استفاده کن
+      if (ratingStep === 0 && !inputMethods.stim1) {
+        inputMethods.stim1 = lastInputType;
+      } else if (ratingStep === 1 && !inputMethods.stim2) {
+        inputMethods.stim2 = lastInputType;
+      } else if (ratingStep === 2 && !inputMethods.sequence) {
+        inputMethods.sequence = lastInputType;
+      }
 
       // جلوه انتخاب
       document.querySelectorAll('#rating-trial .valence-btn').forEach(b => b.classList.remove('selected'));
       btn.classList.add('selected');
       setTimeout(() => btn.classList.remove('selected'), 400);
-
       const value = parseInt(btn.dataset.value);
       const rt = Date.now() - ratingStartTime;
-
       if (ratingStep === 0) { ratings.stim1 = value; rts.stim1 = rt; }
       else if (ratingStep === 1) { ratings.stim2 = value; rts.stim2 = rt; }
       else { ratings.sequence = value; rts.sequence = rt; }
-
       ratingStep++;
-
       if (ratingStep < 3) {
         setTimeout(showRatingQuestion, 700);
       } else {
@@ -683,7 +658,6 @@
       }
     };
   });
-
   // کیبورد
   document.addEventListener('keydown', e => {
     // Catch
@@ -692,34 +666,36 @@
       if (e.key === '1') targetBtn = document.querySelector('#catch-trial [data-seq="Neutral-Neutral"]');
       if (e.key === '2') targetBtn = document.querySelector('#catch-trial [data-seq="Negative-Neutral"]');
       if (e.key === '3') targetBtn = document.querySelector('#catch-trial [data-seq="Neutral-Negative"]');
-
       if (targetBtn) {
         e.preventDefault();
+        catchInputMethod = 'keyboard';   // قبل از click ست می‌شود
         targetBtn.classList.add('keyboard-effect');
         setTimeout(() => targetBtn.classList.remove('keyboard-effect'), 220);
         targetBtn.click();
       }
     }
-
     // Rating
     if (canRespond && !isModalActive && !ratingTrial.classList.contains('hidden') && e.key >= '1' && e.key <= '9') {
       e.preventDefault();
       const btn = document.querySelector(`#rating-trial .valence-btn[data-value="${e.key}"]`);
       if (btn) {
+        // قبل از click ست می‌شود
+        if (ratingStep === 0) inputMethods.stim1 = 'keyboard';
+        else if (ratingStep === 1) inputMethods.stim2 = 'keyboard';
+        else if (ratingStep === 2) inputMethods.sequence = 'keyboard';
+
         btn.classList.add('keyboard-effect');
         setTimeout(() => btn.classList.remove('keyboard-effect'), 220);
         btn.click();
       }
     }
   });
-
   // مدیریت مدال سریع‌تر
   document.addEventListener('DOMContentLoaded', function () {
     function closeModal() {
       fasterModal.classList.remove('active');
       document.body.style.overflow = '';
       isModalActive = false;
-
       // اگر در Catch هستیم
       if (!catchTrial.classList.contains('hidden')) {
         canRespond = true;
@@ -731,7 +707,6 @@
         startRatingTimeout();
       }
     }
-
     document.getElementById('closeModal').onclick = closeModal;
     fasterModal.querySelector('.modal-overlay').onclick = closeModal;
   });

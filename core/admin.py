@@ -4,6 +4,33 @@ from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from .models import *
 
+@admin.register(Choice)
+class ChoiceAdmin(admin.ModelAdmin):
+    list_display = ('id', 'text', 'value', 'question')
+    list_filter = ('value',)
+    search_fields = ('text',)
+
+class ChoiceInline(admin.TabularInline):  # یا StackedInline
+    model = Choice
+    extra = 1  # تعداد فرم خالی اضافی
+    fields = ('text', 'value')  # یا هر فیلدی که دارید
+
+@admin.register(FeedbackSettings)
+class PCMSettingsAdmin(admin.ModelAdmin):
+    list_display = ('feedback_mode', 'feedback_first_n', 'feedback_until_correct', 'feedback_correct_consecutive')
+    
+    fieldsets = (
+        ('تنظیمات فیدبک مرحله تمرین توالی', {
+            'fields': (
+                'feedback_mode',
+                'feedback_first_n',
+                'feedback_until_correct',
+                'feedback_correct_consecutive',
+            )
+        }),
+    )
+
+
 # ------------------- CustomUser -------------------
 admin.site.register(CustomUser)
 class CustomUserAdmin(BaseUserAdmin):

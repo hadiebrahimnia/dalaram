@@ -354,22 +354,28 @@
     const negativeUrls = {{ negative_urls|safe }};
     const cuesMapping = {{ cues_mapping|safe }};
     const remainingSequences = {{ remaining_sequences|safe }}; // لیست متعادل و تصادفی باقی‌مانده
-
     const audio = document.getElementById('audio-player');
     const intro = document.getElementById('intro');
     const fixation = document.getElementById('fixation');
     const choice = document.getElementById('choice');
     const feedback = document.getElementById('feedback');
-    
-
+    const feedbackMode = "{{ feedback_mode|default:'always' }}";
+    const feedbackFirstN = {{ feedback_first_n|default:5 }};
+    const feedbackUntilCorrect = {{ feedback_until_correct|default:5 }};
+    const feedbackCorrectConsecutive = {{ feedback_correct_consecutive|yesno:"true,false" }};
+    let correctSoFar = {{ correct_so_far|default:0 }};
+    let consecutiveCorrect = 0;  // اگر متوالی لازم باشه
+   
     let responseStartTime = null;
     let responseTimeout = null;
     let isModalActive = false;
     let delay_number = 0;
-
+    let responseInputMethod = null;
     const RESPONSE_TIME_LIMIT = 3000; // ۳
-
     let expectedSeq, currentCue, currentStim1, currentStim2;
+
+    // برای تشخیص دقیق‌تر نوع ورودی (موس / تاچ)
+    let lastInputType = 'mouse';
 
     function getCsrfToken() {
       const name = 'csrftoken';
@@ -381,6 +387,35 @@
       return '';
     }
 
+    // تابع تصمیم‌گیری نمایش فیدبک
+    function shouldShowFeedback(isCorrect) {
+      if (feedbackMode === 'never') return false;
+      if (feedbackMode === 'always') return true;
+
+      if (feedbackMode === 'first_n') {
+        return trialIndex <= feedbackFirstN;
+      }
+
+      if (feedbackMode === 'until_n_correct') {
+        if (feedbackCorrectConsecutive) {
+          return consecutiveCorrect < feedbackUntilCorrect;
+        } else {
+          return correctSoFar < feedbackUntilCorrect;
+        }
+      }
+
+      if (feedbackMode === 'first_n_or_until_correct') {
+        const stillInFirstN = trialIndex <= feedbackFirstN;
+        const notReachedCorrect = feedbackCorrectConsecutive
+          ? consecutiveCorrect < feedbackUntilCorrect
+          : correctSoFar < feedbackUntilCorrect;
+        return stillInFirstN || notReachedCorrect;
+      }
+
+      return true; // fallback
+    }
+
+    
     function showFixation(cb) {
       fixation.classList.remove('hidden');
       setTimeout(() => {
@@ -388,32 +423,26 @@
         cb();
       }, 1000);
     }
-
     function play(url, next) {
       audio.src = url;
       audio.play().catch(e => console.error('خطا در پخش:', e));
       audio.onended = () => setTimeout(next, 500);
     }
-
     function startTrial() {
       delay_number = 0;
+      responseInputMethod = null;   // مهم
       intro.classList.add('hidden');
-
       // گرفتن توالی بعدی از لیست باقی‌مانده (که در ویو متعادل شده)
       expectedSeq = remainingSequences.shift();
-
       // انتخاب cue متناسب با توالی
       const validCues = Object.keys(cuesMapping).filter(cue => cuesMapping[cue] === expectedSeq);
       currentCue = validCues[Math.floor(Math.random() * validCues.length)];
-
       // انتخاب stimulusها
       const [cat1, cat2] = expectedSeq.split('-');
       const pool1 = cat1 === 'Neutral' ? neutralUrls : negativeUrls;
       const pool2 = cat2 === 'Neutral' ? neutralUrls : negativeUrls;
-
       currentStim1 = pool1[Math.floor(Math.random() * pool1.length)];
       currentStim2 = pool2[Math.floor(Math.random() * pool2.length)];
-
       showFixation(() => {
         play(currentCue, () => {
           play(currentStim1, () => {
@@ -426,6 +455,14 @@
         });
       });
     }
+
+    // تشخیص نوع ورودی با Pointer Events (بهترین روش)
+    document.addEventListener('pointerdown', (e) => {
+        if (e.pointerType === 'touch') lastInputType = 'touch';
+        else if (e.pointerType === 'mouse') lastInputType = 'mouse';
+        else if (e.pointerType === 'pen') lastInputType = 'touch';
+    }, { passive: true });
+
     // کلیک روی دکمه‌های انتخاب توالی
     document.querySelectorAll('.response_btn').forEach(btn => {
       btn.addEventListener("touchstart", function () {
@@ -436,7 +473,12 @@
         }, 200);
       }, { passive: true });
       btn.onclick = () => {
-        
+       
+        // اگر از کیبورد آمده باشد قبلاً ست شده، در غیر این صورت از lastInputType استفاده کن
+        if (!responseInputMethod) {
+            responseInputMethod = lastInputType;
+        }
+
         const response_rt = Date.now() - responseStartTime;
         if (responseTimeout) {
           clearTimeout(responseTimeout);
@@ -447,8 +489,19 @@
           responseTimeout = null;
         }
         const correct = btn.dataset.seq === expectedSeq;
-        feedback.textContent = correct ? '✅ درست!' : '❌ غلط!';
-        feedback.style.color = correct ? '#28a745' : '#dc3545';
+        if (correct) {
+          correctSoFar++;
+          consecutiveCorrect++;
+        } else {
+          consecutiveCorrect = 0;
+        }
+        if (shouldShowFeedback(correct)) {
+          feedback.textContent = correct ? '✅ درست!' : '❌ غلط!';
+          feedback.style.color = correct ? '#28a745' : '#dc3545';
+        } else {
+          feedback.textContent = '';  // یا هیچی نشون نده
+        }
+
         fetch('/pcm/save/', {
           method: 'POST',
           headers: {
@@ -465,7 +518,8 @@
             category_stim2: expectedSeq.split('-')[1],
             user_response: btn.dataset.seq,
             response_rt: response_rt,
-            delay_number:delay_number,
+            delay_number: delay_number,
+            response_input_method: responseInputMethod,
             is_correct: correct
           })
         })
@@ -484,12 +538,11 @@
             }, 1500);
           }
         })
-        
+       
         .catch(err => console.error('خطا در ارسال:', err));
-        
+       
       };
     });
-
     function startResponseTimer() {
       responseStartTime = Date.now();
       // پاک کردن تایمر قبلی اگر وجود داشته باشه
@@ -497,9 +550,7 @@
         clearTimeout(responseTimeout);
         responseTimeout = null;
       }
-
       if (isModalActive) return; // اگر مدال بازه، تایمر شروع نشه
-
       responseTimeout = setTimeout(() => {
         delay_number++;
         // فقط اگر هنوز صفحه انتخاب بازه و مدال فعال نیست
@@ -510,15 +561,22 @@
         }
       }, RESPONSE_TIME_LIMIT);
     }
-
     // پشتیبانی از کلیدهای کیبورد ۱، ۲، ۳
     document.addEventListener('keydown', e => {
       if (choice.classList.contains('hidden')) return;
-      if (e.key === '1') document.querySelector('[data-seq="Neutral-Neutral"]').click();
-      if (e.key === '2') document.querySelector('[data-seq="Neutral-Negative"]').click();
-      if (e.key === '3') document.querySelector('[data-seq="Negative-Neutral"]').click();
+      if (e.key === '1') {
+        responseInputMethod = 'keyboard';   // قبل از click ست می‌شود
+        document.querySelector('[data-seq="Neutral-Neutral"]').click();
+      }
+      if (e.key === '2') {
+        responseInputMethod = 'keyboard';   // قبل از click ست می‌شود
+        document.querySelector('[data-seq="Neutral-Negative"]').click();
+      }
+      if (e.key === '3') {
+        responseInputMethod = 'keyboard';   // قبل از click ست می‌شود
+        document.querySelector('[data-seq="Negative-Neutral"]').click();
+      }
     });
-
   </script>
   <script>
     document.addEventListener('DOMContentLoaded', function () {

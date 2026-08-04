@@ -190,7 +190,7 @@
 
 <audio id="audio-player" preload="auto"></audio>
 
-<script>
+HTML<script>
     const remainingFiles = {{ remaining_main_files|safe }};
     const audio = document.getElementById('audio-player');
     const intro = document.getElementById('intro');
@@ -198,22 +198,21 @@
     const valenceRating = document.getElementById('valence-rating');
     const arousalRating = document.getElementById('arousal-rating');
     const fasterModal = document.getElementById('fasterModal');
-
     let currentIndex = 0;
     let currentSound = null;
     let currentPhase = null; // 'valence' یا 'arousal'
-
-    let valence = null, valenceRt = null, valenceDelay = 0;
-    let arousal = null, arousalRt = null, arousalDelay = 0;
-
+    let valence = null, valenceRt = null, valenceDelay = 0, valenceInputMethod = null;
+    let arousal = null, arousalRt = null, arousalDelay = 0, arousalInputMethod = null;
     let startTime = null;
     let timeoutId = null;
     let isModalActive = false;
     let canRespond = false;
 
+    // برای تشخیص دقیق‌تر نوع ورودی (موس / تاچ)
+    let lastInputType = 'mouse';
+
     const RESPONSE_TIMEOUT = 3000;
     const FIXATION_DURATION = 1000;
-
     function getCsrfToken() {
         const cookies = document.cookie.split(';');
         for (let cookie of cookies) {
@@ -222,7 +221,6 @@
         }
         return '';
     }
-
     function showFixation(callback) {
         valenceRating.classList.add('hidden');
         arousalRating.classList.add('hidden');
@@ -232,57 +230,45 @@
             callback();
         }, FIXATION_DURATION);
     }
-
     function playSound(url, onEnded) {
         currentSound = url;
         audio.src = url;
         audio.play().catch(e => console.error('Audio error:', e));
         audio.onended = onEnded;
     }
-
     function startTimer() {
         clearTimeout(timeoutId);
         startTime = Date.now();
         canRespond = true;
-
         timeoutId = setTimeout(() => {
             if (!canRespond || isModalActive) return;
-
             if (currentPhase === 'valence') valenceDelay++;
             else if (currentPhase === 'arousal') arousalDelay++;
-
             fasterModal.classList.add('active');
             document.body.style.overflow = 'hidden';
             isModalActive = true;
         }, RESPONSE_TIMEOUT);
     }
-
     function closeModal() {
         fasterModal.classList.remove('active');
         document.body.style.overflow = '';
         isModalActive = false;
-
         if (currentPhase === 'valence' || currentPhase === 'arousal') {
             startTimer();
         }
     }
-
     document.getElementById('closeModal').onclick = closeModal;
     fasterModal.querySelector('.modal-overlay').onclick = closeModal;
-
     function showValenceRating() {
         currentPhase = 'valence';
         arousalRating.classList.add('hidden');
         arousalRating.classList.remove('fade-in', 'fade-out');
-
         valenceRating.classList.remove('hidden');
         valenceRating.classList.add('fade-out');
-
         requestAnimationFrame(() => {
             setTimeout(() => {
                 valenceRating.classList.remove('fade-out');
                 valenceRating.classList.add('fade-in');
-
                 // زمان واکنش دقیقاً بعد از اتمام انیمیشن
                 setTimeout(() => {
                     startTimer();
@@ -290,25 +276,19 @@
             }, 20);
         });
     }
-
     function showArousalRating() {
         currentPhase = 'arousal';
-
         valenceRating.classList.remove('fade-in');
         valenceRating.classList.add('fade-out');
-
         setTimeout(() => {
             valenceRating.classList.add('hidden');
             valenceRating.classList.remove('fade-out');
-
             arousalRating.classList.remove('hidden');
             arousalRating.classList.add('fade-out');
-
             requestAnimationFrame(() => {
                 setTimeout(() => {
                     arousalRating.classList.remove('fade-out');
                     arousalRating.classList.add('fade-in');
-
                     // زمان واکنش دقیقاً بعد از اتمام انیمیشن
                     setTimeout(() => {
                         startTimer();
@@ -318,40 +298,49 @@
         }, 350);
     }
 
+    // تشخیص نوع ورودی با Pointer Events (بهترین روش)
+    document.addEventListener('pointerdown', (e) => {
+        if (e.pointerType === 'touch') lastInputType = 'touch';
+        else if (e.pointerType === 'mouse') lastInputType = 'mouse';
+        else if (e.pointerType === 'pen') lastInputType = 'touch';
+    }, { passive: true });
+
     // پاسخ خوشایندی
     document.querySelectorAll('#valence-rating .valence-btn').forEach(btn => {
         btn.onclick = () => {
             if (currentPhase !== 'valence' || isModalActive || !canRespond) return;
-
             canRespond = false;
             clearTimeout(timeoutId);
+
+            // اگر از کیبورد آمده باشد قبلاً ست شده، در غیر این صورت از lastInputType استفاده کن
+            if (!valenceInputMethod) {
+                valenceInputMethod = lastInputType;
+            }
 
             document.querySelectorAll('#valence-rating .valence-btn').forEach(b => b.classList.remove('selected'));
             btn.classList.add('selected');
             setTimeout(() => btn.classList.remove('selected'), 350);
-
             valence = parseInt(btn.dataset.value);
             valenceRt = Date.now() - startTime;
-
             setTimeout(showArousalRating, 600);
         };
     });
-
     // پاسخ برانگیختگی
     document.querySelectorAll('#arousal-rating .arousal-btn').forEach(btn => {
         btn.onclick = () => {
             if (currentPhase !== 'arousal' || isModalActive || !canRespond) return;
-
             canRespond = false;
             clearTimeout(timeoutId);
+
+            if (!arousalInputMethod) {
+                arousalInputMethod = lastInputType;
+            }
 
             document.querySelectorAll('#arousal-rating .arousal-btn').forEach(b => b.classList.remove('selected'));
             btn.classList.add('selected');
             setTimeout(() => btn.classList.remove('selected'), 350);
-
             arousal = parseInt(btn.dataset.value);
             arousalRt = Date.now() - startTime;
-
             fetch('/pcm/save/', {
                 method: 'POST',
                 headers: {
@@ -366,9 +355,11 @@
                     valence: valence,
                     valence_rt: valenceRt,
                     valence_delay_number: valenceDelay,
+                    valence_input_method: valenceInputMethod,
                     arousal: arousal,
                     arousal_rt: arousalRt,
-                    arousal_delay_number: arousalDelay
+                    arousal_delay_number: arousalDelay,
+                    arousal_input_method: arousalInputMethod
                 })
             }).then(response => response.json())
               .catch(err => console.error('Save failed:', err))
@@ -382,28 +373,25 @@
               });
         };
     });
-
     // پشتیبانی از کیبورد
     document.addEventListener('keydown', e => {
         if (isModalActive || !canRespond) return;
         if (e.key < '1' || e.key > '9') return;
-
         e.preventDefault();
-
         let btn = null;
         if (currentPhase === 'valence') {
             btn = document.querySelector(`#valence-rating .valence-btn[data-value="${e.key}"]`);
+            valenceInputMethod = 'keyboard';   // قبل از click ست می‌شود
         } else if (currentPhase === 'arousal') {
             btn = document.querySelector(`#arousal-rating .arousal-btn[data-value="${e.key}"]`);
+            arousalInputMethod = 'keyboard';   // قبل از click ست می‌شود
         }
-
         if (btn) {
             btn.classList.add('keyboard-effect');
             setTimeout(() => btn.classList.remove('keyboard-effect'), 220);
             btn.click();
         }
     });
-
     // جلوه تاچ
     document.querySelectorAll('.valence-btn, .arousal-btn').forEach(btn => {
         btn.addEventListener('touchstart', function () {
@@ -414,24 +402,22 @@
             }, 700);
         }, { passive: true });
     });
-
     function startCurrentTrial() {
         if (currentIndex >= remainingFiles.length) {
             location.href = '/experiment/pcm/';
             return;
         }
-
         valence = arousal = null;
         valenceRt = arousalRt = null;
         valenceDelay = arousalDelay = 0;
+        valenceInputMethod = null;   // مهم
+        arousalInputMethod = null;   // مهم
         currentPhase = null;
         canRespond = false;
-
         showFixation(() => {
             playSound(remainingFiles[currentIndex], showValenceRating);
         });
     }
-
     document.getElementById('start-btn').onclick = () => {
         intro.classList.add('hidden');
         document.querySelector('.content').style.display = 'flex';

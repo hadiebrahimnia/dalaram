@@ -364,10 +364,11 @@ def rating_save_response(request):
             valence=data.get('valence'),
             valence_rt=data.get('valence_rt'),
             valence_delay_number = data.get('valence_delay_number', 0),
+            valence_input_method = data.get('valence_input_method'),
             arousal=data.get('arousal'),
             arousal_rt=data.get('arousal_rt'),
             arousal_delay_number = data.get('arousal_delay_number', 0),
-
+            arousal_input_method = data.get('arousal_input_method'),
         )
 
     else:
@@ -625,6 +626,9 @@ def pcm_view(request):
     seq_count = seq_responses.count()  # تعداد پاسخ های ثبت شده 
     progress_percentage = (seq_count / SEQ_TRIALS) * 100
 
+    feedback = FeedbackSettings.objects.first()
+    seq_correct_so_far = seq_responses.filter(is_correct=True).count()
+
     if seq_count < SEQ_TRIALS:  # تغییر به < برای جلوگیری از >= که قبلاً بود
         # محاسبه تعداد باقی‌مانده و ساخت لیست متعادل و تصادفی برای توالی‌های باقی‌مانده
         remain_trials = SEQ_TRIALS - seq_count
@@ -675,6 +679,15 @@ def pcm_view(request):
             'negative_urls': json.dumps(NEGATIVE_URLS),
             'cues_mapping': json.dumps(cues_mapping),
             'remaining_sequences': json.dumps(sequence_order),  
+
+            # --- تنظیمات فیدبک ---
+            'feedback_mode': feedback.feedback_mode if feedback else 'always',
+            'feedback_first_n': feedback.feedback_first_n if feedback else 5,
+            'feedback_until_correct': feedback.feedback_until_correct if feedback else 5,
+            'feedback_correct_consecutive': feedback.feedback_correct_consecutive if feedback else False,
+            'correct_so_far': seq_correct_so_far,  # برای JS
+
+
         }
         return render(request, '1_seq_practice.html', context)
     else:
@@ -1109,6 +1122,7 @@ def pcm_save_response(request):
             user_response=data['user_response'],
             response_rt=data['response_rt'],
             delay_number=data['delay_number'],
+            response_input_method=data['response_input_method'],
             is_correct=data['is_correct'],
         )
 
@@ -1146,6 +1160,7 @@ def pcm_save_response(request):
             user_response=data.get('user_response'),
             response_rt=data['response_rt'],
             delay_number=data.get('delay_number', 0),
+            response_input_method=data.get('response_input_method'),
             is_correct=data.get('is_correct')
         )
 
@@ -1165,12 +1180,15 @@ def pcm_save_response(request):
             valence_stim1=data.get('valence_stim1'),
             valence_rt_stim1=data.get('valence_rt_stim1'),
             valence_delay_number_stim1=data.get('valence_delay_number_stim1', 0),
+            valence_input_method_stim1=data.get('valence_input_method_stim1'),
             valence_stim2=data.get('valence_stim2'),
             valence_rt_stim2=data.get('valence_rt_stim2'),
             valence_delay_number_stim2=data.get('valence_delay_number_stim2', 0),
+            valence_input_method_stim2=data.get('valence_input_method_stim2'),
             valence_sequence=data.get('valence_sequence'),
             valence_rt_sequence=data.get('valence_rt_sequence'),
             valence_delay_number_sequence=data.get('valence_delay_number_sequence', 0),
+            valence_input_method_sequence=data.get('valence_input_method_sequence'),
         )
 
     # مرحله ۴: تمرین رتبه‌بندی کامل
@@ -1182,9 +1200,11 @@ def pcm_save_response(request):
             valence=data.get('valence'),
             valence_rt=data.get('valence_rt'),
             valence_delay_number = data.get('valence_delay_number', 0),
+            valence_input_method=data.get('valence_input_method'),
             arousal=data.get('arousal'),
             arousal_rt=data.get('arousal_rt'),
             arousal_delay_number = data.get('arousal_delay_number', 0),
+            arousal_input_method=data.get('arousal_input_method'),
         )
 
     # مرحله ۵: رتبه‌بندی نهایی
@@ -1197,9 +1217,11 @@ def pcm_save_response(request):
             valence=data.get('valence'),
             valence_rt=data.get('valence_rt'),
             valence_delay_number = data.get('valence_delay_number', 0),
+            valence_input_method=data.get('valence_input_method'),
             arousal=data.get('arousal'),
             arousal_rt=data.get('arousal_rt'),
             arousal_delay_number = data.get('arousal_delay_number', 0),
+            arousal_input_method=data.get('arousal_input_method'),
         )
 
     else:
