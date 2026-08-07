@@ -140,28 +140,46 @@ def complete_profile(request):
     if request.method == 'POST':
         form = ParticipantInfoForm(request.POST)
         if form.is_valid():
-            user = CustomUser.objects.create(
+            # ساخت کاربر با تمام فیلدهای فرم
+            user = CustomUser(
                 username=username,
-                birth_date=form.cleaned_data['birth_date'],
-                gender=form.cleaned_data['gender'],
-                hand=form.cleaned_data['hand'],
-                disorder=form.cleaned_data['disorder'],
-                drug=form.cleaned_data['drug'],
+                birth_date=form.cleaned_data.get('birth_date'),
+                gender=form.cleaned_data.get('gender'),
+                hand=form.cleaned_data.get('hand'),
+                marriage=form.cleaned_data.get('marriage'),
+                education=form.cleaned_data.get('education'),
+                smoking=form.cleaned_data.get('smoking'),
+                alcohol=form.cleaned_data.get('alcohol'),
+                caffeine=form.cleaned_data.get('caffeine'),
+                substance=form.cleaned_data.get('substance'),
+                supplement=form.cleaned_data.get('supplement'),
+                trauma=form.cleaned_data.get('trauma'),
+                tbi=form.cleaned_data.get('tbi'),
+                seizure=form.cleaned_data.get('seizure'),
+                sleep=form.cleaned_data.get('sleep'),
+                sleep_hours=form.cleaned_data.get('sleep_hours'),
+                mental_disorders=form.cleaned_data.get('mental_disorders', []),  # لیست چندانتخابی
+                disorder=form.cleaned_data.get('disorder', ''),
+                drug=form.cleaned_data.get('drug', ''),
+                notes=form.cleaned_data.get('notes', ''),
             )
+            user.set_unusable_password()  # چون با شماره موبایل وارد می‌شود
+            user.save()
+
             login(request, user)
             messages.success(request, "ثبت‌نام با موفقیت انجام شد! خوش آمدید.")
-            
+
             # پاک کردن سشن
             if 'pending_username' in request.session:
                 del request.session['pending_username']
-                
+
             return redirect('home')
     else:
         form = ParticipantInfoForm()
 
     return render(request, 'complete_profile.html', {
         'form': form,
-        'username': username
+        'username': username,
     })
 
 ###################################################################################################### 

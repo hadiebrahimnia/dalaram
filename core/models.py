@@ -5,7 +5,9 @@ from django.contrib.auth.models import AbstractUser
 ###################################################################################################### 
 ###################################################################################################### 
 ###################################################################################################### 
+
 class CustomUser(AbstractUser):
+
     username = models.CharField(
         "شماره موبایل",
         max_length=11,
@@ -13,24 +15,239 @@ class CustomUser(AbstractUser):
         help_text="شماره موبایل کاربر (۱۱ رقمی)",
     )
 
+    birth_date = models.DateField(
+        "تاریخ تولد",
+        null=True,
+        blank=True,
+    )
+
     GENDER_CHOICES = [
-        ('M', 'مرد'),
-        ('F', 'زن'),
+        ("M", "مرد"),
+        ("F", "زن"),
     ]
 
+    gender = models.CharField(
+        "جنسیت",
+        max_length=1,
+        choices=GENDER_CHOICES,
+        null=True,
+        blank=True,
+    )
+
     HAND_CHOICES = [
-        ('R', 'راست'),
-        ('L', 'چپ'),
+        ("R", "راست"),
+        ("L", "چپ"),
     ]
-    birth_date = models.DateField("تاریخ تولد", null=True)
-    gender = models.CharField("جنسیت", max_length=1, choices=GENDER_CHOICES)
-    hand = models.CharField("دست غالب", max_length=1, choices=HAND_CHOICES)
-    disorder = models.TextField("سابقه بیماری", max_length=200, blank=True)
-    drug = models.TextField("سابقه مصرف دارو", max_length=100, blank=True)
+    hand = models.CharField(
+        "دست غالب",
+        max_length=1,
+        choices=HAND_CHOICES,
+        null=True,
+        blank=True,
+    )
+
+    MARRIAGE_CHOICES = [
+        ("S", "مجرد"),
+        ("M", "متاهل"),
+    ]
+    marriage = models.CharField(
+        "وضعیت تاهل",
+        max_length=1,
+        choices=MARRIAGE_CHOICES,
+        null=True,
+        blank=True,
+    )
+
+    EDUCATION_CHOICES = [
+        ("NONE", "بدون تحصیلات رسمی"),
+        ("PRIMARY", "ابتدایی"),
+        ("SECONDARY", "متوسطه"),
+        ("DIPLOMA", "دیپلم"),
+        ("ASSOCIATE", "کاردانی"),
+        ("BACHELOR", "کارشناسی"),
+        ("MASTER", "کارشناسی ارشد"),
+        ("PHD", "دکتری"),
+    ]
+    education = models.CharField(
+        "سطح تحصیلات",
+        max_length=20,
+        choices=EDUCATION_CHOICES,
+        null=True,
+        blank=True,
+    )
+
+    SMOKING_CHOICES = [
+        ("NONE", "هرگز مصرف نکرده‌ام"),
+        ("PAST", "در گذشته مصرف می‌کردم (فعلاً خیر)"),
+        ("OCCASIONAL", "گاه‌به‌گاه مصرف می‌کنم"),
+        ("REGULAR", "مصرف منظم دارم"),
+    ]
+    smoking = models.CharField(
+        "مصرف سیگار",
+        max_length=12,
+        choices=SMOKING_CHOICES,
+        null=True,
+        blank=True,
+    )
+
+    ALCOHOL_CHOICES = [
+        ("NONE", "هرگز مصرف نکرده‌ام"),
+        ("PAST", "در گذشته مصرف می‌کردم (فعلاً خیر)"),
+        ("OCCASIONAL", "گاه‌به‌گاه مصرف می‌کنم"),
+        ("REGULAR", "مصرف منظم دارم"),
+    ]
+    alcohol = models.CharField(
+        "مصرف الکل",
+        max_length=12,
+        choices=ALCOHOL_CHOICES,
+        null=True,
+        blank=True,
+    )
+
+    CAFFEINE_CHOICES = [
+        ("NONE", "اصلاً مصرف نمی‌کنم"),
+        ("LOW", "کم (۱ فنجان یا کمتر در روز)"),
+        ("MODERATE", "متوسط (۲–۳ فنجان در روز)"),
+        ("HIGH", "زیاد (بیش از ۳ فنجان در روز)"),
+    ]
+    caffeine = models.CharField(
+        "مصرف کافئین",
+        max_length=10,
+        choices=CAFFEINE_CHOICES,
+        null=True,
+        blank=True,
+    )
+
+    TRAUMA_CHOICES = [
+        ("NONE", "ندارم"),
+        ("MILD", "رویداد استرس‌زای خفیف"),
+        ("MODERATE", "رویداد استرس‌زای متوسط"),
+        ("SEVERE", "ترومای شدید یا چندین رویداد"),
+    ]
+    trauma = models.CharField(
+        "سابقه تروما یا رویدادهای استرس‌زا",
+        max_length=10,
+        choices=TRAUMA_CHOICES,
+        null=True,
+        blank=True,
+    )
+
+    SUBSTANCE_CHOICES = [
+        ("NONE", "هرگز مصرف نکرده‌ام"),
+        ("PAST", "در گذشته مصرف کرده‌ام (فعلاً خیر)"),
+        ("OCCASIONAL", "گاه‌به‌گاه مصرف می‌کنم"),
+        ("REGULAR", "مصرف منظم دارم"),
+    ]
+    substance = models.CharField(
+        "مصرف مواد مخدر",
+        max_length=12,
+        choices=SUBSTANCE_CHOICES,
+        null=True,
+        blank=True,
+    )
+
+    SUPPLEMENT_CHOICES = [
+        ("NONE", "مصرف نمی‌کنم"),
+        ("OCCASIONAL", "گاه‌به‌گاه"),
+        ("REGULAR", "به‌صورت منظم"),
+    ]
+    supplement = models.CharField(
+        "مصرف مکمل‌ها یا ویتامین‌ها",
+        max_length=12,
+        choices=SUPPLEMENT_CHOICES,
+        null=True,
+        blank=True,
+    )
+
+    TBI_CHOICES = [
+        ("NONE", "ندارم"),
+        ("MILD", "ضربه خفیف (بدون از دست دادن هوشیاری)"),
+        ("MODERATE", "ضربه متوسط (از دست دادن کوتاه‌مدت هوشیاری)"),
+        ("SEVERE", "ضربه شدید (از دست دادن طولانی‌مدت هوشیاری یا بستری)"),
+    ]
+    tbi = models.CharField(
+        "سابقه ضربه مغزی",
+        max_length=10,
+        choices=TBI_CHOICES,
+        null=True,
+        blank=True,
+    )
+
+    SEIZURE_CHOICES = [
+        ("NONE", "ندارم"),
+        ("PAST", "در گذشته داشتم (فعلاً خیر)"),
+        ("CONTROLLED", "دارم ولی تحت کنترل است"),
+        ("ACTIVE", "دارم و فعال است"),
+    ]
+    seizure = models.CharField(
+        "سابقه تشنج یا صرع",
+        max_length=12,
+        choices=SEIZURE_CHOICES,
+        null=True,
+        blank=True,
+    )
+
+    SLEEP_CHOICES = [
+        ("NONE", "ندارم"),
+        ("INSOMNIA", "بی‌خوابی"),
+        ("HYPERSOMNIA", "خواب‌آلودگی بیش از حد"),
+        ("SLEEP_APNEA", "آپنه خواب"),
+        ("NIGHTMARE", "کابوس‌های مکرر"),
+        ("OTHER", "سایر اختلالات خواب"),
+    ]
+    sleep = models.CharField(
+        "اختلال خواب",
+        max_length=15,
+        choices=SLEEP_CHOICES,
+        null=True,
+        blank=True,
+    )
+
+    sleep_hours = models.FloatField(
+        "میانگین ساعات خواب",
+        null=True,
+        blank=True,
+    )
+
+    MENTAL_DISORDER_CHOICES = [
+        ("DEPRESSION", "افسردگی"),
+        ("ANXIETY", "اضطراب"),
+        ("PANIC", "اختلال پانیک"),
+        ("OCD", "وسواس فکری-عملی (OCD)"),
+        ("PTSD", "اختلال استرس پس از سانحه (PTSD)"),
+        ("BIPOLAR", "اختلال دوقطبی"),
+        ("SCHIZOPHRENIA", "اسکیزوفرنی"),
+        ("ADHD", "اختلال کمبود توجه/بیش‌فعالی (ADHD)"),
+        ("PERSONALITY", "اختلال شخصیت"),
+        ("OTHER", 'سایر(در قسمت " توضیحات تکمیلی " توضیح دهید)'),
+    ]
+
+    mental_disorders = models.JSONField(
+        "اختلالات روانی",
+        default=list,
+        blank=True,
+        help_text="می‌توانید چند مورد را انتخاب کنید",
+    )
+
+    disorder = models.TextField(
+        "سابقه بیماری",
+        max_length=200,
+        blank=True,
+    )
+
+    drug = models.TextField(
+        "سابقه مصرف دارو",
+        max_length=100,
+        blank=True,
+    )
+
+    notes = models.TextField(
+        "توضیحات تکمیلی",
+        blank=True,
+    )
 
     def __str__(self):
         return self.username
-    
 
 ###################################################################################################### 
 ###################################################################################################### 
