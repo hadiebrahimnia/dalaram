@@ -424,9 +424,59 @@
       }, 1000);
     }
     function play(url, next) {
-      audio.src = url;
-      audio.play().catch(e => console.error('خطا در پخش:', e));
-      audio.onended = () => setTimeout(next, 500);
+      return new Promise((resolve, reject) => {
+        audio.onended = null;
+        audio.onerror = null;
+        audio.onplaying = null;
+
+        audio.src = url;
+        audio.load();
+
+        let hasStarted = false;
+        let timeoutId = null;
+
+        const cleanup = () => {
+          clearTimeout(timeoutId);
+          audio.onended = null;
+          audio.onerror = null;
+          audio.onplaying = null;
+        };
+
+        // اگر بعد از ۴ ثانیه شروع نشد → رفرش
+        timeoutId = setTimeout(() => {
+          if (!hasStarted) {
+            cleanup();
+            location.reload();
+          }
+        }, 4000);
+
+        audio.onerror = () => {
+          cleanup();
+          location.reload();
+        };
+
+        audio.onplaying = () => {
+          hasStarted = true;
+          clearTimeout(timeoutId);
+        };
+
+        audio.onended = () => {
+          cleanup();
+          setTimeout(() => {
+            resolve();
+            if (typeof next === 'function') next();
+          }, 500);
+        };
+
+        const playPromise = audio.play();
+
+        if (playPromise !== undefined) {
+          playPromise.catch(() => {
+            cleanup();
+            location.reload();
+          });
+        }
+      });
     }
     function startTrial() {
       delay_number = 0;
@@ -443,16 +493,18 @@
       const pool2 = cat2 === 'Neutral' ? neutralUrls : negativeUrls;
       currentStim1 = pool1[Math.floor(Math.random() * pool1.length)];
       currentStim2 = pool2[Math.floor(Math.random() * pool2.length)];
-      showFixation(() => {
-        play(currentCue, () => {
-          play(currentStim1, () => {
-            play(currentStim2, () => {
-              choice.classList.remove('hidden');
-              responseStartTime = Date.now();
-              startResponseTimer();
-            });
-          });
-        });
+      showFixation(async () => {
+        try {
+          await play(currentCue);
+          await play(currentStim1);
+          await play(currentStim2);
+
+          choice.classList.remove('hidden');
+          responseStartTime = Date.now();
+          startResponseTimer();
+        } catch (err) {
+          location.reload();
+        }
       });
     }
 

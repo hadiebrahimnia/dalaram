@@ -236,11 +236,59 @@
     }
 
     function playSound(url, onEnded) {
-        currentSound = url;
-        audio.src = url;
-        audio.play().catch(e => console.error('Audio error:', e));
-        audio.onended = onEnded;
-    }
+        return new Promise((resolve, reject) => {
+            audio.onended = null;
+            audio.onerror = null;
+            audio.onplaying = null;
+
+            currentSound = url;
+            audio.src = url;
+            audio.load();
+
+            let hasStarted = false;
+            let timeoutId = null;
+
+            const cleanup = () => {
+            clearTimeout(timeoutId);
+            audio.onended = null;
+            audio.onerror = null;
+            audio.onplaying = null;
+            };
+
+            // اگر بعد از ۴ ثانیه شروع نشد → رفرش
+            timeoutId = setTimeout(() => {
+            if (!hasStarted) {
+                cleanup();
+                location.reload();
+            }
+            }, 4000);
+
+            audio.onerror = () => {
+            cleanup();
+            location.reload();
+            };
+
+            audio.onplaying = () => {
+            hasStarted = true;
+            clearTimeout(timeoutId);
+            };
+
+            audio.onended = () => {
+            cleanup();
+            resolve();
+            if (typeof onEnded === 'function') onEnded();
+            };
+
+            const playPromise = audio.play();
+
+            if (playPromise !== undefined) {
+            playPromise.catch(() => {
+                cleanup();
+                location.reload();
+            });
+            }
+        });
+        }
 
     function startTimer() {
         clearTimeout(timeoutId);
@@ -442,15 +490,20 @@
         valence = arousal = null;
         valenceRt = arousalRt = null;
         valenceDelay = arousalDelay = 0;
-        valenceInputMethod = null;   // مهم
-        arousalInputMethod = null;   // مهم
+        valenceInputMethod = null;
+        arousalInputMethod = null;
         currentPhase = null;
         canRespond = false;
 
-        showFixation(() => {
-            playSound(remainingFiles[currentIndex], showValenceRating);
+        showFixation(async () => {
+            try {
+            await playSound(remainingFiles[currentIndex]);
+            showValenceRating();
+            } catch (err) {
+            location.reload();
+            }
         });
-    }
+        }
 
     document.getElementById('start-btn').onclick = () => {
         intro.classList.add('hidden');

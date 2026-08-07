@@ -376,9 +376,6 @@ def rating_save_response(request):
 
     return JsonResponse({'status': 'success'})
 
-
-
-
 ###################################################################################################### 
 ###################################################################################################### 
 ###################################################################################################### 
@@ -567,21 +564,19 @@ def get_or_create_cue_mapping(user):
     except PCMCueMapping.DoesNotExist:
         pass
 
-    # اگر وجود نداشت، mapping جدید می‌سازیم
-    random.seed(user.id or user.pk)  # اگر id هنوز نباشد pk هم کار می‌کند
+    # ساخت یک generator تصادفی محلی و deterministically بر اساس user
+    rng = random.Random(user.id or user.pk)
 
     seqs = SEQUENCES[:]
-    random.shuffle(seqs)
+    rng.shuffle(seqs)
 
     mapping = {}
     for i, cue_url in enumerate(CUE_URLS):
-        # اگر تعداد cue بیشتر از ۳ باشد، از random.choice استفاده می‌کنیم
         if i < len(seqs):
             mapping[cue_url] = seqs[i]
         else:
-            mapping[cue_url] = random.choice(SEQUENCES)
+            mapping[cue_url] = rng.choice(SEQUENCES)
 
-    # حالا با defaults ایجاد می‌کنیم تا فیلد mapping حتما پر باشد
     obj, created = PCMCueMapping.objects.get_or_create(
         user=user,
         defaults={'mapping': mapping}
@@ -590,8 +585,7 @@ def get_or_create_cue_mapping(user):
 
 
 def get_sequence_order(user, total_trials: int) -> List[str]:
-    """ساخت لیست متعادل و تصادفی توالی‌ها با seed بر اساس user.id"""
-    random.seed(user.id)  # برای تکرارپذیری در refreshها
+    rng = random.Random(user.id)   # ← اینجا هم محلی
 
     possible_sequences = ["Neutral-Neutral", "Neutral-Negative", "Negative-Neutral"]
     trials_per_seq = total_trials // 3
@@ -601,12 +595,10 @@ def get_sequence_order(user, total_trials: int) -> List[str]:
     for _ in range(trials_per_seq):
         sequence_order.extend(possible_sequences)
 
-    # اضافه کردن باقی‌مانده
     extra_sequences = possible_sequences[:remainder]
     sequence_order.extend(extra_sequences)
 
-    # shuffle کردن لیست
-    random.shuffle(sequence_order)
+    rng.shuffle(sequence_order)
     return sequence_order
 
 @login_required(login_url='login_or_signup')
@@ -1234,77 +1226,77 @@ def final_view(request):
     user = request.user
     PCM_FILES_RAW = [
         '5-MP-MA/102.mp3',
-        # '5-MP-MA/152.mp3',
-        # '5-MP-MA/170.mp3',
-        # '5-MP-MA/246.mp3',
-        # '5-MP-MA/320.mp3',
-        # '5-MP-MA/322.mp3',
-        # '5-MP-MA/358.mp3',
-        # '5-MP-MA/361.mp3',
-        # '5-MP-MA/364.mp3',
-        # '5-MP-MA/368.mp3',
-        # '5-MP-MA/370.mp3',
-        # '5-MP-MA/373.mp3',
-        # '5-MP-MA/374.mp3',
-        # '5-MP-MA/375.mp3',
-        # '5-MP-MA/376.mp3',
-        # '5-MP-MA/382.mp3',
-        # '5-MP-MA/403.mp3',
-        # '5-MP-MA/410.mp3',
-        # '5-MP-MA/425.mp3',
-        # '5-MP-MA/698.mp3',
-        # '5-MP-MA/701.mp3',
-        # '5-MP-MA/705.mp3',
-        # '5-MP-MA/722.mp3',
-        # '5-MP-MA/724.mp3',
-        # '7-LP-HA/106.mp3',
-        # '7-LP-HA/115.mp3',
-        # '7-LP-HA/116.mp3',
-        # '7-LP-HA/133.mp3',
-        # '7-LP-HA/244.mp3',
-        # '7-LP-HA/255.mp3',
-        # '7-LP-HA/260.mp3',
-        # '7-LP-HA/261.mp3',
-        # '7-LP-HA/275.mp3',
-        # '7-LP-HA/276.mp3',
-        # '7-LP-HA/277.mp3',
-        # '7-LP-HA/278.mp3',
-        # '7-LP-HA/279.mp3',
-        # '7-LP-HA/282.mp3',
-        # '7-LP-HA/283.mp3',
-        # '7-LP-HA/284.mp3',
-        # '7-LP-HA/285.mp3',
-        # '7-LP-HA/286.mp3',
-        # '7-LP-HA/288.mp3',
-        # '7-LP-HA/289.mp3',
-        # '7-LP-HA/290.mp3',
-        # '7-LP-HA/292.mp3',
-        # '7-LP-HA/296.mp3',
-        # '7-LP-HA/310.mp3',
-        # '7-LP-HA/380.mp3',
-        # '7-LP-HA/420.mp3',
-        # '7-LP-HA/422.mp3',
-        # '7-LP-HA/423.mp3',
-        # '7-LP-HA/424.mp3',
-        # '7-LP-HA/501.mp3',
-        # '7-LP-HA/502.mp3',
-        # '7-LP-HA/600.mp3',
-        # '7-LP-HA/624.mp3',
-        # '7-LP-HA/625.mp3',
-        # '7-LP-HA/626.mp3',
-        # '7-LP-HA/699.mp3',
-        # '7-LP-HA/711.mp3',
-        # '7-LP-HA/712.mp3',
-        # '7-LP-HA/713.mp3',
-        # '7-LP-HA/714.mp3',
-        # '7-LP-HA/730.mp3',
-        # '7-LP-HA/732.mp3',
-        # '8-LP-MA/241.mp3',
-        # '8-LP-MA/242.mp3',
-        # '8-LP-MA/280.mp3',
-        # '8-LP-MA/293.mp3',
-        # '8-LP-MA/295.mp3',
-        # '8-LP-MA/611.mp3',
+        '5-MP-MA/152.mp3',
+        '5-MP-MA/170.mp3',
+        '5-MP-MA/246.mp3',
+        '5-MP-MA/320.mp3',
+        '5-MP-MA/322.mp3',
+        '5-MP-MA/358.mp3',
+        '5-MP-MA/361.mp3',
+        '5-MP-MA/364.mp3',
+        '5-MP-MA/368.mp3',
+        '5-MP-MA/370.mp3',
+        '5-MP-MA/373.mp3',
+        '5-MP-MA/374.mp3',
+        '5-MP-MA/375.mp3',
+        '5-MP-MA/376.mp3',
+        '5-MP-MA/382.mp3',
+        '5-MP-MA/403.mp3',
+        '5-MP-MA/410.mp3',
+        '5-MP-MA/425.mp3',
+        '5-MP-MA/698.mp3',
+        '5-MP-MA/701.mp3',
+        '5-MP-MA/705.mp3',
+        '5-MP-MA/722.mp3',
+        '5-MP-MA/724.mp3',
+        '7-LP-HA/106.mp3',
+        '7-LP-HA/115.mp3',
+        '7-LP-HA/116.mp3',
+        '7-LP-HA/133.mp3',
+        '7-LP-HA/244.mp3',
+        '7-LP-HA/255.mp3',
+        '7-LP-HA/260.mp3',
+        '7-LP-HA/261.mp3',
+        '7-LP-HA/275.mp3',
+        '7-LP-HA/276.mp3',
+        '7-LP-HA/277.mp3',
+        '7-LP-HA/278.mp3',
+        '7-LP-HA/279.mp3',
+        '7-LP-HA/282.mp3',
+        '7-LP-HA/283.mp3',
+        '7-LP-HA/284.mp3',
+        '7-LP-HA/285.mp3',
+        '7-LP-HA/286.mp3',
+        '7-LP-HA/288.mp3',
+        '7-LP-HA/289.mp3',
+        '7-LP-HA/290.mp3',
+        '7-LP-HA/292.mp3',
+        '7-LP-HA/296.mp3',
+        '7-LP-HA/310.mp3',
+        '7-LP-HA/380.mp3',
+        '7-LP-HA/420.mp3',
+        '7-LP-HA/422.mp3',
+        '7-LP-HA/423.mp3',
+        '7-LP-HA/424.mp3',
+        '7-LP-HA/501.mp3',
+        '7-LP-HA/502.mp3',
+        '7-LP-HA/600.mp3',
+        '7-LP-HA/624.mp3',
+        '7-LP-HA/625.mp3',
+        '7-LP-HA/626.mp3',
+        '7-LP-HA/699.mp3',
+        '7-LP-HA/711.mp3',
+        '7-LP-HA/712.mp3',
+        '7-LP-HA/713.mp3',
+        '7-LP-HA/714.mp3',
+        '7-LP-HA/730.mp3',
+        '7-LP-HA/732.mp3',
+        '8-LP-MA/241.mp3',
+        '8-LP-MA/242.mp3',
+        '8-LP-MA/280.mp3',
+        '8-LP-MA/293.mp3',
+        '8-LP-MA/295.mp3',
+        '8-LP-MA/611.mp3',
     ]
 
     # حذف تکراری‌ها
@@ -1319,6 +1311,7 @@ def final_view(request):
         arousal__isnull=True
     ).count()
     PCM_percentage = (rating_pcm_done / TOTAL_MAIN_PCM_TRIALS) * 100 if TOTAL_MAIN_PCM_TRIALS > 0 else 100
+    print(PCM_percentage)
     if PCM_percentage == 100 :
         pcm_completed = True
     else:

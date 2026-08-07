@@ -3,6 +3,9 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from .models import *
+from django.utils.html import format_html
+from django.utils.safestring import mark_safe
+import json
 
 @admin.register(Choice)
 class ChoiceAdmin(admin.ModelAdmin):
@@ -90,7 +93,82 @@ class CustomUserAdmin(BaseUserAdmin):
     search_fields = ("username", "first_name", "last_name")
     ordering = ("username",)
 
-admin.site.register(PCMCueMapping)
+
+# ==============================
+# ادمین مخصوص PCMCueMapping
+# ==============================
+@admin.register(PCMCueMapping)
+class PCMCueMappingAdmin(admin.ModelAdmin):
+    list_display = ('user', 'mapping_preview', 'created_at')
+    list_filter = ('created_at',)
+    search_fields = ('user__username', 'user__email', 'user__first_name', 'user__last_name')
+    readonly_fields = ('user', 'mapping_pretty', 'created_at')
+    ordering = ('-created_at',)
+
+    def mapping_preview(self, obj):
+        if not obj.mapping:
+            return "-"
+        
+        lines = []
+        for cue, seq in obj.mapping.items():
+            # فقط عدد قبل از .mp3 رو بگیر
+            cue_name = cue.split('/')[-1].replace('.mp3', '')
+            
+            # تبدیل Neutral-Negative به Neutral -> Negative
+            pretty_seq = seq.replace('-', ' -> ')
+            
+            lines.append(f"<b>{cue_name}</b> → {pretty_seq}")
+        
+        return mark_safe("<br>".join(lines))
+
+    mapping_preview.short_description = "نگاشت Cue → Sequence"
+
+    def mapping_pretty(self, obj):
+        if not obj.mapping:
+            return "-"
+        pretty = json.dumps(obj.mapping, indent=2, ensure_ascii=False)
+        return format_html(
+            "<pre style='direction:ltr; background:#f5f5f5; padding:12px; border-radius:6px;'>{}</pre>",
+            pretty
+        )
+    
+    mapping_pretty.short_description = "نگاشت کامل (JSON)"
+
+
+class CustomUserAdmin(admin.ModelAdmin):
+    list_display = (
+        'username',
+        'email',
+        'first_name',
+        'last_name',
+        'is_staff',
+        'cue_mapping_preview',
+        'date_joined',
+    )
+    search_fields = ('username', 'email', 'first_name', 'last_name')
+    list_filter = ('is_staff', 'is_active', 'date_joined')
+
+    def cue_mapping_preview(self, obj):
+        try:
+            mapping_obj = obj.cue_mapping
+        except (PCMCueMapping.DoesNotExist, AttributeError):
+            try:
+                mapping_obj = PCMCueMapping.objects.get(user=obj)
+            except PCMCueMapping.DoesNotExist:
+                return format_html('<span style="color:#999;">ندارد</span>')
+
+        if not mapping_obj.mapping:
+            return "-"
+
+        lines = []
+        for cue, seq in mapping_obj.mapping.items():
+            cue_name = cue.split('/')[-1].replace('.mp3', '')
+            pretty_seq = seq.replace('-', ' -> ')
+            lines.append(f"<b>{cue_name}</b> → {pretty_seq}")
+        
+        return mark_safe("<br>".join(lines))
+
+    cue_mapping_preview.short_description = "نگاشت Cue به Sequence"
 
 # ------------------- Questionnaire & Related -------------------
 @admin.register(Questionnaire)
