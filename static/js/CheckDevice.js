@@ -4,7 +4,7 @@
 const DEVICE_POLICY = {
   allowedDeviceTypes: ['Desktop','Mobile','Tablet'],   // موبایل هم مجاز است (ولی باید افقی شود)
   allowedOS: [],
-  allowedBrowsers: ['Chrome', 'Firefox'],
+  allowedBrowsers: ['Chrome', 'Firefox','Edge'],
   minScreenWidth: 0,                           // برای موبایل محدودیت عرض نمی‌گذاریم
   allowTouchDevices: true
 };
@@ -122,50 +122,6 @@ function showBlockedMessage(info) {
 }
 
 // ======================================================
-// تابع اصلی
-// ======================================================
-function initDeviceCheck(stageName) {
-  const info = detectDevice();
-  const check = checkDeviceAllowed(info);
-
-  // ۱. اگر دستگاه غیرمجاز بود
-  if (!check.allowed) {
-    showBlockedMessage(info);
-    return false; // متوقف کن
-  }
-
-  // ۲. ثبت لاگ دستگاه
-  const payload = {
-    stage: stageName,
-    device_type: info.device_type,
-    os: info.os,
-    browser: info.browser,
-    screen_width: info.screen_width,
-    screen_height: info.screen_height,
-    is_touch: info.is_touch,
-    audio_volume: window.audioVolume || null
-  };
-
-  fetch('/save-device-log/', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'X-CSRFToken': getCsrfToken()
-    },
-    body: JSON.stringify(payload)
-  }).catch(err => console.error('Error saving device log:', err));
-
-  // ۳. اگر موبایل بود → پیام چرخش را مدیریت کن
-  if (info.device_type === 'Mobile') {
-    updateRotateMessage();
-    window.addEventListener('resize', updateRotateMessage);
-    window.addEventListener('orientationchange', updateRotateMessage);
-  }
-
-  return true;
-}
-
-// ======================================================
 // مدیریت پیام چرخش گوشی (با استایل داخلی)
 // ======================================================
 function isLandscape() {
@@ -228,48 +184,4 @@ function updateRotateMessage() {
   } else {
     rotateEl.style.display = 'flex';
   }
-}
-
-// ======================================================
-// تابع اصلی (بدون تغییر زیاد)
-// ======================================================
-function initDeviceCheck(stageName) {
-  const info = detectDevice();
-  const check = checkDeviceAllowed(info);
-
-  // ۱. اگر دستگاه غیرمجاز بود
-  if (!check.allowed) {
-    showBlockedMessage(info);
-    return false;
-  }
-
-  // ۲. ثبت لاگ دستگاه
-  const payload = {
-    stage: stageName,
-    device_type: info.device_type,
-    os: info.os,
-    browser: info.browser,
-    screen_width: info.screen_width,
-    screen_height: info.screen_height,
-    is_touch: info.is_touch,
-    audio_volume: window.audioVolume || null
-  };
-
-  fetch('/save-device-log/', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'X-CSRFToken': getCsrfToken()
-    },
-    body: JSON.stringify(payload)
-  }).catch(err => console.error('Error saving device log:', err));
-
-  // ۳. اگر موبایل بود → پیام چرخش را مدیریت کن
-  if (info.device_type === 'Mobile') {
-    updateRotateMessage();
-    window.addEventListener('resize', updateRotateMessage);
-    window.addEventListener('orientationchange', updateRotateMessage);
-  }
-
-  return true;
 }

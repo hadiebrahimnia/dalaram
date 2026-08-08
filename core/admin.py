@@ -398,41 +398,14 @@ class RatingResponseAdmin(admin.ModelAdmin):
     
 
 
-# ------------------- مرحله ۱: تمرین تشخیص توالی -------------------
-class PCMSequencePracticeResponseInline(admin.TabularInline):
-    model = PCMSequencePracticeResponse
-    extra = 0
-    can_delete = False
-    readonly_fields = ('trial', 'cue_short', 'stimulus1_short', 'stimulus2_short','category_stim1','category_stim2', 'user_response', 'delay_number','response_input_method','is_correct_display', 'created_at')
-    fields = readonly_fields
-    ordering = ('trial',)
-
-    def cue_short(self, obj): return obj.cue[-30:]
-    def stimulus1_short(self, obj): return obj.stimulus1[-30:] if obj.stimulus1 else '-'
-    def stimulus2_short(self, obj): return obj.stimulus2[-30:] if obj.stimulus2 else '-'
-    def is_correct_display(self, obj): return "✓" if obj.is_correct else "✗" if obj.is_correct is False else "-"
 
 
-@admin.register(PCMSequencePracticeResponse)
-class PCMSequencePracticeResponseAdmin(admin.ModelAdmin):
-    list_display = ('user_username', 'trial', 'cue_short','category_stim2','category_stim1', 'user_response','response_rt' ,'delay_number','response_input_method','is_correct_display', 'created_at')
-    list_filter = ('user', 'created_at')
-    search_fields = ('user__username', 'cue', 'user_response')
-    readonly_fields = ('user', 'trial', 'cue', 'stimulus1', 'stimulus2','category_stim1','category_stim2', 'user_response','response_rt','delay_number','response_input_method','is_correct', 'created_at','is_active')
-    ordering = ('-created_at', 'trial')
-
-    def user_username(self, obj): return obj.user.username
-    def cue_short(self, obj): return obj.cue[-40:]
-    def is_correct_display(self, obj): return "✓ درست" if obj.is_correct else "✗ غلط" if obj.is_correct is False else "—"
-
-
-# ------------------- مرحله ۲: تمرین رتبه‌بندی خوشایندی -------------------
+# ------------------- مرحله 1: تمرین رتبه‌بندی خوشایندی -------------------
 @admin.register(PCMValencePracticeResponse)
 class PCMValencePracticeResponseAdmin(admin.ModelAdmin):
     list_display = (
         'user_username',
         'trial',
-        'cue_short',
         'cue',
         'stimulus1',
         'stimulus2',
@@ -507,9 +480,106 @@ class PCMValencePracticeResponseAdmin(admin.ModelAdmin):
     def user_username(self, obj):
         return obj.user.username
 
-    @admin.display(description='سرنخ (کوتاه)')
-    def cue_short(self, obj):
-        return obj.cue[-30:] if obj.cue else "-"
+    
+# ------------------- مرحله 2: تمرین تشخیص توالی -------------------
+class PCMSequencePracticeResponseInline(admin.TabularInline):
+    model = PCMSequencePracticeResponse
+    extra = 0
+    can_delete = False
+    readonly_fields = ('block','trial', 'stimulus1_short', 'stimulus2_short','category_stim1','category_stim2', 'user_response', 'delay_number','response_input_method','expected_sequence','is_consistent','is_correct_display', 'created_at')
+    fields = readonly_fields
+    ordering = ('trial',)
+
+    def cue_short(self, obj): return obj.cue[-30:]
+    def stimulus1_short(self, obj): return obj.stimulus1[-30:] if obj.stimulus1 else '-'
+    def stimulus2_short(self, obj): return obj.stimulus2[-30:] if obj.stimulus2 else '-'
+    def is_correct_display(self, obj): return "✓" if obj.is_correct else "✗" if obj.is_correct is False else "-"
+
+
+@admin.register(PCMSequencePracticeResponse)
+class PCMSequencePracticeResponseAdmin(admin.ModelAdmin):
+    list_display = ('user_username','block', 'trial','category_stim2','category_stim1', 'user_response','response_rt' ,'delay_number','response_input_method','is_correct_display','is_consistent','expected_sequence', 'created_at')
+    list_filter = ('user', 'created_at')
+    search_fields = ('user__username', 'cue', 'user_response')
+    readonly_fields = ('user','block', 'trial', 'cue', 'stimulus1', 'stimulus2','category_stim1','category_stim2', 'expected_sequence','is_consistent','user_response','is_correct','response_rt','delay_number','response_input_method', 'created_at','is_active')
+    ordering = ('-created_at', 'trial')
+
+    def user_username(self, obj): return obj.user.username
+    def cue_short(self, obj): return obj.cue[-40:]
+    def is_correct_display(self, obj): return "✓ درست" if obj.is_correct else "✗ غلط" if obj.is_correct is False else "—"
+
+
+class PCMSequenceCatchResponseInline(admin.TabularInline):
+    model = PCMSequenceCatchResponse
+    extra = 0
+    can_delete = False
+
+    readonly_fields = (
+        'trial',
+        'block',
+        'cue',
+        'user_response',
+        'response_rt',
+        'delay_number',
+        'response_input_method',
+        'is_correct',
+        'created_at',
+        'is_active',
+    )
+
+    fields = readonly_fields
+    ordering = ('trial',)
+
+
+@admin.register(PCMSequenceCatchResponse)
+class PCMSequenceCatchResponseAdmin(admin.ModelAdmin):
+    list_display = (
+        'user_username',
+        'trial',
+        'block',
+        'cue',
+        'user_response',
+        'response_rt',
+        'delay_number',
+        'response_input_method',
+        'is_correct',
+        'is_active',
+        'created_at',
+    )
+
+    list_filter = (
+        'user',
+        'block',
+        'is_correct',
+        'is_active',
+        'created_at',
+    )
+
+    search_fields = (
+        'user__username',
+        'cue',
+        'user_response',
+    )
+
+    readonly_fields = (
+        'user',
+        'trial',
+        'block',
+        'cue',
+        'user_response',
+        'response_rt',
+        'delay_number',
+        'response_input_method',
+        'is_correct',
+        'created_at',
+        'is_active'
+    )
+
+    ordering = ('-created_at', 'trial')
+
+    @admin.display(description='کاربر')
+    def user_username(self, obj):
+        return obj.user.username
 
 
 # ------------------- مرحله ۳: آزمون اصلی PCM -------------------
@@ -542,7 +612,6 @@ class PCMCatchResponseAdmin(admin.ModelAdmin):
         'user_username',
         'trial',
         'block',
-        'cue_short',
         'cue',
         'user_response',
         'response_rt',
@@ -587,9 +656,6 @@ class PCMCatchResponseAdmin(admin.ModelAdmin):
     def user_username(self, obj):
         return obj.user.username
 
-    @admin.display(description='سرنخ (کوتاه)')
-    def cue_short(self, obj):
-        return obj.cue[-40:] if obj.cue else "-"
 
 
 @admin.register(PCMMainResponse)
@@ -598,7 +664,6 @@ class PCMMainResponseAdmin(admin.ModelAdmin):
         'user_username',
         'block',
         'trial',
-        'cue_short',
         'cue',
         'stimulus1',
         'stimulus2',
@@ -901,4 +966,7 @@ class DeviceLogAdmin(admin.ModelAdmin):
 
     def has_change_permission(self, request, obj=None):
         return False
-    
+
+
+
+admin.site.register(VolumeLog)

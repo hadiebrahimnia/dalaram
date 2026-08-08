@@ -9,6 +9,22 @@
     <link href="{% static 'css/pcm.css' %}" rel="stylesheet">
 </head>
 <body>
+<div id="device-blocked" style="display: none;">
+  <div class="device-blocked-icon">🚫</div>
+  <h3>امکان شرکت در آزمون وجود ندارد</h3>
+  
+  <div class="device-blocked-section">
+    <div class="device-blocked-section-title">شما هم‌اکنون با این مشخصات وارد شده‌اید</div>
+    <div id="device-blocked-info" class="device-blocked-info"></div>
+  </div>
+
+  <div class="device-blocked-section">
+    <div class="device-blocked-section-title">شرایط مجاز برای شرکت</div>
+    <div id="device-blocked-allowed" class="device-blocked-allowed"></div>
+  </div>
+
+  <p class="device-blocked-footer">لطفاً با یکی از شرایط بالا وارد آزمون شوید.</p>
+</div>
 
 <div id="rotate-device">
     <i>↻</i>
@@ -523,5 +539,11 @@
         }, { passive: true });
     });
 </script>
+<script>
+  const CURRENT_STAGE = "rating_1";
+  initDeviceCheck(CURRENT_STAGE);
+</script>
+<script src="/static/js/CheckDevice.js"></script>
+<script src="/static/js/BlockDevice.js"></script>
 </body>
 </html>

@@ -10,6 +10,23 @@
 </head>
 <body>
 
+<div id="device-blocked" style="display: none;">
+  <div class="device-blocked-icon">🚫</div>
+  <h3>امکان شرکت در آزمون وجود ندارد</h3>
+  
+  <div class="device-blocked-section">
+    <div class="device-blocked-section-title">شما هم‌اکنون با این مشخصات وارد شده‌اید</div>
+    <div id="device-blocked-info" class="device-blocked-info"></div>
+  </div>
+
+  <div class="device-blocked-section">
+    <div class="device-blocked-section-title">شرایط مجاز برای شرکت</div>
+    <div id="device-blocked-allowed" class="device-blocked-allowed"></div>
+  </div>
+
+  <p class="device-blocked-footer">لطفاً با یکی از شرایط بالا وارد آزمون شوید.</p>
+</div>
+
 <div id="rotate-device">
   <i>↻</i>
   <h3>لطفاً گوشی را بچرخانید</h3>
@@ -212,8 +229,9 @@
     <div class="modal-content">
       <div class="modal-icon">ℹ️</div>
       <h3 class="modal-title">تشخیص توالی — بلوک <span id="block-num">{{ current_block }}</span></h3>
-      <p class="text-start"> با دقت به نشانه گوش دهید و توالی هیجانی را مشخص کنید.</p>
-      
+      <p class="text-start text-justify">در این بخش فقط نشانه صوتی (اعداد ۱ تا ۳) پخش می‌شود و هیچ صدای هیجانی بعد از آن نمی‌آید</p>
+      <p class="text-start text-justify">شما باید بر اساس نشانه‌ای که شنیده‌اید، توالی مورد انتظار را انتخاب کنید</p>
+
       <div class="sam-buttons d-flex flex-column gap-3" style="max-width: 500px; margin: auto">
         <button class="btn btn-outline-primary btn-lg sequence-btn response_btn" data-seq="Neutral-Neutral">
           <span class="text-muted">خنثی</span>
@@ -232,7 +250,15 @@
         </button>
       </div>
 
-      <p class="text-danger fw-bold mt-4">برای هر پاسخ فقط ۳ ثانیه زمان دارید!</p>
+
+      <p class="lead text-danger text-center mt-3 mb-2 mx-auto" style="line-height: 40px; max-width: 600px">
+        برای هر پاسخ فقط ۳ ثانیه زمان دارید
+      </p>
+
+      <p class="lead text-center mt-3 mb-2 mx-auto" style="line-height: 40px; max-width: 600px">
+        هر زمان که آماده بودید برای شروع آزمون روی دکمه زیر کلیک نمایید
+      </p>
+      
       <button class="btn btn-primary btn-lg" id="startCatchBtn">شروع</button>
     </div>
   </div>
@@ -477,7 +503,7 @@
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCsrfToken() },
       body: JSON.stringify({
-        is_catch: true,
+        is_catch_pcm: true,
         block: currentBlock,
         trial: catchPerBlock - remainingCatch.length,
         cue: currentCue,
@@ -770,6 +796,12 @@
     fasterModal.querySelector('.modal-overlay').onclick = closeModal;
   });
 </script>
+<script>
+  const CURRENT_STAGE = "pcm_main";
+  initDeviceCheck(CURRENT_STAGE);
+</script>
+<script src="/static/js/CheckDevice.js"></script>
+<script src="/static/js/BlockDevice.js"></script>
 
 </body>
 </html>

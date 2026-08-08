@@ -392,6 +392,18 @@ class DeviceLog(models.Model):
     def __str__(self):
         return f"{self.user.username} | {self.stage} | {self.device_type}"
 
+class VolumeLog(models.Model):
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='volume_log')
+    volume = models.PositiveIntegerField( null=True, blank=True, verbose_name="volume" )
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = "حجم صدا"
+        verbose_name_plural = "حجم صدا"
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"{self.user.username} | {self.volume} "
 
 class FeedbackSettings(models.Model):
     # ... فیلدهای دیگر تنظیمات ...
@@ -558,38 +570,8 @@ class RatingResponse(models.Model):
 ###################################################################################################### 
 ###################################################################################################### 
 ###################################################################################################### 
-class PCMSequencePracticeResponse(models.Model):  # مرحله ۱
-    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
-    trial = models.PositiveIntegerField()
-    cue = models.CharField(max_length=100)
-    stimulus1 = models.CharField(max_length=100, null=True, blank=True)
-    stimulus2 = models.CharField(max_length=100, null=True, blank=True)
-    category_stim1 = models.CharField(max_length=10, null=True, blank=True)
-    category_stim2 = models.CharField(max_length=10, null=True, blank=True)
-    user_response = models.CharField(max_length=30, null=True, blank=True)  # توالی انتخابی
-    response_rt = models.PositiveIntegerField(null=True, blank=True)
-    delay_number = models.PositiveIntegerField(default=0, blank=True) 
-    response_input_method = models.CharField(
-        max_length=20, 
-        null=True, 
-        blank=True,
-        choices=[
-            ('keyboard', 'Keyboard'),
-            ('mouse', 'Mouse'),
-            ('touch', 'Touch'),
-        ]
-    )
-    is_correct = models.BooleanField(null=True, blank=True)
-    created_at = models.DateTimeField(auto_now_add=True)
-    is_active = models.BooleanField(default=True, verbose_name="فعال/غیرفعال")
-
-    class Meta:
-        unique_together = ('user', 'trial', 'created_at')
-        verbose_name = "B-1)تمرین تشخیص توالی"
-        ordering = ['created_at']
-
-
-class PCMValencePracticeResponse(models.Model):  # مرحله ۲
+# مرحله 1
+class PCMValencePracticeResponse(models.Model):  
     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
     trial = models.PositiveIntegerField()
     cue = models.CharField(max_length=100)
@@ -641,11 +623,55 @@ class PCMValencePracticeResponse(models.Model):  # مرحله ۲
 
     class Meta:
         unique_together = ('user', 'trial')
-        verbose_name = "B-2)تمرین رتبه‌بندی خوشایندی"
+        verbose_name = "B-1)ValencePractice"
         ordering = ['trial']
 
+# مرحله 2
+class PCMSequencePracticeResponse(models.Model):  
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
+    block = models.PositiveIntegerField(
+            verbose_name="شماره بلاک", null=True, blank=True
+        )
+    trial = models.PositiveIntegerField()
+    cue = models.CharField(max_length=100)
+    stimulus1 = models.CharField(max_length=100, null=True, blank=True)
+    stimulus2 = models.CharField(max_length=100, null=True, blank=True)
+    category_stim1 = models.CharField(max_length=10, null=True, blank=True)
+    category_stim2 = models.CharField(max_length=10, null=True, blank=True)
+    expected_sequence = models.CharField(
+        max_length=30,
+        verbose_name="توالی مورد انتظار",
+        blank=True,
+        null=True
+    )
+    is_consistent = models.BooleanField(
+        default=True,
+        verbose_name="آیا توالی ارائه‌شده با کیو سازگار بود؟"
+    )
+    user_response = models.CharField(max_length=30, null=True, blank=True)
+    response_rt = models.PositiveIntegerField(null=True, blank=True)
+    delay_number = models.PositiveIntegerField(default=0, blank=True) 
+    response_input_method = models.CharField(
+        max_length=20, 
+        null=True, 
+        blank=True,
+        choices=[
+            ('keyboard', 'Keyboard'),
+            ('mouse', 'Mouse'),
+            ('touch', 'Touch'),
+        ]
+    )
+    is_correct = models.BooleanField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    is_active = models.BooleanField(default=True, verbose_name="فعال/غیرفعال")
 
-class PCMCatchResponse(models.Model):  # مرحله ۱
+    class Meta:
+        unique_together = ('user', 'trial', 'created_at')
+        verbose_name = "B-2)SequencePractice"
+        ordering = ['created_at']
+
+
+class PCMSequenceCatchResponse(models.Model):  
     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
     block = models.PositiveIntegerField(
         verbose_name="شماره بلاک", null=True, blank=True
@@ -671,7 +697,37 @@ class PCMCatchResponse(models.Model):  # مرحله ۱
 
     class Meta:
         unique_together = ('user', 'trial', 'created_at')
-        verbose_name = "B-3)PCM-Catch"
+        verbose_name = "B-3)SequenceCatch"
+        ordering = ['created_at']
+
+# مرحله 3
+class PCMCatchResponse(models.Model):  
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
+    block = models.PositiveIntegerField(
+        verbose_name="شماره بلاک", null=True, blank=True
+    )
+    trial = models.PositiveIntegerField()
+    cue = models.CharField(max_length=100)
+    user_response = models.CharField(max_length=30, null=True, blank=True)  # توالی انتخابی
+    response_rt = models.PositiveIntegerField(null=True, blank=True)
+    delay_number = models.PositiveIntegerField(default=0, blank=True)
+    response_input_method = models.CharField(
+        max_length=20, 
+        null=True, 
+        blank=True,
+        choices=[
+            ('keyboard', 'Keyboard'),
+            ('mouse', 'Mouse'),
+            ('touch', 'Touch'),
+        ]
+    )
+    is_correct = models.BooleanField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    is_active = models.BooleanField(default=True, verbose_name="فعال/غیرفعال")
+
+    class Meta:
+        unique_together = ('user', 'trial', 'created_at')
+        verbose_name = "B-4)PCM-Catch"
         ordering = ['created_at']
 
 class PCMMainResponse(models.Model):
@@ -798,8 +854,8 @@ class PCMMainResponse(models.Model):
 
     class Meta:
         unique_together = ('user', 'block', 'trial')
-        verbose_name = "B-3)PCM-Main"
-        verbose_name_plural = "B-3)PCM-Main"
+        verbose_name = "B-5)PCM-Main"
+        verbose_name_plural = "B-5)PCM-Main"
         ordering = ['-created_at', 'block', 'trial']
 
     def __str__(self):
@@ -847,7 +903,7 @@ class RatingPracticeResponse(models.Model):  # مرحله ۴ - تمرین رتب
 
     class Meta:
         unique_together = ('user', 'trial')
-        verbose_name = "B-4)تمرین رتبه‌بندی (Valence+Arousal)"
+        verbose_name = "B-6)RatingPractice"
         ordering = ['trial']
 
 class RatingMainResponse(models.Model):  # مرحله ۵ - رتبه‌بندی
@@ -886,7 +942,7 @@ class RatingMainResponse(models.Model):  # مرحله ۵ - رتبه‌بندی
 
     class Meta:
         unique_together = ('user', 'stimulus_number')
-        verbose_name = "B-5)رتبه‌بندی اصلی"
+        verbose_name = "B-7)Rating"
         ordering = ['-created_at']
 
 

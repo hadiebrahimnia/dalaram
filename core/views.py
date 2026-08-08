@@ -47,6 +47,25 @@ def save_device_log(request):
 
     except Exception as e:
         return JsonResponse({'status': 'error', 'message': str(e)}, status=400)
+
+@login_required
+@require_POST
+def save_volume_log(request):
+    try:
+        data = json.loads(request.body)
+
+        VolumeLog.objects.create(
+            user=request.user,
+            volume=data.get("volume")
+        )
+
+        return JsonResponse({"status": "success"})
+
+    except Exception as e:
+        return JsonResponse(
+            {"status": "error", "message": str(e)},
+            status=400
+        )
     
 # _LATIN_TO_PERSIAN_DIGITS = str.maketrans('0123456789', '۰۱۲۳۴۵۶۷۸۹')
 
@@ -356,6 +375,8 @@ def rating_save_response(request):
         return JsonResponse({'status': 'error', 'message': 'JSON نامعتبر'}, status=400)
 
     user = request.user
+
+    
     # مرحله ۱: تمرین تشخیص توالی
 
     if data.get('is_rating_practice'):
@@ -408,6 +429,7 @@ def extract_stimulus_number(url: Optional[str]) -> Optional[int]:
         return int(number_str)
     except (IndexError, ValueError):
         return None
+
 
 def get_cues_mapping() -> Dict[str, str]:
     """ساخت mapping بین فایل‌های cue و sequence مورد انتظار"""
@@ -574,50 +596,118 @@ def get_used_stimuli_urls(user):
             stimuli.add(resp.stimulus2)
     return list(stimuli)
 
-SEQUENCES = ['Neutral-Neutral', 'Negative-Neutral', 'Neutral-Negative']
+# SEQUENCES = ['Neutral-Neutral', 'Negative-Neutral', 'Neutral-Negative']
+# def get_or_create_cue_mapping(user):
+#     # ابتدا سعی می‌کنیم mapping موجود را بگیریم
+#     try:
+#         return PCMCueMapping.objects.get(user=user).mapping
+#     except PCMCueMapping.DoesNotExist:
+#         pass
+
+#     # ساخت یک generator تصادفی محلی و deterministically بر اساس user
+#     rng = random.Random(user.id or user.pk)
+
+#     seqs = SEQUENCES[:]
+#     rng.shuffle(seqs)
+
+#     mapping = {}
+#     for i, cue_url in enumerate(CUE_URLS):
+#         if i < len(seqs):
+#             mapping[cue_url] = seqs[i]
+#         else:
+#             mapping[cue_url] = rng.choice(SEQUENCES)
+
+#     obj, created = PCMCueMapping.objects.get_or_create(
+#         user=user,
+#         defaults={'mapping': mapping}
+#     )
+#     return obj.mapping
+
+
+# def get_sequence_order(user, total_trials: int) -> List[str]:
+#     rng = random.Random(user.id)   # ← اینجا هم محلی
+
+#     possible_sequences = ["Neutral-Neutral", "Neutral-Negative", "Negative-Neutral"]
+#     trials_per_seq = total_trials // 3
+#     remainder = total_trials % 3
+
+#     sequence_order = []
+#     for _ in range(trials_per_seq):
+#         sequence_order.extend(possible_sequences)
+
+#     extra_sequences = possible_sequences[:remainder]
+#     sequence_order.extend(extra_sequences)
+
+#     rng.shuffle(sequence_order)
+#     return sequence_order
+
+
+
+SEQUENCES = ['Negative-Neutral', 'Neutral-Negative', 'Neutral-Neutral']
 def get_or_create_cue_mapping(user):
-    # ابتدا سعی می‌کنیم mapping موجود را بگیریم
     try:
         return PCMCueMapping.objects.get(user=user).mapping
     except PCMCueMapping.DoesNotExist:
         pass
 
-    # ساخت یک generator تصادفی محلی و deterministically بر اساس user
-    rng = random.Random(user.id or user.pk)
-
-    seqs = SEQUENCES[:]
-    rng.shuffle(seqs)
-
-    mapping = {}
-    for i, cue_url in enumerate(CUE_URLS):
-        if i < len(seqs):
-            mapping[cue_url] = seqs[i]
-        else:
-            mapping[cue_url] = rng.choice(SEQUENCES)
-
+    # تخصیص ثابت و بدون رندم برای همه کاربران
+    mapping = {
+        "/static/sounds/CUE/1/1.mp3": "Negative-Neutral",
+        "/static/sounds/CUE/2/2.mp3": "Neutral-Negative",
+        "/static/sounds/CUE/3/3.mp3": "Neutral-Neutral",
+    }
+    # اگر CUE_URLS از جای دیگری می‌آید و ممکن است ترتیب یا تعدادش فرق کند:
     obj, created = PCMCueMapping.objects.get_or_create(
         user=user,
         defaults={'mapping': mapping}
     )
     return obj.mapping
 
-
 def get_sequence_order(user, total_trials: int) -> List[str]:
-    rng = random.Random(user.id)   # ← اینجا هم محلی
-
-    possible_sequences = ["Neutral-Neutral", "Neutral-Negative", "Negative-Neutral"]
+    possible_sequences = ["Negative-Neutral", "Neutral-Negative", "Neutral-Neutral"]
     trials_per_seq = total_trials // 3
     remainder = total_trials % 3
-
     sequence_order = []
     for _ in range(trials_per_seq):
         sequence_order.extend(possible_sequences)
-
-    extra_sequences = possible_sequences[:remainder]
-    sequence_order.extend(extra_sequences)
-
-    rng.shuffle(sequence_order)
+    sequence_order.extend(possible_sequences[:remainder])
     return sequence_order
+
+def normalize_cue_to_full(cue, cues_mapping) -> Optional[str]:
+    """
+    هر فرمتی از cue (عدد، نام فایل، یا مسیر کامل) را
+    به مسیر کامل موجود در cues_mapping تبدیل می‌کند.
+    """
+    if cue is None:
+        return None
+
+    cue = str(cue).strip()
+
+    # ۱. اگر از قبل مسیر کامل است
+    if cue in cues_mapping:
+        return cue
+
+    # ۲. اگر فقط عدد است (مثل "1" یا 1)
+    if cue.isdigit():
+        candidate = f"/static/sounds/CUE/{cue}/{cue}.mp3"
+        if candidate in cues_mapping:
+            return candidate
+
+    # ۳. اگر فقط نام فایل است (مثل "1.mp3")
+    if cue.endswith('.mp3'):
+        number = cue.split('.')[0]
+        if number.isdigit():
+            candidate = f"/static/sounds/CUE/{number}/{number}.mp3"
+            if candidate in cues_mapping:
+                return candidate
+
+    # ۴. جستجوی آخرین بخش مسیر
+    for full in cues_mapping:
+        if full.endswith(f"/{cue}") or full.endswith(f"/{cue}.mp3"):
+            return full
+
+    return None
+
 
 @login_required(login_url='login_or_signup')
 @questionnaires_required([1, 2, 3])
@@ -628,95 +718,7 @@ def pcm_view(request):
     NEUTRAL_URLS = [build_audio_url(f) for f in neutral_raw]
     NEGATIVE_URLS = [build_audio_url(f) for f in negative_raw]
 
-    # --- مرحله ۱: تمرین تشخیص توالی ---
-    SEQ_TRIALS = 21  # تعداد کل مرحله تمرینی
-    SEQ_THRESHOLD = 0.80  # درصد پاسخ درست برای گذر از مرحله 
-    
-    seq_responses = PCMSequencePracticeResponse.objects.filter(user=user)
-    seq_count = seq_responses.count()  # تعداد پاسخ های ثبت شده 
-    progress_percentage = (seq_count / SEQ_TRIALS) * 100
-
-    feedback = FeedbackSettings.objects.first()
-    seq_correct_so_far = seq_responses.filter(is_correct=True).count()
-
-    if seq_count < SEQ_TRIALS:  # تغییر به < برای جلوگیری از >= که قبلاً بود
-        # محاسبه تعداد باقی‌مانده و ساخت لیست متعادل و تصادفی برای توالی‌های باقی‌مانده
-        remain_trials = SEQ_TRIALS - seq_count
-        possible_sequences = ["Neutral-Neutral", "Neutral-Negative", "Negative-Neutral"]
-        
-        # شمارش تعداد استفاده‌شده از هر توالی تا حالا (برای حفظ تعادل کلی)
-        used_sequences = [
-            f"{r.category_stim1}-{r.category_stim2}" 
-            for r in seq_responses if r.category_stim1 and r.category_stim2
-        ]
-        counts = Counter(used_sequences)
-        
-        # محاسبه تعداد هدف کلی برای هر توالی (برای کل SEQ_TRIALS)
-        target_per_seq = SEQ_TRIALS // len(possible_sequences)
-        remainder_total = SEQ_TRIALS % len(possible_sequences)
-        
-        # محاسبه تعداد باقی‌مانده برای هر توالی بر اساس هدف - استفاده‌شده
-        remaining_per_seq = {}
-        for i, seq in enumerate(possible_sequences):
-            target = target_per_seq + (1 if i < remainder_total else 0)
-            remaining_per_seq[seq] = max(0, target - counts.get(seq, 0))
-        
-        # ساخت لیست remaining_sequences بر اساس تعداد باقی‌مانده هر توالی
-        sequence_order = []
-        for seq, rem in remaining_per_seq.items():
-            sequence_order.extend([seq] * rem)
-        
-        # اگر مجموع باقی‌مانده برابر remain_trials نبود (به دلیل خطا)، تنظیم کنیم
-        if len(sequence_order) != remain_trials:
-            # این نباید اتفاق بیفتد، اما برای ایمنی
-            trials_per_seq = remain_trials // len(possible_sequences)
-            remainder = remain_trials % len(possible_sequences)
-            sequence_order = []
-            for i in range(trials_per_seq):
-                sequence_order.extend(possible_sequences)
-            for i in range(remainder):
-                sequence_order.append(possible_sequences[i])
-        
-        # shuffle تصادفی لیست
-        random.shuffle(sequence_order)
-        
-        context = {
-            'current_trial': seq_count,
-            'total_trials': SEQ_TRIALS,
-            'progress_percentage': progress_percentage,
-            'cue_urls': json.dumps(CUE_URLS),
-            'neutral_urls': json.dumps(NEUTRAL_URLS),
-            'negative_urls': json.dumps(NEGATIVE_URLS),
-            'cues_mapping': json.dumps(cues_mapping),
-            'remaining_sequences': json.dumps(sequence_order),  
-
-            # --- تنظیمات فیدبک ---
-            'feedback_mode': feedback.feedback_mode if feedback else 'always',
-            'feedback_first_n': feedback.feedback_first_n if feedback else 5,
-            'feedback_until_correct': feedback.feedback_until_correct if feedback else 5,
-            'feedback_correct_consecutive': feedback.feedback_correct_consecutive if feedback else False,
-            'correct_so_far': seq_correct_so_far,  # برای JS
-
-
-        }
-        return render(request, '1_seq_practice.html', context)
-    else:
-        
-        seq_correct = seq_responses.filter(is_correct=True).count()  # محاسبه پاسخ درست 
-        seq_accuracy = seq_correct / seq_count if seq_count > 0 else 0
-
-        print(seq_accuracy)
-        if seq_accuracy >= SEQ_THRESHOLD:
-            pass
-        else:
-            text = "متاسفانه با توجه نتایج کسب شده حائز شرکت در ادامه آزمون نبودید "
-            context = {
-                'text': text,
-            }
-            return render(request, 'failed.html', context)
-        
-
-    # --- مرحله ۲: تمرین رتبه‌بندی خوشایندی ---
+    # --- مرحله 1: تمرین رتبه‌بندی خوشایندی ---
     VALENCE_PRACTICE_TRIALS = 10
     valence_practice_responses = PCMValencePracticeResponse.objects.filter(user=user)
     valence_practice_count = valence_practice_responses.count()
@@ -775,7 +777,294 @@ def pcm_view(request):
             # مهم: ارسال لیست توالی‌های باقی‌مانده به کلاینت
             'remaining_sequences': json.dumps(sequence_order),
         }
-        return render(request, '2_valence_practice.html', context)
+        return render(request, '1_valence_practice.html', context)
+    
+
+    # --- مرحله 2: تمرین تشخیص توالی ---
+    PRACTICE_TRIALS = 30
+    CATCH_TRIALS_PER_BLOCK = 6
+    TOTAL_PER_BLOCK = PRACTICE_TRIALS + CATCH_TRIALS_PER_BLOCK  # 36
+    SEQ_THRESHOLD = 0.80
+    MAX_BLOCKS = 3
+
+    # پیدا کردن آخرین بلاک استفاده‌شده
+    last_practice = (
+        PCMSequencePracticeResponse.objects
+        .filter(user=user, is_active=True)
+        .order_by('-block', '-trial')
+        .first()
+    )
+    last_catch = (
+        PCMSequenceCatchResponse.objects
+        .filter(user=user, is_active=True)
+        .order_by('-block', '-trial')
+        .first()
+    )
+
+    max_block_practice = last_practice.block if last_practice and last_practice.block else 0
+    max_block_catch = last_catch.block if last_catch and last_catch.block else 0
+    current_block = max(max_block_practice, max_block_catch, 1)
+
+    def is_block_fully_done(block_num):
+        p_count = PCMSequencePracticeResponse.objects.filter(
+            user=user, block=block_num, is_active=True
+        ).count()
+        c_count = PCMSequenceCatchResponse.objects.filter(
+            user=user, block=block_num, is_active=True
+        ).count()
+        return p_count >= PRACTICE_TRIALS and c_count >= CATCH_TRIALS_PER_BLOCK
+    
+    show_retry_modal = False
+    while current_block <= MAX_BLOCKS and is_block_fully_done(current_block):
+        # دقت فقط روی کش‌ها محاسبه می‌شود
+        c_correct = PCMSequenceCatchResponse.objects.filter(
+            user=user, block=current_block, is_active=True, is_correct=True
+        ).count()
+        accuracy = c_correct / CATCH_TRIALS_PER_BLOCK if CATCH_TRIALS_PER_BLOCK > 0 else 0
+
+        if accuracy >= SEQ_THRESHOLD:
+            # این بلاک قبول شده → برو مرحله بعد
+            return redirect('/experiment/pcm/')
+        else:
+            # این بلاک رد شده → برو بلاک بعدی
+            show_retry_modal = True
+            current_block += 1
+
+    if current_block > MAX_BLOCKS:
+        text = "متاسفانه با توجه به نتایج کسب‌شده حائز شرکت در ادامه آزمون نبودید"
+        return render(request, 'failed.html', {'text': text})
+
+    # ------------------------------------------------------------------
+    # حالا current_block آماده است
+    # ------------------------------------------------------------------
+    practice_responses = PCMSequencePracticeResponse.objects.filter(
+        user=user, block=current_block, is_active=True
+    )
+    practice_count = practice_responses.count()
+    practice_correct = practice_responses.filter(is_correct=True).count()
+
+    catch_responses = PCMSequenceCatchResponse.objects.filter(
+        user=user, block=current_block, is_active=True
+    )
+    catch_count = catch_responses.count()
+    catch_correct = catch_responses.filter(is_correct=True).count()
+
+    feedback = FeedbackSettings.objects.first()
+
+    # تعداد کل انجام‌شده در این بلاک (برای progress)
+    completed_in_block = practice_count + catch_count
+    progress_percentage = (completed_in_block / TOTAL_PER_BLOCK) * 100
+
+    # ========== اگر هنوز تمرین تمام نشده ==========
+    if practice_count < PRACTICE_TRIALS:
+        remain_trials = PRACTICE_TRIALS - practice_count
+
+        cue_list = list(cues_mapping.keys())
+        # اطمینان از اینکه دقیقاً ۳ نشانه داریم
+        if len(cue_list) != 3:
+            # در صورت نیاز می‌توانید لاگ یا هندلینگ اضافه کنید
+            pass
+
+        # شمارش استفاده‌شده تا الان (به ازای هر cue)
+        used_per_cue = Counter()
+        used_consistent_per_cue = Counter()
+        used_inconsistent_seqs_per_cue = defaultdict(Counter)  # cue -> Counter of actual sequences that were inconsistent
+
+        for r in practice_responses:
+            if r.cue:
+                used_per_cue[r.cue] += 1
+                if r.is_consistent:
+                    used_consistent_per_cue[r.cue] += 1
+                else:
+                    # r.category_stim1 و r.category_stim2 را به صورت "Neutral-Negative" در نظر می‌گیریم
+                    actual = f"{r.category_stim1}-{r.category_stim2}" if r.category_stim1 and r.category_stim2 else None
+                    if actual:
+                        used_inconsistent_seqs_per_cue[r.cue][actual] += 1
+
+        remaining_plan = []
+
+        for cue in cue_list:
+            mapped = cues_mapping[cue]
+            other_seqs = [s for s in ["Neutral-Neutral", "Neutral-Negative", "Negative-Neutral"] if s != mapped]
+
+            # هدف نهایی به ازای هر cue: ۱۰ تریال
+            # ۸ consistent + ۱ از other_seqs[0] + ۱ از other_seqs[1]
+            still_need_total = max(0, 10 - used_per_cue[cue])
+            still_need_consistent = max(0, 8 - used_consistent_per_cue[cue])
+            still_need_incons = {
+                other_seqs[0]: max(0, 1 - used_inconsistent_seqs_per_cue[cue][other_seqs[0]]),
+                other_seqs[1]: max(0, 1 - used_inconsistent_seqs_per_cue[cue][other_seqs[1]]),
+            }
+
+            # اول consistentهای باقی‌مانده
+            for _ in range(still_need_consistent):
+                remaining_plan.append({
+                    "cue": cue,
+                    "expected_seq": mapped,
+                    "is_consistent": True,
+                })
+
+            # بعد inconsistentها
+            for seq, need in still_need_incons.items():
+                for _ in range(need):
+                    remaining_plan.append({
+                        "cue": cue,
+                        "expected_seq": seq,
+                        "is_consistent": False,
+                    })
+
+            # اگر به هر دلیلی هنوز کم آمد (مثلاً داده‌های قبلی ناقص بود)
+            current_for_this_cue = still_need_consistent + sum(still_need_incons.values())
+            while current_for_this_cue < still_need_total:
+                remaining_plan.append({
+                    "cue": cue,
+                    "expected_seq": mapped,
+                    "is_consistent": True,
+                })
+                current_for_this_cue += 1
+
+        # اگر مجموع remaining_plan از remain_trials بیشتر شد، فقط به اندازه remain_trials نگه می‌داریم
+        # (نباید اتفاق بیفتد مگر اینکه داده‌های قبلی نامتعادل باشد)
+        if len(remaining_plan) > remain_trials:
+            random.shuffle(remaining_plan)
+            remaining_plan = remaining_plan[:remain_trials]
+        elif len(remaining_plan) < remain_trials:
+            # پر کردن با consistent تصادفی (ایمنی)
+            for _ in range(remain_trials - len(remaining_plan)):
+                cue = random.choice(cue_list)
+                remaining_plan.append({
+                    "cue": cue,
+                    "expected_seq": cues_mapping[cue],
+                    "is_consistent": True,
+                })
+
+        random.shuffle(remaining_plan)
+
+        # قانون ۹ تای اول (فقط اگر از اول بلاک شروع کرده‌ایم)
+        if practice_count == 0:
+            cons = [t for t in remaining_plan if t["is_consistent"]]
+            incons = [t for t in remaining_plan if not t["is_consistent"]]
+            random.shuffle(cons)
+            random.shuffle(incons)
+            first_6 = cons[:6]
+            rest = cons[6:] + incons
+            random.shuffle(rest)
+            remaining_plan = first_6 + rest
+
+        remaining_sequences = [t["expected_seq"] for t in remaining_plan]
+        remaining_cues = [t["cue"] for t in remaining_plan]
+        remaining_consistent = [t["is_consistent"] for t in remaining_plan]
+
+        # --- پلان catch از قبل (دقیقاً ۲ بار از هر نشانه) ---
+        catch_plan = []
+        for cue in cue_list:
+            catch_plan.extend([cue] * 2)  # دقیقاً ۲ بار هر cue
+        random.shuffle(catch_plan)
+
+        # کم کردن cueهایی که قبلاً ثبت شده‌اند
+        used_cues = [r.cue for r in catch_responses]
+        used_counter = Counter(used_cues)
+        final_catch_cues = []
+        for cue in catch_plan:
+            if used_counter[cue] > 0:
+                used_counter[cue] -= 1
+            else:
+                final_catch_cues.append(cue)
+
+        # اگر هنوز کم بود (نادر)
+        while len(final_catch_cues) < CATCH_TRIALS_PER_BLOCK:
+            # ترجیحاً از cueهایی که کمتر استفاده شده‌اند
+            least_used = min(cue_list, key=lambda c: used_counter[c])
+            final_catch_cues.append(least_used)
+            used_counter[least_used] += 1
+        final_catch_cues = final_catch_cues[:CATCH_TRIALS_PER_BLOCK]
+
+        context = {
+            'current_trial': completed_in_block,          # تعداد کل انجام‌شده
+            'total_trials': TOTAL_PER_BLOCK,             # همیشه 36
+            'trial_number_for_save': practice_count,
+            'progress_percentage': round(progress_percentage, 1),
+            'cue_urls': json.dumps(CUE_URLS),
+            'neutral_urls': json.dumps(NEUTRAL_URLS),
+            'negative_urls': json.dumps(NEGATIVE_URLS),
+            'cues_mapping': json.dumps(cues_mapping),
+            'remaining_sequences': json.dumps(remaining_sequences),
+            'remaining_cues': json.dumps(remaining_cues),
+            'remaining_consistent': json.dumps(remaining_consistent),
+            'catch_cues_plan': json.dumps(final_catch_cues),   # پلان کش از قبل
+            'current_block': current_block,
+            'is_catch_stage': False,
+            'practice_trials_done': practice_count,
+            'catch_trials_done': catch_count,
+
+            'feedback_mode': feedback.feedback_mode if feedback else 'always',
+            'feedback_first_n': feedback.feedback_first_n if feedback else 5,
+            'feedback_until_correct': feedback.feedback_until_correct if feedback else 5,
+            'feedback_correct_consecutive': feedback.feedback_correct_consecutive if feedback else False,
+            'correct_so_far': practice_correct,
+            'show_retry_modal': show_retry_modal,
+        }
+        return render(request, '2_seq_practice.html', context)
+
+    # ========== مرحله Catch (۶ تریال) - فقط وقتی تمرین تمام شده و صفحه رفرش شده ==========
+    if catch_count < CATCH_TRIALS_PER_BLOCK:
+        remain_catch = CATCH_TRIALS_PER_BLOCK - catch_count
+        cue_list = list(cues_mapping.keys())
+
+        # شمارش دقیق با نرمال‌سازی
+        used_cues = []
+        for r in catch_responses:
+            full = normalize_cue_to_full(r.cue, cues_mapping)
+            if full:
+                used_cues.append(full)
+        used_counter = Counter(used_cues)
+
+        remaining_cues = []
+        for cue in cue_list:
+            used = used_counter.get(cue, 0)
+            still_need = max(0, 2 - used)
+            remaining_cues.extend([cue] * still_need)
+
+        # ایمنی
+        if len(remaining_cues) < remain_catch:
+            for cue in cue_list:
+                if used_counter.get(cue, 0) < 2:
+                    remaining_cues.append(cue)
+                    used_counter[cue] = used_counter.get(cue, 0) + 1
+                    if len(remaining_cues) >= remain_catch:
+                        break
+        elif len(remaining_cues) > remain_catch:
+            random.shuffle(remaining_cues)
+            remaining_cues = remaining_cues[:remain_catch]
+
+        random.shuffle(remaining_cues)
+
+        context = {
+            'current_trial': completed_in_block,
+            'total_trials': TOTAL_PER_BLOCK,            
+            'trial_number_for_save': catch_count,
+            'progress_percentage': round(progress_percentage, 1),
+            'cue_urls': json.dumps(CUE_URLS),
+            'neutral_urls': json.dumps(NEUTRAL_URLS),
+            'negative_urls': json.dumps(NEGATIVE_URLS),
+            'cues_mapping': json.dumps(cues_mapping),
+            'remaining_sequences': json.dumps([]),
+            'remaining_cues': json.dumps(remaining_cues),
+            'remaining_consistent': json.dumps([]),
+            'catch_cues_plan': json.dumps([]),          
+            'current_block': current_block,
+            'is_catch_stage': True,
+            'practice_trials_done': practice_count,
+            'catch_trials_done': catch_count,
+
+            'feedback_mode': feedback.feedback_mode if feedback else 'always',
+            'feedback_first_n': feedback.feedback_first_n if feedback else 5,
+            'feedback_until_correct': feedback.feedback_until_correct if feedback else 5,
+            'feedback_correct_consecutive': feedback.feedback_correct_consecutive if feedback else False,
+            'correct_so_far': catch_correct,
+            'show_retry_modal': show_retry_modal,
+        }
+        return render(request, '2_seq_practice.html', context)
 
 
     # --- مرحله ۳: آزمون اصلی PCM ---
@@ -840,29 +1129,48 @@ def pcm_view(request):
         # فقط نشانه (cue) ارائه می‌شود و کاربر توالی مورد انتظار را مشخص می‌کند
         if catch_count < CATCH_TRIALS_PER_BLOCK:
             remain_catch = CATCH_TRIALS_PER_BLOCK - catch_count
-            possible_sequences = ["Neutral-Neutral", "Neutral-Negative", "Negative-Neutral"]
+            cue_list = list(cues_mapping.keys())
 
-            # چون category دیگر ذخیره نمی‌شود، فقط تعداد باقی‌مانده را متعادل توزیع می‌کنیم
-            target_per_seq = remain_catch // 3
-            remainder = remain_catch % 3
+            # شمارش دقیق cueهای استفاده‌شده در این بلاک با نرمال‌سازی
+            used_cues = []
+            for r in PCMCatchResponse.objects.filter(user=user, block=block_num):
+                full = normalize_cue_to_full(r.cue, cues_mapping)
+                if full:
+                    used_cues.append(full)
+            used_counter = Counter(used_cues)
 
+            # ساخت لیست باقی‌مانده: حداکثر ۲ تا از هر نشانه
+            remaining_cues = []
+            for cue in cue_list:
+                used = used_counter.get(cue, 0)
+                still_need = max(0, 2 - used)
+                remaining_cues.extend([cue] * still_need)
+
+            # ایمنی در برابر داده‌های ناقص یا بیش از حد
+            if len(remaining_cues) < remain_catch:
+                # اگر به هر دلیلی کمتر بود، از نشانه‌هایی که هنوز کمتر از ۲ دارند پر کن
+                for cue in cue_list:
+                    if used_counter.get(cue, 0) < 2:
+                        remaining_cues.append(cue)
+                        used_counter[cue] = used_counter.get(cue, 0) + 1
+                        if len(remaining_cues) >= remain_catch:
+                            break
+            elif len(remaining_cues) > remain_catch:
+                random.shuffle(remaining_cues)
+                remaining_cues = remaining_cues[:remain_catch]
+
+            random.shuffle(remaining_cues)
+
+            # تبدیل به فرمت مورد نیاز (با expected_seq)
             catch_trials = []
-            for i, seq in enumerate(possible_sequences):
-                count = target_per_seq + (1 if i < remainder else 0)
-                cue_candidates = [c for c, exp in cues_mapping.items() if exp == seq]
-                for _ in range(count):
-                    if cue_candidates:
-                        cue = random.choice(cue_candidates)
-                    else:
-                        cue = random.choice(CUE_URLS)
-                    catch_trials.append({
-                        'cue': cue,
-                        'expected_seq': cues_mapping.get(cue, seq),
-                    })
+            for cue in remaining_cues:
+                catch_trials.append({
+                    'cue': cue,
+                    'expected_seq': cues_mapping.get(cue),
+                })
 
-            random.shuffle(catch_trials)
             all_catch_sequences[block_num] = catch_trials
-
+            
         # --- ساخت توالی‌های main برای این بلاک (اگر نیاز باشد) ---
         if main_count < MAIN_TRIALS_PER_BLOCK:
             remain_main = MAIN_TRIALS_PER_BLOCK - main_count
@@ -1118,50 +1426,65 @@ def pcm_save_response(request):
         return JsonResponse({'status': 'error', 'message': 'JSON نامعتبر'}, status=400)
 
     user = request.user
-    # مرحله ۱: تمرین تشخیص توالی
-    if data.get('is_seq_practice'):
+    # مرحله 1: تمرین رتبه‌بندی خوشایندی
+    if data.get('is_valence_practice'):
+            PCMValencePracticeResponse.objects.create(
+                user=user,
+                trial=data['trial'],
+                cue=extract_stimulus_number(data['cue']),
+                stimulus1=extract_stimulus_number(data.get('stimulus1')),
+                stimulus2=extract_stimulus_number(data.get('stimulus2')),
+                category_stim1=data.get('category_stim1'),
+                category_stim2=data.get('category_stim2'),
+                valence_stim1=data.get('valence_stim1'),
+                valence_rt_stim1=data.get('valence_rt_stim1') or data.get('rt_stim1'),
+                valence_delay_number_stim1=data.get('valence_delay_number_stim1', 0),
+                valence_input_method_stim1=data.get('valence_input_method_stim1'),
+                valence_stim2=data.get('valence_stim2'),
+                valence_rt_stim2=data.get('valence_rt_stim2') or data.get('rt_stim2'),
+                valence_delay_number_stim2=data.get('valence_delay_number_stim2', 0),
+                valence_input_method_stim2=data.get('valence_input_method_stim2'),
+                valence_sequence=data.get('valence_sequence'),
+                valence_rt_sequence=data.get('valence_rt_sequence') or data.get('rt_sequence'),
+                valence_delay_number_sequence=data.get('valence_delay_number_sequence', 0),
+                valence_input_method_sequence=data.get('valence_input_method_sequence'),
+            )
+    # مرحله 2: تمرین تشخیص توالی
+    elif data.get('is_catch'):
+        PCMSequenceCatchResponse.objects.create(
+            user=request.user,
+            block=data.get('block', 1),
+            trial=data['trial'],
+            cue=extract_stimulus_number(data['cue']),
+            user_response=data['user_response'],
+            response_rt=data.get('response_rt'),
+            delay_number=data.get('delay_number', 0),
+            response_input_method=data.get('response_input_method'),
+            is_correct=data.get('is_correct'),
+        )
+    
+    elif data.get('is_seq_practice'):
         
         PCMSequencePracticeResponse.objects.create(
             user=user,
             trial=data['trial'] ,
+            block=data.get('block', 1),
             cue=extract_stimulus_number(data['cue']),
             stimulus1=extract_stimulus_number(data.get('stimulus1')),
             stimulus2=extract_stimulus_number(data.get('stimulus2')),
             category_stim1=data.get('category_stim1'),
             category_stim2=data.get('category_stim2'),
+            expected_sequence=data.get('expected_sequence'),
             user_response=data['user_response'],
             response_rt=data['response_rt'],
             delay_number=data['delay_number'],
             response_input_method=data['response_input_method'],
             is_correct=data['is_correct'],
-        )
-
-    # مرحله ۲: تمرین رتبه‌بندی خوشایندی
-    elif data.get('is_valence_practice'):
-        PCMValencePracticeResponse.objects.create(
-            user=user,
-            trial=data['trial'],
-            cue=extract_stimulus_number(data['cue']),
-            stimulus1=extract_stimulus_number(data.get('stimulus1')),
-            stimulus2=extract_stimulus_number(data.get('stimulus2')),
-            category_stim1=data.get('category_stim1'),
-            category_stim2=data.get('category_stim2'),
-            valence_stim1=data.get('valence_stim1'),
-            valence_rt_stim1=data.get('valence_rt_stim1') or data.get('rt_stim1'),
-            valence_delay_number_stim1=data.get('valence_delay_number_stim1', 0),
-            valence_input_method_stim1=data.get('valence_input_method_stim1'),
-            valence_stim2=data.get('valence_stim2'),
-            valence_rt_stim2=data.get('valence_rt_stim2') or data.get('rt_stim2'),
-            valence_delay_number_stim2=data.get('valence_delay_number_stim2', 0),
-            valence_input_method_stim2=data.get('valence_input_method_stim2'),
-            valence_sequence=data.get('valence_sequence'),
-            valence_rt_sequence=data.get('valence_rt_sequence') or data.get('rt_sequence'),
-            valence_delay_number_sequence=data.get('valence_delay_number_sequence', 0),
-            valence_input_method_sequence=data.get('valence_input_method_sequence'),
+            is_consistent=data.get('is_consistent', True),
         )
 
     # مرحله ۳: آزمون اصلی
-    elif data.get('is_catch'):
+    elif data.get('is_catch_pcm'):
         PCMCatchResponse.objects.create(
             user=user,
             block=data.get('block', None),

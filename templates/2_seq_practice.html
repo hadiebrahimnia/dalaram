@@ -1,0 +1,779 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>مرحله 2</title>
+  {% load static %}
+  <link href="{% static 'plugins/bootstrap/css/bootstrap.rtl.min.css' %}" rel="stylesheet" />
+  <link href="{% static 'css/pcm.css' %}" rel="stylesheet" />
+</head>
+<body>
+
+<div id="device-blocked" style="display: none;">
+  <div class="device-blocked-icon">🚫</div>
+  <h3>امکان شرکت در آزمون وجود ندارد</h3>
+  
+  <div class="device-blocked-section">
+    <div class="device-blocked-section-title">شما هم‌اکنون با این مشخصات وارد شده‌اید</div>
+    <div id="device-blocked-info" class="device-blocked-info"></div>
+  </div>
+
+  <div class="device-blocked-section">
+    <div class="device-blocked-section-title">شرایط مجاز برای شرکت</div>
+    <div id="device-blocked-allowed" class="device-blocked-allowed"></div>
+  </div>
+
+  <p class="device-blocked-footer">لطفاً با یکی از شرایط بالا وارد آزمون شوید.</p>
+</div>
+
+<!-- پیام چرخش گوشی -->
+<div id="rotate-device">
+  <i>↻</i>
+  <h3>لطفاً گوشی را بچرخانید</h3>
+  <p>برای تجربه بهتر، صفحه را به حالت افقی ببرید</p>
+</div>
+
+<!-- دستور اعمل  -->
+  <div id="intro" class="card m-5" style="">
+    <div class="card-body text-center p-5">
+    <div style="
+      background: linear-gradient(135deg, #3b82f6, #4f46e5);
+      color: #fff;
+      text-align: center;
+      padding: 30px;
+      border-radius: 18px;
+      max-width: 700px;
+      box-shadow: 0 10px 25px rgba(0,0,0,.15);
+      margin: auto;
+      line-height: 1.8;
+    ">
+      <div style="font-size:42px; font-weight:bold; ">
+          مرحله 2
+      </div>
+      <div style="font-size:16px;margin-top:10px;">
+          ⏱️ زمان تقریبی: ۶ دقیقه
+      </div>
+    </div>
+    <div class="mb-1 mt-5">
+      <h3 class="text-start text-justify mb-4 mx-auto" style="line-height: 40px; max-width: 500px">
+        در این مرحله:
+      </h3>
+      <p class="lead text-start text-justify mb-4 mx-auto" style="line-height: 40px; max-width: 500px">
+         ابتدا یک نشانه صوتی شامل اعداد ۱ تا ۳ می‌شنوید(که نشان دهنده توالی صوتی بعد از آن است) و بعد از آن دو صدای هیجانی همانند شکل زیر:
+      </p>
+      <p class="lead text-cnter ltr mb-4 mx-auto" style="line-height: 40px; max-width: 500px">
+        <span>صدای دوم</span><span style="font-size:25px;margin:0px 20px">→</span>
+        <span>صدای اول</span><span style="font-size:25px;margin:0px 20px">→</span>
+        <span>نشانه<span style="font-size:13px;">(شامل اعداد 1 تا 3)</span> </span> 
+      </p>
+
+      <p class="lead text-start text-justify mb-4 mx-auto" style="line-height: 40px; max-width: 500px">
+        شما باید همانند تصویر زیر  توالی شنیده شده بر اساس  هیجان صدای اول و دوم مشخص نمایید
+      </p>
+
+    <h6 class="text-start mb-2 mx-auto" style="line-height: 40px; max-width: 500px">
+      کدام توالی شنیده شد؟
+    </h6>
+    <div class="sam-buttons d-flex flex-column gap-3" style="max-width: 500px; margin: auto">
+      <button class="btn btn-outline-primary btn-lg sequence-btn" data-seq="Neutral-Neutral">
+        <span class="text-muted">خنثی</span>
+          <span class="text-dark" style="font-weight: bolder;margin: 10px;">→</span>
+        <span class="text-muted" >خنثی</span>
+      </button>
+      <button class="btn btn-outline-primary btn-lg sequence-btn" data-seq="Negative-Neutral">
+        <span class="text-muted" >خنثی</span>
+          <span class="text-dark" style="font-weight: bolder;margin: 10px;">→</span>
+        <span class="text-danger">منفی</span>
+      </button>
+      <button class="btn btn-outline-primary btn-lg sequence-btn" data-seq="Neutral-Negative">
+        <span class="text-danger">منفی</span>
+          <span class="text-dark" style="font-weight: bolder;margin: 10px;">→</span>
+        <span class="text-muted" >خنثی</span>
+      </button>
+    </div>
+    </div>
+
+    <h4 class="text-start text-justify mb-5 mt-5 mx-auto" style="line-height: 40px; max-width: 500px">
+      لطفاً با تمرکز کامل گوش دهید و بدون وقفه، بدون تغییر حجم صدا و بدون حواس‌پرتی به سوالات پاسخ دهید.
+    </h4>
+    <h4 class="text-start text-justify text-danger mt-5 m-auto" style="max-width: 700px; line-height: 40px;">
+     نکات مهم:
+    </h4>
+    <h5 class="text-start text-justify text-danger mt-3 m-auto" style="max-width: 700px; line-height: 40px;">
+      1 ) تنها زمانی آزمون را شروع نمایید که دستورالعمل فوق را به خوبی متوجه شده باشید
+    </h5>
+
+    <h5 class="text-start text-justify text-danger mt-3 m-auto" style="max-width: 700px; line-height: 40px;">
+      2 ) برای هر پاسخ تنها ۳ ثانیه زمان دارید. لطفاً سریع و بر اساس اولین احساس خود پاسخ دهید.
+    </h5>
+
+    <h5 class="text-start text-justify text-danger mt-3 m-auto" style="max-width: 700px; line-height: 40px;">
+      3 ) در صورتی که در هر قسمت صداها پخش نشد، صفحه را رفرش کنید و از پاسخ دادن خودداری نمایید (با رفرش صفحه اطلاعات شما از بین نرفته و میتوانید ادامه آزمون را تکمیل نمایید)
+    </h5>
+
+    <div class="progress-container mb-4">
+      <div class="d-flex justify-content-between mb-2">
+        <span class="text-muted">پیشرفت مرحله</span>
+      </div>
+      <div class="progress" style="direction: ltr; height: 20px;">
+        <div class="progress-bar bg-success progress-bar-striped"
+              role="progressbar"
+              style="width: {{ progress_percentage }}%;"
+              aria-valuenow="{{ progress_percentage }}"
+              aria-valuemin="0"
+              aria-valuemax="100">
+          <span class="fw-bold" style="direction: rtl;">{{ current_trial }} از {{ total_trials }}</span>
+        </div>
+      </div>
+    </div>
+    <p class="lead text-center mt-5 mb-2 mx-auto" style="line-height: 40px; max-width: 600px">
+      هر زمان که آماده بودید برای شروع آزمون روی دکمه زیر کلیک نمایید
+    </p>
+    <button id="start-btn" class="btn btn-success btn-lg mt-4 px-5">
+      {% if progress_percentage == 0 %}
+        شروع
+      {% else %}
+       ادامه
+      {% endif %}
+    </button>
+  </div>
+</div>
+
+ 
+<!-- Content -->   
+  <div class="content">
+    <!-- Fixation Cross -->
+    <div id="fixation" class="full-center hidden">
+      <div class="fixation">+</div>
+    </div>
+    <!-- صفحه انتخاب توالی -->
+    <div id="choice" class="hidden">
+      <div class="card p-4">
+        <div class="card-body text-center">
+          <h3 class="mb-4">کدام توالی شنیده شد؟</h3>
+          <div class="sam-buttons d-flex flex-column gap-3" style="max-width: 500px; margin: auto">
+            <button class="btn btn-outline-primary btn-lg sequence-btn response_btn" data-seq="Neutral-Neutral">
+              <span class="text-muted">خنثی</span>
+                <span class="text-dark" style="font-weight: bolder;margin: 10px;">→</span>
+              <span class="text-muted" >خنثی</span>
+            </button>
+            <button class="btn btn-outline-primary btn-lg sequence-btn response_btn" data-seq="Negative-Neutral">
+              <span class="text-muted" >خنثی</span>
+                <span class="text-dark" style="font-weight: bolder;margin: 10px;">→</span>
+              <span class="text-danger">منفی</span>
+            </button>
+            <button class="btn btn-outline-primary btn-lg sequence-btn response_btn" data-seq="Neutral-Negative">
+              <span class="text-danger">منفی</span>
+                <span class="text-dark" style="font-weight: bolder;margin: 10px;">→</span>
+              <span class="text-muted" >خنثی</span>
+            </button>
+          </div>
+          <div id="feedback" class="mt-2 fs-2 fw-bold"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <audio id="audio-player" preload="auto"></audio>
+
+  <div id="fasterModal" class="custom-modal">
+    <div class="modal-overlay"></div>
+    <div class="modal-content">
+      <div class="modal-icon">⚠️</div>
+      <h3 class="modal-title">سریع‌تر پاسخ دهید</h3>
+      <button class="modal-button" id="closeModal">
+        ادامه
+      </button>
+    </div>
+  </div>
+
+  <div id="catch-intro-modal" class="custom-modal" style="display:none;">
+    <div class="modal-overlay"></div>
+    <div class="modal-content">
+      <div class="modal-icon">ℹ️</div>
+      <p class="text-start text-justify">در این بخش فقط نشانه صوتی (اعداد ۱ تا ۳) پخش می‌شود و هیچ صدای هیجانی بعد از آن نمی‌آید و شما باید بر اساس نشانه‌ای که در قسمت قبل شنیده‌اید، توالی مورد انتظار را انتخاب کنید :</p>
+
+      <div class="sam-buttons d-flex flex-column gap-3" style="max-width: 500px; margin: auto">
+        <button class="btn btn-outline-primary btn-lg sequence-btn response_btn" data-seq="Neutral-Neutral">
+          <span class="text-muted">خنثی</span>
+            <span class="text-dark" style="font-weight: bolder;margin: 10px;">→</span>
+          <span class="text-muted" >خنثی</span>
+        </button>
+        <button class="btn btn-outline-primary btn-lg sequence-btn response_btn" data-seq="Negative-Neutral">
+          <span class="text-muted" >خنثی</span>
+            <span class="text-dark" style="font-weight: bolder;margin: 10px;">→</span>
+          <span class="text-danger">منفی</span>
+        </button>
+        <button class="btn btn-outline-primary btn-lg sequence-btn response_btn" data-seq="Neutral-Negative">
+          <span class="text-danger">منفی</span>
+            <span class="text-dark" style="font-weight: bolder;margin: 10px;">→</span>
+          <span class="text-muted" >خنثی</span>
+        </button>
+      </div>
+
+      <p class="lead text-danger text-center mt-3 mb-2 mx-auto" style="line-height: 40px; max-width: 600px">
+        برای هر پاسخ فقط ۳ ثانیه زمان دارید
+      </p>
+
+      <p class="lead text-center mt-3 mb-2 mx-auto" style="line-height: 40px; max-width: 600px">
+        هر زمان که آماده بودید برای شروع آزمون روی دکمه زیر کلیک نمایید
+      </p>
+      <button class="modal-button" id="start-catch-btn">متوجه شدم، شروع</button>
+    </div>
+  </div>
+
+  <!-- مدال تکرار بلاک به دلیل عدم کسب حد نصاب -->
+  <div id="retry-block-modal" class="custom-modal" style="display:none;">
+    <div class="modal-overlay"></div>
+    <div class="modal-content">
+      <div class="modal-icon">⚠️</div>
+      <h5 class="text-danger text-center">متاسفانه در مرحله قبلی به حد نصاب لازم نرسیدید</h5>
+      <p class="text-center" style="line-height: 1.9; margin: 15px 0;">
+        به همین دلیل باید این مرحله را دوباره تکرار کنید.
+      </p>
+      <h5 class="text-center" style="line-height: 1.9; margin: 15px 0;">لطفا با تمرکز بیشتری به نشانه ها و توالی‌های صوتی ارائه شده با آن توجه نمایید</h5>
+      <button class="modal-button" id="close-retry-modal">
+        متوجه شدم، ادامه
+      </button>
+    </div>
+  </div>
+
+
+
+<script>
+  // ========== ابزارها ==========
+  function requestFullscreen() {
+    const elem = document.documentElement;
+    try {
+      if (elem.requestFullscreen) {
+        elem.requestFullscreen().catch(() => {});
+      } else if (elem.mozRequestFullScreen) {
+        elem.mozRequestFullScreen();
+      } else if (elem.webkitRequestFullscreen) {
+        elem.webkitRequestFullscreen();
+      } else if (elem.msRequestFullscreen) {
+        elem.msRequestFullscreen();
+      }
+    } catch (e) {}
+  }
+
+  function getCsrfToken() {
+    const name = 'csrftoken';
+    const cookies = document.cookie.split(';');
+    for (let cookie of cookies) {
+      const [key, value] = cookie.trim().split('=');
+      if (key === name) return decodeURIComponent(value);
+    }
+    return '';
+  }
+
+  // ========== داده‌های امن از ویو ==========
+  let trialIndexDisplay = {{ current_trial|default:0 }};
+  const totalTrials = {{ total_trials|default:36 }};
+  let trialIndex = {{ trial_number_for_save|default:0 }} + 1;
+
+  const cueUrls            = {{ cue_urls|default:"[]"|safe }};
+  const neutralUrls        = {{ neutral_urls|default:"[]"|safe }};
+  const negativeUrls       = {{ negative_urls|default:"[]"|safe }};
+  const cuesMapping        = {{ cues_mapping|default:"{}"|safe }};
+  let remainingSequences   = {{ remaining_sequences|default:"[]"|safe }};
+  let remainingCues        = {{ remaining_cues|default:"[]"|safe }};
+  let remainingConsistent  = {{ remaining_consistent|default:"[]"|safe }};
+  const catchCuesPlan      = {{ catch_cues_plan|default:"[]"|safe }};
+
+  let isCatchStage = {{ is_catch_stage|default:False|yesno:"true,false" }};
+  const currentBlock = {{ current_block|default:1 }};
+  const showRetryModal = {{ show_retry_modal|default:False|yesno:"true,false" }};
+
+  const feedbackMode = "{{ feedback_mode|default:'always' }}";
+  const feedbackFirstN = {{ feedback_first_n|default:5 }};
+  const feedbackUntilCorrect = {{ feedback_until_correct|default:5 }};
+  const feedbackCorrectConsecutive = {{ feedback_correct_consecutive|default:False|yesno:"true,false" }};
+  let correctSoFar = {{ correct_so_far|default:0 }};
+  let consecutiveCorrect = 0;
+
+  // ========== عناصر DOM ==========
+  const audio = document.getElementById('audio-player');
+  const intro = document.getElementById('intro');
+  const fixation = document.getElementById('fixation');
+  const choice = document.getElementById('choice');
+  const feedbackEl = document.getElementById('feedback');
+  const fasterModal = document.getElementById('fasterModal');
+  const catchIntroModal = document.getElementById('catch-intro-modal');
+  const retryBlockModal = document.getElementById('retry-block-modal');
+  const startBtn = document.getElementById('start-btn');
+  const startCatchBtn = document.getElementById('start-catch-btn');
+
+  // ========== متغیرهای وضعیت ==========
+  let responseStartTime = null;
+  let responseTimeout = null;
+  let isModalActive = false;
+  let delay_number = 0;
+  let responseInputMethod = null;
+  const RESPONSE_TIME_LIMIT = 3000;
+
+  let expectedSeq = null;
+  let currentCue = null;
+  let currentStim1 = null;
+  let currentStim2 = null;
+  let currentIsConsistent = true;
+  let lastInputType = 'mouse';
+  let isPlaying = false;
+  let isTransitioning = false;
+
+  // ========== توابع کمکی ==========
+  function shouldShowFeedback(isCorrect) {
+    if (feedbackMode === 'never') return false;
+    if (feedbackMode === 'always') return true;
+    if (feedbackMode === 'first_n') return trialIndex <= feedbackFirstN;
+    if (feedbackMode === 'until_n_correct') {
+      return feedbackCorrectConsecutive
+        ? consecutiveCorrect < feedbackUntilCorrect
+        : correctSoFar < feedbackUntilCorrect;
+    }
+    if (feedbackMode === 'first_n_or_until_correct') {
+      const stillInFirstN = trialIndex <= feedbackFirstN;
+      const notReached = feedbackCorrectConsecutive
+        ? consecutiveCorrect < feedbackUntilCorrect
+        : correctSoFar < feedbackUntilCorrect;
+      return stillInFirstN || notReached;
+    }
+    return true;
+  }
+
+  function showFixation(callback) {
+    fixation.classList.remove('hidden');
+    setTimeout(() => {
+      fixation.classList.add('hidden');
+      callback();
+    }, 1000);
+  }
+
+  function play(url) {
+    return new Promise((resolve, reject) => {
+      if (isPlaying) {
+        try { audio.pause(); } catch(e) {}
+      }
+
+      isPlaying = true;
+      audio.onended = null;
+      audio.onerror = null;
+      audio.onplaying = null;
+
+      audio.src = url;
+      audio.load();
+
+      let hasStarted = false;
+      const timeoutId = setTimeout(() => {
+        if (!hasStarted) {
+          isPlaying = false;
+          cleanup();
+          location.reload();
+        }
+      }, 5000);
+
+      const cleanup = () => {
+        clearTimeout(timeoutId);
+        audio.onended = null;
+        audio.onerror = null;
+        audio.onplaying = null;
+      };
+
+      audio.onerror = () => {
+        isPlaying = false;
+        cleanup();
+        location.reload();
+      };
+
+      audio.onplaying = () => {
+        hasStarted = true;
+        clearTimeout(timeoutId);
+      };
+
+      audio.onended = () => {
+        isPlaying = false;
+        cleanup();
+        setTimeout(resolve, 400);
+      };
+
+      const p = audio.play();
+      if (p !== undefined) {
+        p.catch((err) => {
+          isPlaying = false;
+          cleanup();
+          if (err.name === 'AbortError') {
+            console.warn('Audio play aborted (ignored):', err.message);
+            resolve();
+          } else {
+            console.error('Audio play error:', err);
+            location.reload();
+          }
+        });
+      }
+    });
+  }
+
+  // سوئیچ نرم به مرحله کش
+  function switchToCatchStage() {
+    if (isTransitioning) return;
+    isTransitioning = true;
+
+    isCatchStage = true;
+    remainingSequences = [];
+    remainingConsistent = [];
+    correctSoFar = 0;
+    consecutiveCorrect = 0;
+
+    if (catchCuesPlan && Array.isArray(catchCuesPlan) && catchCuesPlan.length > 0) {
+      remainingCues = [...catchCuesPlan];
+    } else {
+      location.href = '/experiment/pcm/';
+      return;
+    }
+
+    const modal = document.getElementById('catch-intro-modal');
+    if (modal) {
+      modal.style.display = 'flex';
+      modal.style.visibility = 'visible';
+      modal.style.opacity = '1';
+      modal.style.zIndex = '99999';
+      modal.classList.add('active');
+    } else {
+      isTransitioning = false;
+      forceStartTrial();
+    }
+  }
+
+  function startTrial() {
+    if (isTransitioning && !isCatchStage) return;
+
+    delay_number = 0;
+    responseInputMethod = null;
+    intro.classList.add('hidden');
+
+    if (isCatchStage) {
+      if (remainingCues.length === 0) {
+        location.href = '/experiment/pcm/';
+        return;
+      }
+
+      currentCue = remainingCues.shift();
+      expectedSeq = cuesMapping[currentCue];
+      currentIsConsistent = true;
+
+      showFixation(async () => {
+        try {
+          await play(currentCue);
+          choice.classList.remove('hidden');
+          responseStartTime = Date.now();
+          startResponseTimer();
+        } catch (e) {
+          console.error(e);
+          location.reload();
+        }
+      });
+    } else {
+      if (remainingSequences.length === 0 || remainingCues.length === 0) {
+        switchToCatchStage();
+        return;
+      }
+
+      expectedSeq = remainingSequences.shift();
+      currentIsConsistent = remainingConsistent.shift();
+      currentCue = remainingCues.shift();
+
+      if (!expectedSeq) {
+        switchToCatchStage();
+        return;
+      }
+
+      const [cat1, cat2] = expectedSeq.split('-');
+      const pool1 = cat1 === 'Neutral' ? neutralUrls : negativeUrls;
+      const pool2 = cat2 === 'Neutral' ? neutralUrls : negativeUrls;
+      currentStim1 = pool1[Math.floor(Math.random() * pool1.length)];
+      currentStim2 = pool2[Math.floor(Math.random() * pool2.length)];
+
+      showFixation(async () => {
+        try {
+          await play(currentCue);
+          await play(currentStim1);
+          await play(currentStim2);
+          choice.classList.remove('hidden');
+          responseStartTime = Date.now();
+          startResponseTimer();
+        } catch (e) {
+          console.error(e);
+          location.reload();
+        }
+      });
+    }
+  }
+
+  function startResponseTimer() {
+    responseStartTime = Date.now();
+    if (responseTimeout) clearTimeout(responseTimeout);
+    if (isModalActive) return;
+
+    responseTimeout = setTimeout(() => {
+      delay_number++;
+      if (!choice.classList.contains('hidden') && !isModalActive) {
+        isModalActive = true;
+        fasterModal.classList.add('active');
+        document.body.style.overflow = 'hidden';
+      }
+    }, RESPONSE_TIME_LIMIT);
+  }
+
+  // ========== رویدادها ==========
+  document.addEventListener('pointerdown', (e) => {
+    if (e.pointerType === 'touch' || e.pointerType === 'pen') lastInputType = 'touch';
+    else lastInputType = 'mouse';
+  }, { passive: true });
+
+  document.querySelectorAll('.response_btn').forEach(btn => {
+    btn.addEventListener('touchstart', function () {
+      clearTimeout(this.touchTimer);
+      this.classList.add('touch-effect');
+      this.touchTimer = setTimeout(() => this.classList.remove('touch-effect'), 200);
+    }, { passive: true });
+
+    btn.onclick = function () {
+      if (choice.classList.contains('hidden')) return;
+      if (!responseInputMethod) responseInputMethod = lastInputType;
+
+      const rt = Date.now() - responseStartTime;
+      if (responseTimeout) {
+        clearTimeout(responseTimeout);
+        responseTimeout = null;
+      }
+
+      const correct = this.dataset.seq === expectedSeq;
+      if (correct) {
+        correctSoFar++;
+        consecutiveCorrect++;
+      } else {
+        consecutiveCorrect = 0;
+      }
+
+      if (shouldShowFeedback(correct)) {
+        feedbackEl.textContent = correct ? '✅ درست!' : '❌ غلط!';
+        feedbackEl.style.color = correct ? '#28a745' : '#dc3545';
+      } else {
+        feedbackEl.textContent = '';
+      }
+
+      document.querySelectorAll('.response_btn').forEach(b => b.style.pointerEvents = 'none');
+
+      fetch('/pcm/save/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRFToken': getCsrfToken()
+        },
+        body: JSON.stringify({
+          is_seq_practice: !isCatchStage,
+          is_catch: isCatchStage,
+          block: currentBlock,
+          trial: trialIndex,
+          cue: currentCue,
+          stimulus1: isCatchStage ? null : currentStim1,
+          stimulus2: isCatchStage ? null : currentStim2,
+          category_stim1: isCatchStage ? null : expectedSeq.split('-')[0],
+          category_stim2: isCatchStage ? null : expectedSeq.split('-')[1],
+          expected_sequence: expectedSeq,
+          is_consistent: currentIsConsistent,
+          user_response: this.dataset.seq,
+          response_rt: rt,
+          delay_number: delay_number,
+          response_input_method: responseInputMethod,
+          is_correct: correct
+        })
+      })
+      .then(r => r.json())
+      .then(data => {
+        document.querySelectorAll('.response_btn').forEach(b => b.style.pointerEvents = '');
+
+        if (data.status === 'success') {
+          trialIndex++;
+          setTimeout(() => {
+            choice.classList.add('hidden');
+            feedbackEl.textContent = '';
+
+            // پایان مرحله تمرین → رفتن به کش
+            if (!isCatchStage && remainingSequences.length === 0) {
+              switchToCatchStage();
+              return;
+            }
+
+            // پایان مرحله کش → ریدایرکت (بدون نمایش fixation)
+            if (isCatchStage && remainingCues.length === 0) {
+              setTimeout(() => {
+                location.href = '/experiment/pcm/';
+              }, 600);
+              return;
+            }
+
+            // در غیر این صورت تریال بعدی
+            showFixation(startTrial);
+
+          }, 1100);
+        }
+      })
+      .catch(err => {
+        console.error('Save error:', err);
+        document.querySelectorAll('.response_btn').forEach(b => b.style.pointerEvents = '');
+      });
+    };
+  });
+
+  // کیبورد
+  document.addEventListener('keydown', e => {
+    if (choice.classList.contains('hidden')) return;
+    if (e.key === '1') {
+      responseInputMethod = 'keyboard';
+      document.querySelector('[data-seq="Neutral-Neutral"]').click();
+    }
+    if (e.key === '2') {
+      responseInputMethod = 'keyboard';
+      document.querySelector('[data-seq="Neutral-Negative"]').click();
+    }
+    if (e.key === '3') {
+      responseInputMethod = 'keyboard';
+      document.querySelector('[data-seq="Negative-Neutral"]').click();
+    }
+  });
+
+  // ========== دکمه‌های شروع ==========
+  if (startBtn) {
+    startBtn.addEventListener('click', function (e) {
+      e.preventDefault();
+      e.stopPropagation();
+      if (isCatchStage) {
+        const modal = document.getElementById('catch-intro-modal');
+        if (modal) {
+          modal.style.display = 'flex';
+          modal.style.visibility = 'visible';
+          modal.style.opacity = '1';
+          modal.style.zIndex = '99999';
+          modal.classList.add('active');
+        }
+        return;
+      }
+      forceStartTrial();
+    });
+  }
+
+  function forceStartTrial() {
+    isTransitioning = false;
+
+    const content = document.querySelector('.content');
+    if (content) content.style.display = 'flex';
+    document.body.classList.add('no-scroll');
+
+    requestFullscreen();
+    setTimeout(startTrial, 350);
+  }
+
+  if (startCatchBtn) {
+    startCatchBtn.addEventListener('click', function (e) {
+      e.preventDefault();
+      e.stopPropagation();
+
+      if (catchIntroModal) {
+        catchIntroModal.style.display = 'none';
+        catchIntroModal.classList.remove('active');
+      }
+
+      isTransitioning = false;
+
+      const content = document.querySelector('.content');
+      if (content) content.style.display = 'flex';
+      document.body.classList.add('no-scroll');
+
+      requestFullscreen();
+      setTimeout(startTrial, 350);
+    });
+  }
+
+  // بستن مودال تایم‌اوت
+  const closeModalBtn = document.getElementById('closeModal');
+  if (closeModalBtn) {
+    closeModalBtn.addEventListener('click', () => {
+      fasterModal.classList.remove('active');
+      document.body.style.overflow = '';
+      isModalActive = false;
+      startResponseTimer();
+    });
+  }
+
+  // ========== مدال تکرار بلاک ==========
+  if (showRetryModal && retryBlockModal) {
+    setTimeout(() => {
+      retryBlockModal.style.display = 'flex';
+      retryBlockModal.style.visibility = 'visible';
+      retryBlockModal.style.opacity = '1';
+      retryBlockModal.style.zIndex = '99999';
+      retryBlockModal.classList.add('active');
+      document.body.style.overflow = 'hidden';
+    }, 400);
+  }
+
+  const closeRetryBtn = document.getElementById('close-retry-modal');
+  if (closeRetryBtn) {
+    closeRetryBtn.addEventListener('click', () => {
+      if (retryBlockModal) {
+        retryBlockModal.style.display = 'none';
+        retryBlockModal.classList.remove('active');
+        document.body.style.overflow = '';
+      }
+    });
+  }
+</script>
+
+<script src="/static/js/CheckDevice.js"></script>
+<script src="/static/js/BlockDevice.js"></script>
+<script>
+  function initDeviceCheck(stageName) {
+    const info = detectDevice();
+    const check = checkDeviceAllowed(info);
+
+    // ۱. اگر دستگاه غیرمجاز بود
+    if (!check.allowed) {
+      showBlockedMessage(info);
+      return false; // متوقف کن
+    }
+
+    // ۲. ثبت لاگ دستگاه
+    const payload = {
+      stage: "seq_practice",
+      device_type: info.device_type,
+      os: info.os,
+      browser: info.browser,
+      screen_width: info.screen_width,
+      screen_height: info.screen_height,
+      is_touch: info.is_touch,
+      audio_volume: window.audioVolume || null
+    };
+
+    fetch('/save-device-log/', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRFToken': getCsrfToken()
+      },
+      body: JSON.stringify(payload)
+    }).catch(err => console.error('Error saving device log:', err));
+
+    // ۳. اگر موبایل بود → پیام چرخش را مدیریت کن
+    if (info.device_type === 'Mobile') {
+      updateRotateMessage();
+      window.addEventListener('resize', updateRotateMessage);
+      window.addEventListener('orientationchange', updateRotateMessage);
+    }
+
+    return true;
+  }
+</script>
+</body>
+</html>

@@ -41,6 +41,7 @@ urlpatterns = [
     path('questionnaire/<int:pk>/respond/', respond_questionnaire, name='respond_questionnaire'),
 
     path('save-device-log/', save_device_log, name='save_device_log'),
+    path('save-volume-log/', save_volume_log, name='save_volume_log'),
 
     path('result/', result_view, name='result'),
     path('result/pcm/', pcm_result_view, name='pcm_result'),
