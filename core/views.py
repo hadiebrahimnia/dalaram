@@ -816,23 +816,24 @@ def pcm_view(request):
     
     show_retry_modal = False
     while current_block <= MAX_BLOCKS and is_block_fully_done(current_block):
-        # دقت فقط روی کش‌ها محاسبه می‌شود
         c_correct = PCMSequenceCatchResponse.objects.filter(
             user=user, block=current_block, is_active=True, is_correct=True
         ).count()
         accuracy = c_correct / CATCH_TRIALS_PER_BLOCK if CATCH_TRIALS_PER_BLOCK > 0 else 0
 
         if accuracy >= SEQ_THRESHOLD:
-            # این بلاک قبول شده → برو مرحله بعد
-            return redirect('/experiment/pcm/')
+            # بلاک قبول شد → از حلقه خارج شو تا به مرحله ۳ برویم
+            break
         else:
-            # این بلاک رد شده → برو بلاک بعدی
+            # بلاک رد شد → برو بلاک بعدی
             show_retry_modal = True
             current_block += 1
 
     if current_block > MAX_BLOCKS:
         text = "متاسفانه با توجه به نتایج کسب‌شده حائز شرکت در ادامه آزمون نبودید"
         return render(request, 'failed.html', {'text': text})
+
+    # از اینجا به بعد کد مرحله ۳ (آزمون اصلی) اجرا می‌شود
 
     # ------------------------------------------------------------------
     # حالا current_block آماده است

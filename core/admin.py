@@ -486,7 +486,7 @@ class PCMSequencePracticeResponseInline(admin.TabularInline):
     model = PCMSequencePracticeResponse
     extra = 0
     can_delete = False
-    readonly_fields = ('block','trial', 'stimulus1_short', 'stimulus2_short','category_stim1','category_stim2', 'user_response', 'delay_number','response_input_method','expected_sequence','is_consistent','is_correct_display', 'created_at')
+    readonly_fields = ('block','trial','cue', 'stimulus1_short', 'stimulus2_short','category_stim1','category_stim2', 'user_response', 'delay_number','response_input_method','expected_sequence','is_consistent','is_correct_display', 'created_at')
     fields = readonly_fields
     ordering = ('trial',)
 
@@ -498,8 +498,8 @@ class PCMSequencePracticeResponseInline(admin.TabularInline):
 
 @admin.register(PCMSequencePracticeResponse)
 class PCMSequencePracticeResponseAdmin(admin.ModelAdmin):
-    list_display = ('user_username','block', 'trial','category_stim2','category_stim1', 'user_response','response_rt' ,'delay_number','response_input_method','is_correct_display','is_consistent','expected_sequence', 'created_at')
-    list_filter = ('user', 'created_at')
+    list_display = ('user_username','block', 'trial','cue','category_stim2','category_stim1', 'user_response','response_rt' ,'delay_number','response_input_method','is_correct_display','is_consistent','expected_sequence', 'created_at')
+    list_filter = ('user','block','cue','is_correct','is_consistent', 'created_at')
     search_fields = ('user__username', 'cue', 'user_response')
     readonly_fields = ('user','block', 'trial', 'cue', 'stimulus1', 'stimulus2','category_stim1','category_stim2', 'expected_sequence','is_consistent','user_response','is_correct','response_rt','delay_number','response_input_method', 'created_at','is_active')
     ordering = ('-created_at', 'trial')
