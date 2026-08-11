@@ -253,7 +253,6 @@ class RatingPracticeAdmin(admin.ModelAdmin):
     list_display = (
         'user_username',
         'trial',
-        'stimulus_short',
         'stimulus',
 
         'valence',
@@ -272,9 +271,7 @@ class RatingPracticeAdmin(admin.ModelAdmin):
     )
 
     list_filter = (
-        'trial',
-        'is_active',
-        'created_at',
+        'user',
     )
 
     search_fields = (
@@ -310,10 +307,6 @@ class RatingPracticeAdmin(admin.ModelAdmin):
     @admin.display(description='کاربر')
     def user_username(self, obj):
         return obj.user.username
-
-    @admin.display(description='محرک')
-    def stimulus_short(self, obj):
-        return obj.stimulus[-40:] if obj.stimulus else "-"
 
     @admin.display(description='کامل')
     def complete(self, obj):
@@ -330,8 +323,6 @@ class RatingResponseAdmin(admin.ModelAdmin):
         'user_username',
         'trial',
         'stimulus',
-        'stimulus_short',
-
         'valence',
         'valence_rt',
         'valence_delay_number',
@@ -348,14 +339,12 @@ class RatingResponseAdmin(admin.ModelAdmin):
     )
 
     list_filter = (
-        'is_active',
-        'created_at',
+        'user',
     )
 
     search_fields = (
         'user__username',
         'stimulus',
-        'stimulus_file',
     )
 
     readonly_fields = (
@@ -387,10 +376,6 @@ class RatingResponseAdmin(admin.ModelAdmin):
     @admin.display(description='کاربر')
     def user_username(self, obj):
         return obj.user.username
-
-    @admin.display(description='فایل محرک')
-    def stimulus_short(self, obj):
-        return obj.stimulus_file[-40:] if obj.stimulus_file else "-"
 
     @admin.display(description='کامل')
     def complete(self, obj):
@@ -432,11 +417,8 @@ class PCMValencePracticeResponseAdmin(admin.ModelAdmin):
     )
 
     list_filter = (
-        'trial',
-        'category_stim1',
-        'category_stim2',
-        'is_active',
-        'created_at',
+        'user',
+        'cue',
     )
 
     search_fields = (
@@ -486,19 +468,18 @@ class PCMSequencePracticeResponseInline(admin.TabularInline):
     model = PCMSequencePracticeResponse
     extra = 0
     can_delete = False
-    readonly_fields = ('block','trial','cue', 'stimulus1_short', 'stimulus2_short','category_stim1','category_stim2', 'user_response', 'delay_number','response_input_method','expected_sequence','is_consistent','is_correct_display', 'created_at')
+    readonly_fields = ('block','trial','cue', 'stimulus1_short', 'stimulus2_short','category_stim1','category_stim2', 'user_response', 'delay_number','response_input_method','expected_sequence','is_consistent','is_correct', 'created_at')
     fields = readonly_fields
     ordering = ('trial',)
 
     def cue_short(self, obj): return obj.cue[-30:]
     def stimulus1_short(self, obj): return obj.stimulus1[-30:] if obj.stimulus1 else '-'
     def stimulus2_short(self, obj): return obj.stimulus2[-30:] if obj.stimulus2 else '-'
-    def is_correct_display(self, obj): return "✓" if obj.is_correct else "✗" if obj.is_correct is False else "-"
 
 
 @admin.register(PCMSequencePracticeResponse)
 class PCMSequencePracticeResponseAdmin(admin.ModelAdmin):
-    list_display = ('user_username','block', 'trial','cue','category_stim2','category_stim1', 'user_response','response_rt' ,'delay_number','response_input_method','is_correct_display','is_consistent','expected_sequence', 'created_at')
+    list_display = ('user_username','block', 'trial','cue','category_stim1', 'category_stim2','is_consistent','expected_sequence','user_response','is_correct','response_rt' ,'delay_number','response_input_method', 'created_at')
     list_filter = ('user','block','cue','is_correct','is_consistent', 'created_at')
     search_fields = ('user__username', 'cue', 'user_response')
     readonly_fields = ('user','block', 'trial', 'cue', 'stimulus1', 'stimulus2','category_stim1','category_stim2', 'expected_sequence','is_consistent','user_response','is_correct','response_rt','delay_number','response_input_method', 'created_at','is_active')
@@ -506,7 +487,6 @@ class PCMSequencePracticeResponseAdmin(admin.ModelAdmin):
 
     def user_username(self, obj): return obj.user.username
     def cue_short(self, obj): return obj.cue[-40:]
-    def is_correct_display(self, obj): return "✓ درست" if obj.is_correct else "✗ غلط" if obj.is_correct is False else "—"
 
 
 class PCMSequenceCatchResponseInline(admin.TabularInline):
@@ -535,24 +515,22 @@ class PCMSequenceCatchResponseInline(admin.TabularInline):
 class PCMSequenceCatchResponseAdmin(admin.ModelAdmin):
     list_display = (
         'user_username',
-        'trial',
         'block',
+        'trial',
         'cue',
         'user_response',
+        'is_correct',
         'response_rt',
         'delay_number',
         'response_input_method',
-        'is_correct',
-        'is_active',
         'created_at',
     )
 
     list_filter = (
         'user',
         'block',
+        'cue',
         'is_correct',
-        'is_active',
-        'created_at',
     )
 
     search_fields = (
@@ -590,8 +568,8 @@ class PCMCatchResponseInline(admin.TabularInline):
     can_delete = False
 
     readonly_fields = (
-        'trial',
         'block',
+        'trial',
         'cue',
         'user_response',
         'response_rt',
@@ -610,24 +588,22 @@ class PCMCatchResponseInline(admin.TabularInline):
 class PCMCatchResponseAdmin(admin.ModelAdmin):
     list_display = (
         'user_username',
-        'trial',
         'block',
+        'trial',
         'cue',
         'user_response',
+        'is_correct',
         'response_rt',
         'delay_number',
         'response_input_method',
-        'is_correct',
-        'is_active',
         'created_at',
     )
 
     list_filter = (
         'user',
         'block',
+        'cue',
         'is_correct',
-        'is_active',
-        'created_at',
     )
 
     search_fields = (
@@ -667,10 +643,11 @@ class PCMMainResponseAdmin(admin.ModelAdmin):
         'cue',
         'stimulus1',
         'stimulus2',
-        'expected_sequence',
-        'consistent',
         'category_stim1',
         'category_stim2',
+
+        'expected_sequence',
+        'is_consistent',
 
         'valence_stim1',
         'valence_rt_stim1',
@@ -688,17 +665,14 @@ class PCMMainResponseAdmin(admin.ModelAdmin):
         'valence_input_method_sequence',
 
         'complete',
-        'is_active',
         'created_at',
     )
 
     list_filter = (
+        'user',
         'block',
+        'cue',
         'is_consistent',
-        'is_active',
-        'category_stim1',
-        'category_stim2',
-        'created_at',
     )
 
     search_fields = (
@@ -751,10 +725,6 @@ class PCMMainResponseAdmin(admin.ModelAdmin):
     def cue_short(self, obj):
         return obj.cue[-30:] if obj.cue else "-"
 
-    @admin.display(description='سازگار')
-    def consistent(self, obj):
-        return "✓" if obj.is_consistent else "✗"
-
     @admin.display(description='کامل')
     def complete(self, obj):
         return "✓" if obj.is_complete() else "◐"
@@ -766,7 +736,6 @@ class RatingPracticeResponseAdmin(admin.ModelAdmin):
     list_display = (
         'user_username',
         'trial',
-        'stimulus_short',
         'stimulus',
 
         'valence',
@@ -785,9 +754,7 @@ class RatingPracticeResponseAdmin(admin.ModelAdmin):
     )
 
     list_filter = (
-        'trial',
-        'is_active',
-        'created_at',
+        'user',
     )
 
     search_fields = (
@@ -820,10 +787,6 @@ class RatingPracticeResponseAdmin(admin.ModelAdmin):
     def user_username(self, obj):
         return obj.user.username
 
-    @admin.display(description='محرک')
-    def stimulus_short(self, obj):
-        return obj.stimulus[-40:] if obj.stimulus else "-"
-
     @admin.display(description='کامل')
     def complete(self, obj):
         return (
@@ -839,7 +802,6 @@ class RatingMainResponseAdmin(admin.ModelAdmin):
         'user_username',
         'trial',
         'stimulus_number',
-        'stimulus_short',
 
         'valence',
         'valence_rt',
@@ -857,14 +819,12 @@ class RatingMainResponseAdmin(admin.ModelAdmin):
     )
 
     list_filter = (
-        'is_active',
-        'created_at',
+        'user',
     )
 
     search_fields = (
         'user__username',
-        'stimulus_number',
-        'stimulus_file',
+        'stimulus',
     )
 
     readonly_fields = (
@@ -897,9 +857,6 @@ class RatingMainResponseAdmin(admin.ModelAdmin):
     def user_username(self, obj):
         return obj.user.username
 
-    @admin.display(description='محرک')
-    def stimulus_short(self, obj):
-        return obj.stimulus_file[-40:] if obj.stimulus_file else "-"
 
     @admin.display(description='کامل')
     def complete(self, obj):

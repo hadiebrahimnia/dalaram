@@ -58,7 +58,7 @@
 
     <div class="mb-1 mt-5">
         <p class="lead text-start text-justify mb-4 mx-auto" style="line-height: 40px; max-width: 500px">
-        در این مرحله نیز دقیقا مثل مرحله قبل <strong>یک صدای هیجانی</strong> خواهید شنید و باید میزان <strong>خوشایندی</strong> و <strong>برانگیختگی</strong> آن صدا را مشخص کنید.
+        در این مرحله نیز دقیقا مثل مرحله قبل <strong>یک صدای هیجانی</strong> خواهید شنید و باید میزان <strong class="text-danger">خوشایندی</strong> و <strong class="text-danger">برانگیختگی</strong> آن صدا را مشخص کنید.
         </p>
 
         <h3 class="text-start text-justify mb-2 mt-5 mx-auto" style="line-height: 40px; max-width: 500px">
@@ -130,15 +130,27 @@
     </div>
 
     <h4 class="mb-5 mt-5 m-auto" style="max-width: 700px; line-height: 40px;">
-      در صورتی که از کامپیوتر استفاده می‌کنید، می‌توانید با کلیک روی آدمک‌ها یا فشردن کلیدهای ۱ تا ۹ بالای کیبورد پاسخ دهید.
-    </h4>
-
-    <h4 class="mb-5 mt-5 m-auto" style="max-width: 700px; line-height: 40px;">
       پاسخ درست یا غلط وجود ندارد. فقط احساس واقعی خودتان از شنیدن صداها را گزارش کنید.
     </h4>
 
-    <h5 class="text-danger mt-5 m-auto" style="max-width: 700px; line-height: 40px;">
-      برای هر پاسخ تنها ۳ ثانیه زمان دارید. لطفاً سریع و بر اساس اولین احساس خود پاسخ دهید.
+    <h4 class="mb-5 mt-5 m-auto" style="max-width: 700px; line-height: 40px;">
+      در صورتی که از کامپیوتر استفاده می‌کنید، می‌توانید با کلیک روی آدمک‌ها یا فشردن کلیدهای ۱ تا ۹ بالای کیبورد پاسخ دهید.
+    </h4>
+    
+
+    <h4 class="text-start text-justify text-danger mt-5 m-auto" style="max-width: 700px; line-height: 40px;">
+     نکات مهم:
+    </h4>
+    <h5 class="text-start text-justify text-danger mt-3 m-auto" style="max-width: 700px; line-height: 40px;">
+      1 ) تنها زمانی آزمون را شروع نمایید که دستورالعمل فوق را به خوبی متوجه شده باشید
+    </h5>
+
+    <h5 class="text-start text-justify text-danger mt-3 m-auto" style="max-width: 700px; line-height: 40px;">
+      2 ) برای هر پاسخ تنها ۳ ثانیه زمان دارید. لطفاً سریع و بر اساس اولین احساس خود پاسخ دهید.
+    </h5>
+
+    <h5 class="text-start text-justify text-danger mt-3 m-auto" style="max-width: 700px; line-height: 40px;">
+      3 ) در صورتی که در هر قسمت صداها پخش نشد، صفحه را رفرش کنید و از پاسخ دادن خودداری نمایید (با رفرش صفحه اطلاعات شما از بین نرفته و میتوانید ادامه آزمون را تکمیل نمایید)
     </h5>
 
     <div class="progress-container mb-4">
@@ -151,7 +163,17 @@
       </div>
     </div>
 
-    <button id="start-btn" class="btn btn-success btn-lg mt-4 px-5">شروع</button>
+    <p class="lead text-center mt-5 mb-2 mx-auto" style="line-height: 40px; max-width: 600px">
+      هر زمان که آماده بودید برای شروع آزمون روی دکمه زیر کلیک نمایید
+    </p>
+
+    <button id="start-btn" class="btn btn-success btn-lg mt-4 px-5">
+        {% if progress_percentage == 0 %}
+        شروع
+        {% else %}
+         ادامه
+        {% endif %}
+    </button>
   </div>
 </div>
 
@@ -499,12 +521,49 @@
         startCurrentTrial();
     };
 </script>
-<script>
-  const CURRENT_STAGE = "rating_main";
-  initDeviceCheck(CURRENT_STAGE);
-</script>
 <script src="/static/js/CheckDevice.js"></script>
 <script src="/static/js/BlockDevice.js"></script>
+<script src="/static/js/touch.js"></script>
+<script>
+  function initDeviceCheck(stageName) {
+    const info = detectDevice();
+    const check = checkDeviceAllowed(info);
 
+    // ۱. اگر دستگاه غیرمجاز بود
+    if (!check.allowed) {
+      showBlockedMessage(info);
+      return false; // متوقف کن
+    }
+    // ۲. ثبت لاگ دستگاه
+    const payload = {
+      stage: "PCM:5)Rating",
+      device_type: info.device_type,
+      os: info.os,
+      browser: info.browser,
+      screen_width: info.screen_width,
+      screen_height: info.screen_height,
+      is_touch: info.is_touch,
+      audio_volume: window.audioVolume || null
+    };
+
+    fetch('/save-device-log/', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRFToken': getCsrfToken()
+      },
+      body: JSON.stringify(payload)
+    }).catch(err => console.error('Error saving device log:', err));
+
+    // ۳. اگر موبایل بود → پیام چرخش را مدیریت کن
+    if (info.device_type === 'Mobile') {
+      updateRotateMessage();
+      window.addEventListener('resize', updateRotateMessage);
+      window.addEventListener('orientationchange', updateRotateMessage);
+    }
+
+    return true;
+  }
+</script>
 </body>
 </html>

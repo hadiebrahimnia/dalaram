@@ -223,7 +223,7 @@
         مرحله هست که در ابتدای هر بخش توضیحات لازم در خصوص آن بخش ارائه
         می‌شود. بخش اصلی آزمون شامل 3 بلوک آزمایشی است به همراه یک بلوک آموزشی
         اولیه که
-        در مجموع حدود 50 دقیقه طول می‌کشد.
+        در مجموع حدود 60 دقیقه طول می‌کشد.
       </p>
 
       <p class="text-justify">
@@ -266,7 +266,7 @@
          توصیه می‌شود این آزمون در کامپیوتر یا لپ تاپ تکمیل شود ( تنها در صورتی که به این وسایل دسترسی نداشتید از موبایل به عنوان جایگزین استفاده نمایید ) 
         </p>
         <p class="text-justify">
-           • این آزمون در حدود 50 دقیقه زمان می‌برد و باید در یک مرحله بدون وقفه اجرا شود <br />
+           • این آزمون در حدود 60 دقیقه زمان می‌برد و باید در یک مرحله بدون وقفه اجرا شود <br />
         </p>
         <p class="text-justify">
            • برای تمرکز بیشتر و شنیدن دقیق فایل‌های صوتی، حتماً از <strong>هدفون یا هندزفری</strong> استفاده کنید.<br />
@@ -353,7 +353,6 @@
     </div>
   </div>
   
-
 <script>
     document.addEventListener('DOMContentLoaded', function () {
       const fasterModal = document.getElementById('fasterModal');
@@ -661,13 +660,42 @@
       expectedSeq = remainingSequences.shift();
       const [cat1, cat2] = expectedSeq.split('-');
 
+      // انتخاب نشانه (cue)
       const validCues = Object.keys(cuesMapping).filter(cue => cuesMapping[cue] === expectedSeq);
       currentCue = validCues[Math.floor(Math.random() * validCues.length)];
 
+      // ---------- انتخاب محرک‌ها با جلوگیری از تکرار ----------
       const pool1 = cat1 === 'Neutral' ? neutralUrls : negativeUrls;
       const pool2 = cat2 === 'Neutral' ? neutralUrls : negativeUrls;
-      currentStim1 = pool1[Math.floor(Math.random() * pool1.length)];
-      currentStim2 = pool2[Math.floor(Math.random() * pool2.length)];
+
+      // انتخاب صدای اول
+      let idx1 = Math.floor(Math.random() * pool1.length);
+      currentStim1 = pool1[idx1];
+
+      // انتخاب صدای دوم
+      let idx2;
+      if (cat1 === 'Neutral' && cat2 === 'Neutral') {
+        // شرط مهم: در Neutral-Neutral دو صدا نباید یکسان باشند
+        do {
+          idx2 = Math.floor(Math.random() * pool2.length);
+        } while (pool2[idx2] === currentStim1 && pool2.length > 1);
+      } else {
+        idx2 = Math.floor(Math.random() * pool2.length);
+      }
+      currentStim2 = pool2[idx2];
+
+      // حذف صداهای استفاده‌شده از لیست‌ها (تا در تریال‌های بعدی همین صفحه تکرار نشوند)
+      // توجه: چون ممکن است pool1 و pool2 به یک آرایه اشاره کنند (هر دو Neutral)، باید با دقت حذف کنیم
+      if (pool1 === pool2) {
+        // هر دو از لیست خنثی هستند
+        // اول بزرگ‌تر را حذف کن تا ایندکس‌ها به‌هم نریزد
+        const indices = [idx1, idx2].sort((a, b) => b - a);
+        indices.forEach(i => pool1.splice(i, 1));
+      } else {
+        pool1.splice(idx1, 1);
+        pool2.splice(idx2, 1);
+      }
+      // -------------------------------------------------------
 
       // ریست کامل برای تریال جدید
       currentRatingStep = 0;
@@ -895,6 +923,7 @@
 </script>
 <script src="/static/js/CheckDevice.js"></script>
 <script src="/static/js/BlockDevice.js"></script>
+<script src="/static/js/touch.js"></script>
 <script>
   function initDeviceCheck(stageName) {
     const info = detectDevice();
@@ -908,7 +937,7 @@
 
     // ۲. ثبت لاگ دستگاه
     const payload = {
-      stage: "valence_practice",
+      stage: "PCM:1)Valence_Practice",
       device_type: info.device_type,
       os: info.os,
       browser: info.browser,

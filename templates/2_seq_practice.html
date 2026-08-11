@@ -37,66 +37,75 @@
 <!-- دستور اعمل  -->
   <div id="intro" class="card m-5" style="">
     <div class="card-body text-center p-5">
-    <div style="
-      background: linear-gradient(135deg, #3b82f6, #4f46e5);
-      color: #fff;
-      text-align: center;
-      padding: 30px;
-      border-radius: 18px;
-      max-width: 700px;
-      box-shadow: 0 10px 25px rgba(0,0,0,.15);
-      margin: auto;
-      line-height: 1.8;
-    ">
-      <div style="font-size:42px; font-weight:bold; ">
-          مرحله 2
+      <div style="
+        background: linear-gradient(135deg, #3b82f6, #4f46e5);
+        color: #fff;
+        text-align: center;
+        padding: 30px;
+        border-radius: 18px;
+        max-width: 700px;
+        box-shadow: 0 10px 25px rgba(0,0,0,.15);
+        margin: auto;
+        line-height: 1.8;
+      ">
+        <div style="font-size:42px; font-weight:bold; ">
+            مرحله 2
+        </div>
+        <div style="font-size:16px;margin-top:10px;">
+            ⏱️ زمان تقریبی: ۶ دقیقه
+        </div>
       </div>
-      <div style="font-size:16px;margin-top:10px;">
-          ⏱️ زمان تقریبی: ۶ دقیقه
+      <div class="mb-1 mt-5">
+        <h3 class="text-start text-justify mb-4 mx-auto" style="line-height: 40px; max-width: 500px">
+          در این مرحله:
+        </h3>
+        <p class="lead text-start text-justify mb-4 mx-auto" style="line-height: 40px; max-width: 500px">
+          ابتدا یک نشانه صوتی شامل اعداد ۱ تا ۳ می‌شنوید(که نشان دهنده توالی صوتی بعد از آن است) و بعد از آن دو صدای هیجانی همانند شکل زیر:
+        </p>
+        <p class="lead text-cnter ltr mb-4 mx-auto" style="line-height: 40px; max-width: 500px">
+          <span>صدای دوم</span><span style="font-size:25px;margin:0px 20px">→</span>
+          <span>صدای اول</span><span style="font-size:25px;margin:0px 20px">→</span>
+          <span>نشانه<span style="font-size:13px;">(شامل اعداد 1 تا 3)</span> </span> 
+        </p>
+
+        <p class="lead text-start text-justify mb-4 mx-auto" style="line-height: 40px; max-width: 500px">
+          شما باید همانند تصویر زیر  توالی شنیده شده بر اساس  هیجان صدای اول و دوم مشخص نمایید
+        </p>
+
+      <h6 class="text-start mb-2 mx-auto" style="line-height: 40px; max-width: 500px">
+        کدام توالی شنیده شد؟
+      </h6>
+      <div class="sam-buttons d-flex flex-column gap-3" style="max-width: 500px; margin: auto">
+        <button class="btn btn-outline-primary btn-lg sequence-btn" data-seq="Neutral-Neutral">
+          <span class="text-muted">خنثی</span>
+            <span class="text-dark" style="font-weight: bolder;margin: 10px;">→</span>
+          <span class="text-muted" >خنثی</span>
+        </button>
+        <button class="btn btn-outline-primary btn-lg sequence-btn" data-seq="Negative-Neutral">
+          <span class="text-muted" >خنثی</span>
+            <span class="text-dark" style="font-weight: bolder;margin: 10px;">→</span>
+          <span class="text-danger">منفی</span>
+        </button>
+        <button class="btn btn-outline-primary btn-lg sequence-btn" data-seq="Neutral-Negative">
+          <span class="text-danger">منفی</span>
+            <span class="text-dark" style="font-weight: bolder;margin: 10px;">→</span>
+          <span class="text-muted" >خنثی</span>
+        </button>
       </div>
-    </div>
-    <div class="mb-1 mt-5">
-      <h3 class="text-start text-justify mb-4 mx-auto" style="line-height: 40px; max-width: 500px">
-        در این مرحله:
+      
+      <h3 class="text-start text-justify mb-2 mt-5 mx-auto" style="line-height: 40px; max-width: 500px">
+        بعد از پایان مرحله توالی‌های صوتی :
       </h3>
       <p class="lead text-start text-justify mb-4 mx-auto" style="line-height: 40px; max-width: 500px">
-         ابتدا یک نشانه صوتی شامل اعداد ۱ تا ۳ می‌شنوید(که نشان دهنده توالی صوتی بعد از آن است) و بعد از آن دو صدای هیجانی همانند شکل زیر:
-      </p>
-      <p class="lead text-cnter ltr mb-4 mx-auto" style="line-height: 40px; max-width: 500px">
-        <span>صدای دوم</span><span style="font-size:25px;margin:0px 20px">→</span>
-        <span>صدای اول</span><span style="font-size:25px;margin:0px 20px">→</span>
-        <span>نشانه<span style="font-size:13px;">(شامل اعداد 1 تا 3)</span> </span> 
+          نشانه صوتی شامل اعداد ۱ تا ۳ را <strong class='text-danger'>بدون صداهای هیجانی</strong> می‌شنوید و باید تعیین کنید هر عدد نشان‌ دهنده کدام توالی بوده است. بنابراین سعی کنید رابطه بین نشانه(اعداد) و توالی را به خاطر بسپارید  
       </p>
 
-      <p class="lead text-start text-justify mb-4 mx-auto" style="line-height: 40px; max-width: 500px">
-        شما باید همانند تصویر زیر  توالی شنیده شده بر اساس  هیجان صدای اول و دوم مشخص نمایید
-      </p>
-
-    <h6 class="text-start mb-2 mx-auto" style="line-height: 40px; max-width: 500px">
-      کدام توالی شنیده شد؟
-    </h6>
-    <div class="sam-buttons d-flex flex-column gap-3" style="max-width: 500px; margin: auto">
-      <button class="btn btn-outline-primary btn-lg sequence-btn" data-seq="Neutral-Neutral">
-        <span class="text-muted">خنثی</span>
-          <span class="text-dark" style="font-weight: bolder;margin: 10px;">→</span>
-        <span class="text-muted" >خنثی</span>
-      </button>
-      <button class="btn btn-outline-primary btn-lg sequence-btn" data-seq="Negative-Neutral">
-        <span class="text-muted" >خنثی</span>
-          <span class="text-dark" style="font-weight: bolder;margin: 10px;">→</span>
-        <span class="text-danger">منفی</span>
-      </button>
-      <button class="btn btn-outline-primary btn-lg sequence-btn" data-seq="Neutral-Negative">
-        <span class="text-danger">منفی</span>
-          <span class="text-dark" style="font-weight: bolder;margin: 10px;">→</span>
-        <span class="text-muted" >خنثی</span>
-      </button>
-    </div>
     </div>
 
     <h4 class="text-start text-justify mb-5 mt-5 mx-auto" style="line-height: 40px; max-width: 500px">
       لطفاً با تمرکز کامل گوش دهید و بدون وقفه، بدون تغییر حجم صدا و بدون حواس‌پرتی به سوالات پاسخ دهید.
     </h4>
+    
     <h4 class="text-start text-justify text-danger mt-5 m-auto" style="max-width: 700px; line-height: 40px;">
      نکات مهم:
     </h4>
@@ -274,8 +283,8 @@
   let trialIndex = {{ trial_number_for_save|default:0 }} + 1;
 
   const cueUrls            = {{ cue_urls|default:"[]"|safe }};
-  const neutralUrls        = {{ neutral_urls|default:"[]"|safe }};
-  const negativeUrls       = {{ negative_urls|default:"[]"|safe }};
+  let neutralUrls          = {{ neutral_urls|default:"[]"|safe }};
+  let negativeUrls         = {{ negative_urls|default:"[]"|safe }};
   const cuesMapping        = {{ cues_mapping|default:"{}"|safe }};
   let remainingSequences   = {{ remaining_sequences|default:"[]"|safe }};
   let remainingCues        = {{ remaining_cues|default:"[]"|safe }};
@@ -418,12 +427,15 @@
   function switchToCatchStage() {
     if (isTransitioning) return;
     isTransitioning = true;
-
     isCatchStage = true;
     remainingSequences = [];
     remainingConsistent = [];
     correctSoFar = 0;
     consecutiveCorrect = 0;
+
+    // ===== ریست شماره تریال برای مرحله Catch =====
+    trialIndex = 1;
+    // =============================================
 
     if (catchCuesPlan && Array.isArray(catchCuesPlan) && catchCuesPlan.length > 0) {
       remainingCues = [...catchCuesPlan];
@@ -431,7 +443,6 @@
       location.href = '/experiment/pcm/';
       return;
     }
-
     const modal = document.getElementById('catch-intro-modal');
     if (modal) {
       modal.style.display = 'flex';
@@ -443,6 +454,47 @@
       isTransitioning = false;
       forceStartTrial();
     }
+  }
+
+  // ========== انتخاب محرک با جلوگیری از تکرار ==========
+  function pickStimuli(cat1, cat2) {
+    const pool1 = cat1 === 'Neutral' ? neutralUrls : negativeUrls;
+    const pool2 = cat2 === 'Neutral' ? neutralUrls : negativeUrls;
+
+    // اگر لیست خالی شد (نباید اتفاق بیفتد)، از لیست اصلی استفاده کن
+    if (pool1.length === 0 || pool2.length === 0) {
+      console.warn('لیست صدا خالی شد، از لیست کامل استفاده می‌شود');
+      return {
+        stim1: (cat1 === 'Neutral' ? neutralUrls : negativeUrls)[0] || null,
+        stim2: (cat2 === 'Neutral' ? neutralUrls : negativeUrls)[0] || null
+      };
+    }
+
+    let idx1 = Math.floor(Math.random() * pool1.length);
+    let stim1 = pool1[idx1];
+
+    let idx2;
+    if (cat1 === 'Neutral' && cat2 === 'Neutral') {
+      // شرط: دو صدا نباید یکسان باشند
+      do {
+        idx2 = Math.floor(Math.random() * pool2.length);
+      } while (pool2[idx2] === stim1 && pool2.length > 1);
+    } else {
+      idx2 = Math.floor(Math.random() * pool2.length);
+    }
+    let stim2 = pool2[idx2];
+
+    // حذف صداهای انتخاب‌شده از لیست‌ها (جلوگیری از تکرار در همین صفحه)
+    if (pool1 === pool2) {
+      // هر دو از یک لیست هستند
+      const indices = [idx1, idx2].sort((a, b) => b - a);
+      indices.forEach(i => pool1.splice(i, 1));
+    } else {
+      pool1.splice(idx1, 1);
+      pool2.splice(idx2, 1);
+    }
+
+    return { stim1, stim2 };
   }
 
   function startTrial() {
@@ -461,6 +513,8 @@
       currentCue = remainingCues.shift();
       expectedSeq = cuesMapping[currentCue];
       currentIsConsistent = true;
+      currentStim1 = null;
+      currentStim2 = null;
 
       showFixation(async () => {
         try {
@@ -489,10 +543,9 @@
       }
 
       const [cat1, cat2] = expectedSeq.split('-');
-      const pool1 = cat1 === 'Neutral' ? neutralUrls : negativeUrls;
-      const pool2 = cat2 === 'Neutral' ? neutralUrls : negativeUrls;
-      currentStim1 = pool1[Math.floor(Math.random() * pool1.length)];
-      currentStim2 = pool2[Math.floor(Math.random() * pool2.length)];
+      const { stim1, stim2 } = pickStimuli(cat1, cat2);
+      currentStim1 = stim1;
+      currentStim2 = stim2;
 
       showFixation(async () => {
         try {
@@ -606,7 +659,7 @@
               return;
             }
 
-            // پایان مرحله کش → ریدایرکت (بدون نمایش fixation)
+            // پایان مرحله کش → ریدایرکت
             if (isCatchStage && remainingCues.length === 0) {
               setTimeout(() => {
                 location.href = '/experiment/pcm/';
@@ -614,7 +667,7 @@
               return;
             }
 
-            // در غیر این صورت تریال بعدی
+            // تریال بعدی
             showFixation(startTrial);
 
           }, 1100);
@@ -733,6 +786,7 @@
 
 <script src="/static/js/CheckDevice.js"></script>
 <script src="/static/js/BlockDevice.js"></script>
+<script src="/static/js/touch.js"></script>
 <script>
   function initDeviceCheck(stageName) {
     const info = detectDevice();
@@ -746,7 +800,7 @@
 
     // ۲. ثبت لاگ دستگاه
     const payload = {
-      stage: "seq_practice",
+      stage: "PCM:2)Sequence_Practices",
       device_type: info.device_type,
       os: info.os,
       browser: info.browser,

@@ -200,6 +200,7 @@ CSS.custom-modal {
 }
 
 .custom-modal.active {
+  display: flex !important;
   opacity: 1;
   visibility: visible;
 }
@@ -474,169 +475,183 @@ CSS.custom-modal {
   }
 }
 
-
-
-
+/* ==================== Hover (ماوس - دسکتاپ) ==================== */
 @media (hover: hover) and (pointer: fine) {
-    .sequence-btn {
-      transition: all 0.2s ease;
-    }
-    .sequence-btn span {
-      transition: color 0.2s ease;
-    }
-    .sequence-btn .text-danger {
-      color: #955a5a!important;  ;
-    }
-    .sequence-btn:hover .text-muted {
-      color: #dbdbdb!important;  
-    }
-    .sequence-btn:hover .text-dark {
-      color: #ffffff!important;  ;
-    }
-    .sequence-btn:hover .text-danger {
-      color: #ffc9c9!important;  ;
-    }
+  .sequence-btn {
+    transition: all 0.2s ease;
+  }
 
+  .sequence-btn span {
+    transition: color 0.2s ease;
+  }
 
-    .sam-btn {
-        transition: all .2s ease;
-    }
-    .sam-btn:active{
-      transform: scale(1.2);
-    }
+  .sequence-btn .text-danger {
+    color: #955a5a !important;
+  }
 
-    .sam-btn:hover {
-        background-color: #0d6efd;
-        border-color: #0d6efd;
-    }
+  .sequence-btn:hover .text-muted {
+    color: #dbdbdb !important;
+  }
 
-    .sam-btn:hover img {
-        filter: brightness(0) invert(1);
-    }
+  .sequence-btn:hover .text-dark {
+    color: #ffffff !important;
+  }
 
-    .sam-btn:hover .key-hint {
-        color: #ffffff;
-    }
+  .sequence-btn:hover .text-danger {
+    color: #ffc9c9 !important;
+  }
+
+  .sam-btn {
+    transition: all 0.2s ease;
+  }
+
+  .sam-btn:hover {
+    background-color: #0d6efd !important;
+    border-color: #0d6efd !important;
+  }
+
+  .sam-btn:hover img {
+    filter: brightness(0) invert(1);
+  }
+
+  .sam-btn:hover .key-hint {
+    color: #ffffff !important;
+  }
 }
 
-
+/* ==================== Touch / Click (موبایل + ریست کامل) ==================== */
 @media (hover: none) and (pointer: coarse) {
-    .sequence-btn,
-    .sequence-btn:hover,
-    .sequence-btn:active,
-    .sequence-btn:focus,
-    .sequence-btn:focus-visible {
-        background-color: transparent !important;
-        border-color: var(--bs-primary) !important;
-        box-shadow: none !important;
-        outline: none !important;
-    }
 
-    .sequence-btn {
-        transition: all 0.15s ease;
-    }
+  /* ========== sequence-btn ========== */
+  .sequence-btn,
+  .sequence-btn:hover,
+  .sequence-btn:active,
+  .sequence-btn:focus,
+  .sequence-btn:focus-visible,
+  .sequence-btn:focus:active,
+  .sequence-btn.active {
+    background-color: transparent !important;
+    border-color: var(--bs-primary) !important;
+    box-shadow: none !important;
+    outline: none !important;
+    transform: none !important;
+  }
 
-    .sequence-btn span {
-        transition: color 0.15s ease;
-    }
+  .sequence-btn {
+    transition: all 0.15s ease;
+  }
 
-    .sequence-btn .text-danger {
-        color: #955a5a !important;
-    }
+  .sequence-btn span {
+    transition: color 0.15s ease;
+  }
 
-    .sequence-btn.touch-effect {
-        background-color: #0d6efd !important;
-        border-color: #0d6efd !important;
-        transform: scale(0.98);
-        box-shadow: none !important;
-    }
+  .sequence-btn .text-danger {
+    color: #955a5a !important;
+  }
 
-    .sequence-btn.touch-effect .text-muted {
-        color: #dbdbdb !important;
-    }
+  /* افکت موقت */
+  .sequence-btn.touch-effect {
+    background-color: #0d6efd !important;
+    border-color: #0d6efd !important;
+    transform: scale(0.98);
+    box-shadow: none !important;
+  }
 
-    .sequence-btn.touch-effect .text-dark {
-        color: #ffffff !important;
-    }
+  .sequence-btn.touch-effect .text-muted {
+    color: #dbdbdb !important;
+  }
 
-    .sequence-btn.touch-effect .text-danger {
-        color: #ffc9c9 !important;
-    }
+  .sequence-btn.touch-effect .text-dark {
+    color: #ffffff !important;
+  }
 
-    /* حذف کامل افکت‌های Bootstrap */
-    .sam-btn:active,
-    .sam-btn.active,
-    .sam-btn:focus,
-    .sam-btn:focus-visible,
-    .btn:first-child:active,
-    :not(.btn-check) + .sam-btn:active {
-        border: 3px solid #ddd !important;
-        outline: none !important;
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1)!important;
-        transform: scale(1) !important;
-    }
+  .sequence-btn.touch-effect .text-danger {
+    color: #ffc9c9 !important;
+  }
 
-    .sam-btn {
-        transition: all .15s ease;
-    }
+  /* ========== sam-btn ========== */
+  .sam-btn,
+  .sam-btn:hover,
+  .sam-btn:active,
+  .sam-btn.active,
+  .sam-btn:focus,
+  .sam-btn:focus-visible,
+  .sam-btn:focus:active,
+  .btn:first-child:active,
+  :not(.btn-check) + .sam-btn:active {
+    background-color: transparent !important;
+    border: 3px solid #ddd !important;
+    outline: none !important;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1) !important;
+    transform: scale(1) !important;
+  }
 
-    .sam-btn img,
-    .sam-btn .key-hint {
-        transition: all .15s ease;
-    }
-    .sam-btn.touch-effect {
-        background-color: #0d6efd !important;
-        border-color: #0d6efd !important;
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1)!important;
-    }
+  .sam-btn {
+    transition: all 0.15s ease;
+  }
 
-    .sam-btn.touch-effect img {
-        filter: brightness(0) invert(1);
-    }
+  .sam-btn img,
+  .sam-btn .key-hint {
+    transition: all 0.15s ease;
+  }
 
-    .sam-btn.touch-effect .key-hint {
-        color: #ffffff !important;
-    }
+  /* افکت موقت */
+  .sam-btn.touch-effect {
+    background-color: #0d6efd !important;
+    border-color: #0d6efd !important;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1) !important;
+  }
+
+  .sam-btn.touch-effect img {
+    filter: brightness(0) invert(1);
+  }
+
+  .sam-btn.touch-effect .key-hint {
+    color: #ffffff !important;
+  }
 }
 
-
-
-#rating-question {
-  transition: opacity 0.18s ease, transform 0.18s ease;
-}
-#rating-question.fade-out {
-  opacity: 0;
-  transform: translateY(-12px);
-}
-#rating-question.fade-in {
-  opacity: 1;
-  transform: translateY(0);
-}
-
-/* افکت انتخاب با کیبورد (همان touch-effect) */
+/* ==================== افکت کیبورد ==================== */
 .sam-btn.keyboard-effect {
   background-color: #0d6efd !important;
   border-color: #0d6efd !important;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15) !important;
   transform: scale(0.97);
 }
+
 .sam-btn.keyboard-effect img {
   filter: brightness(0) invert(1);
 }
+
 .sam-btn.keyboard-effect .key-hint {
   color: #ffffff !important;
 }
 
+/* ==================== انیمیشن‌ها ==================== */
+#rating-question {
+  transition: opacity 0.18s ease, transform 0.18s ease;
+}
 
+#rating-question.fade-out {
+  opacity: 0;
+  transform: translateY(-12px);
+}
+
+#rating-question.fade-in {
+  opacity: 1;
+  transform: translateY(0);
+}
 
 .rating {
   transition: opacity 0.35s ease, transform 0.35s ease;
 }
+
 .rating.fade-out {
   opacity: 0;
   transform: translateY(-18px);
   pointer-events: none;
 }
+
 .rating.fade-in {
   opacity: 1;
   transform: translateY(0);
